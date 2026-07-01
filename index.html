@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>ENG7101 Practice</title>
+<meta name="theme-color" content="#1E2636" />
+<meta name="description" content="ENG7101 Practice — an English practice app by Abdul Wahid." />
+<link rel="manifest" href="manifest.webmanifest" />
+<link rel="apple-touch-icon" href="icon-192.png" />
+<style>
+  :root{
+    --ink:#1E2636; --inkSoft:#55607a; --paper:#F4F0E7; --surface:#FFFDF9;
+    --line:#E7DFCC; --goldLine:#D9C48E; --accent:#1E6F5C; --accentSoft:#E7F0EC;
+    --gold:#9C7A2E; --goldSoft:#F6EDD6; --correct:#1E7A4D; --correctBg:#E9F3EC;
+    --wrong:#A5352B; --wrongBg:#F8EAE7; --muted:#8B8470;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    color:var(--ink);background:var(--paper);min-height:100vh;-webkit-font-smoothing:antialiased;line-height:1.55}
+  .serif{font-family:Georgia,"Times New Roman",serif}
+  .eyebrow{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);font-weight:700}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:14px}
+  .wrap{max-width:820px;margin:0 auto;padding:30px 22px 70px}
+  .wrap-narrow{max-width:620px}
+  .tile{cursor:pointer;transition:transform .12s ease,box-shadow .12s ease,border-color .12s ease}
+  .tile:hover{transform:translateY(-2px);box-shadow:0 10px 26px rgba(30,22,10,.10);border-color:var(--goldLine)}
+  .tile:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+  .soon{opacity:.6;cursor:default}
+  .soon:hover{transform:none;box-shadow:none;border-color:var(--line)}
+  .btn{font:inherit;font-weight:600;border-radius:10px;border:1px solid var(--ink);
+    background:var(--ink);color:#fff;padding:11px 20px;cursor:pointer;transition:opacity .12s}
+  .btn:hover{opacity:.88}
+  .btn:disabled{opacity:.4;cursor:not-allowed}
+  .btn-ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+  .btn-ghost:hover{border-color:var(--ink);opacity:1}
+  .opt{display:flex;gap:12px;align-items:flex-start;width:100%;text-align:left;font:inherit;
+    background:var(--surface);border:1.5px solid var(--line);border-radius:11px;padding:13px 15px;cursor:pointer;
+    transition:border-color .12s,background .12s}
+  .opt:hover:not(:disabled){border-color:var(--gold)}
+  .opt:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+  .opt:disabled{cursor:default}
+  .input{font:inherit;width:100%;border:1.5px solid var(--line);border-radius:11px;padding:12px 14px;
+    background:var(--surface);color:var(--ink)}
+  .input:focus{outline:none;border-color:var(--gold)}
+  textarea.input{resize:vertical;min-height:170px;line-height:1.6}
+  .mark{background:linear-gradient(180deg,transparent 58%,var(--goldSoft) 58%);padding:0 1px}
+  .link{background:none;border:none;color:var(--accent);font:inherit;font-weight:600;cursor:pointer;
+    padding:0;text-decoration:underline;text-underline-offset:3px}
+  .head{border-bottom:1px solid var(--line);background:var(--surface);position:sticky;top:0;z-index:5}
+  .head-in{max-width:820px;margin:0 auto;padding:13px 22px;display:flex;align-items:center;gap:14px}
+  .grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(248px,1fr))}
+  .badge{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);
+    border:1px solid var(--line);border-radius:20px;padding:2px 8px;white-space:nowrap}
+  .scorebadge{font-size:12px;font-weight:700;color:var(--gold);background:transparent;
+    border:1px solid var(--goldLine);border-radius:20px;padding:2px 9px;white-space:nowrap}
+  .scorepill{font-size:12.5px;font-weight:700;color:var(--gold);background:var(--goldSoft);
+    border:1px solid var(--goldLine);border-radius:20px;padding:2px 10px;white-space:nowrap}
+  .masthead{display:flex;align-items:center;gap:18px}
+  .medallion{width:60px;height:60px;border-radius:14px;flex:0 0 auto;object-fit:cover;
+    box-shadow:0 8px 22px rgba(15,12,6,.30);border:1px solid rgba(0,0,0,.22)}
+  .medallion.sm{width:34px;height:34px;border-radius:9px;box-shadow:0 4px 12px rgba(15,12,6,.28)}
+  .medallion.xs{width:26px;height:26px;border-radius:7px;box-shadow:0 3px 9px rgba(15,12,6,.25)}
+  .title{font-family:Georgia,"Times New Roman",serif;font-size:38px;line-height:1.04;margin:0;
+    font-weight:600;letter-spacing:.004em;color:var(--ink)}
+  .byline{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-top:8px}
+  .byline .nm{color:var(--ink);letter-spacing:.13em}
+  .goldrule{height:1px;background:linear-gradient(90deg,var(--goldLine),rgba(217,196,142,0));margin:20px 0 0}
+  .sectlabel{font-family:Georgia,"Times New Roman",serif;font-size:19px;margin:0;letter-spacing:.01em;color:var(--ink)}
+  .diamond{color:var(--goldLine);font-size:10px;letter-spacing:.1em}
+  .foot{margin-top:58px;padding-top:24px;border-top:1px solid var(--line);text-align:center}
+  .copyline{font-size:12px;letter-spacing:.05em;color:var(--muted)}
+  .install{position:fixed;right:18px;bottom:18px;z-index:20;display:none}
+  ul{margin:0}
+  .idgate{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+  .idcard{max-width:430px;width:100%;padding:30px 28px;text-align:center}
+  .idcard .input{text-align:left}
+  .idlbl{display:block;text-align:left;font-size:12.5px;font-weight:700;color:var(--inkSoft);margin:13px 0 5px;letter-spacing:.02em}
+  .opt-tag{font-weight:400;color:var(--muted)}
+  .whoami{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;justify-content:space-between;margin-top:18px;
+    background:var(--goldSoft);border:1px solid var(--goldLine);border-radius:11px;padding:9px 14px;font-size:13.5px;color:var(--ink)}
+  .progsum{padding:16px 18px;margin-top:16px}
+  .progsum-row{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+  .pbar{height:8px;background:var(--line);border-radius:5px;overflow:hidden;margin-top:12px}
+  .pbar-fill{height:100%;background:var(--accent);border-radius:5px;transition:width .3s}
+  .rep-meta{display:flex;flex-wrap:wrap;gap:6px 20px;font-size:13.5px;color:var(--inkSoft)}
+  .rep-group{margin-top:22px}
+  .rep-glabel{font-family:Georgia,"Times New Roman",serif;font-size:16px;font-weight:700;margin-bottom:8px;color:var(--ink)}
+  .rep-tbl{width:100%;border-collapse:collapse;font-size:14px}
+  .rep-tbl td{padding:9px 12px;border:1px solid var(--line);vertical-align:top}
+  .rep-tbl td:first-child{width:55%}
+  .rs-done{color:var(--correct);font-weight:600}
+  .rs-none{color:var(--muted)}
+  .rs-soon{color:var(--muted);font-style:italic}
+  .rep-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:24px}
+  @media print{ .head,.install,.rep-actions,.whoami{display:none!important} body{background:#fff} .card{border-color:#ccc} }
+  @media (prefers-reduced-motion: reduce){.tile,.btn,.opt{transition:none}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<button id="installBtn" class="btn install">Install app</button>
+
+<script>
+/* ============================================================================
+   ENG7101 Practice — by Abdul Wahid
+   Self-contained offline app. All practice content is ORIGINAL (not taken
+   from the course compilation) and written to B1+/B2 (Pearson/Longman) level.
+   ============================================================================ */
+
+const esc = s => String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+const norm = s => s.toLowerCase().trim().replace(/[.,;!?]+$/,"").replace(/\s+/g," ");
+
+/* ============================================================================
+   STUDENT IDENTITY + PROGRESS SYNC
+   ----------------------------------------------------------------------------
+   ▼▼▼ TEACHER: paste your Google Apps Script Web App URL between the quotes.
+   See TEACHER-SETUP.md for the 5-minute setup. Until it is filled in the app
+   still works and tracks scores on each device, but nothing is sent to you. ▼▼▼ */
+const SYNC_URL = "";
+/* ▲▲▲ e.g. "https://script.google.com/macros/s/AKfycb....../exec" ▲▲▲ */
+
+const STUDENT_KEY = "eng7101:student";
+const PENDING_KEY = "eng7101:pending";
+const DEVICE_KEY  = "eng7101:device";
+
+function getStudent(){ try{ return JSON.parse(localStorage.getItem(STUDENT_KEY)||"null"); }catch(e){ return null; } }
+function setStudent(s){ try{ localStorage.setItem(STUDENT_KEY, JSON.stringify(s)); }catch(e){} }
+function clearStudent(){ try{ localStorage.removeItem(STUDENT_KEY); }catch(e){} }
+function deviceId(){
+  let d=""; try{ d=localStorage.getItem(DEVICE_KEY)||""; }catch(e){}
+  if(!d){ d="d-"+Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,8);
+          try{ localStorage.setItem(DEVICE_KEY,d); }catch(e){} }
+  return d;
+}
+
+/* ---- outbound queue: survives offline / failed sends, retried on next load ---- */
+function loadPending(){ try{ return JSON.parse(localStorage.getItem(PENDING_KEY)||"[]"); }catch(e){ return []; } }
+function savePending(a){ try{ localStorage.setItem(PENDING_KEY, JSON.stringify(a)); }catch(e){} }
+function postRow(row){
+  /* text/plain body avoids a CORS preflight that Apps Script cannot answer */
+  return fetch(SYNC_URL,{ method:"POST", mode:"no-cors", keepalive:true,
+    headers:{ "Content-Type":"text/plain;charset=utf-8" }, body:JSON.stringify(row) });
+}
+function flushPending(){
+  if(!SYNC_URL) return;
+  const queue = loadPending(); if(!queue.length) return;
+  savePending([]);                                  // optimistic; re-queue failures
+  queue.forEach(row=>{ postRow(row).catch(()=>{ const cur=loadPending(); cur.push(row); savePending(cur); }); });
+}
+function syncResult(activityId, title, kind, score, total, detail){
+  const st = getStudent() || {name:"(unnamed)"};
+  const row = {
+    name:st.name||"", studentId:st.id||"", cls:st.cls||"",
+    activityId, activity:title, kind,
+    score:(score==null?"":score), total:(total==null?"":total),
+    percent:(total? Math.round((score/total)*100) : ""),
+    detail:detail||"", device:deviceId(), ts:new Date().toISOString()
+  };
+  if(!SYNC_URL) return;                              // local-only mode until URL is set
+  postRow(row).catch(()=>{ const q=loadPending(); q.push(row); savePending(q); });
+}
+
+function renderIdGate(){
+  const st = getStudent() || {};
+  app.innerHTML = `<div class="idgate"><div class="idcard card">
+    <img class="medallion" src="${MARK}" alt="" style="margin-bottom:14px" />
+    <div class="eyebrow">Before you start</div>
+    <h1 class="serif" style="font-size:26px;margin:6px 0 4px">Who's practising?</h1>
+    <p style="color:var(--inkSoft);font-size:14.5px;margin:0 0 6px">Enter your details so your teacher can see the work you complete.</p>
+    <label class="idlbl">Full name *</label>
+    <input class="input" id="idName" placeholder="e.g. Amina Yusuf" value="${esc(st.name||"")}" autocomplete="name">
+    <label class="idlbl">Student ID / number *</label>
+    <input class="input" id="idNum" placeholder="e.g. 7101-042" value="${esc(st.id||"")}">
+    <label class="idlbl">Class / group <span class="opt-tag">(optional)</span></label>
+    <input class="input" id="idCls" placeholder="e.g. Tuesday evening" value="${esc(st.cls||"")}">
+    <button class="btn" id="idGo" style="width:100%;margin-top:20px" disabled>Start practising</button>
+    <p style="color:var(--muted);font-size:12px;margin:12px 0 0">Your name and ID are used to record which topics you finish. Use the same ID each time so your progress is kept.</p>
+  </div></div>`;
+  const name=document.getElementById("idName"), num=document.getElementById("idNum"), go=document.getElementById("idGo");
+  const check=()=>{ go.disabled=!(name.value.trim() && num.value.trim()); };
+  const submit=()=>{
+    const nm=name.value.trim(), nid=num.value.trim(); if(!nm||!nid) return;
+    setStudent({ name:nm, id:nid, cls:document.getElementById("idCls").value.trim() });
+    syncResult("_signin","Signed in","signin",null,null);
+    renderHome();
+  };
+  [name,num].forEach(inp=>inp.addEventListener("input",check)); check();
+  [name,num,document.getElementById("idCls")].forEach(inp=>{
+    inp.addEventListener("keydown",e=>{ if(e.key==="Enter" && name.value.trim() && num.value.trim()) submit(); });
+  });
+  go.addEventListener("click",submit);
+  name.focus(); window.scrollTo(0,0);
+}
+function whoamiHTML(){
+  const st=getStudent(); if(!st) return "";
+  const extra=[st.id,st.cls].filter(Boolean).join(" · ");
+  return `<div class="whoami">
+    <span>Signed in as <strong>${esc(st.name)}</strong>${extra?` <span style="color:var(--muted)">(${esc(extra)})</span>`:""}</span>
+    <button class="link" data-act="switch">Not you? Switch</button></div>`;
+}
+const MARK = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAIAAADTED8xAADC+UlEQVR42oz9Z7BlWXYeBq61z3XvvfS2MisrK8tXZVd1VXV1mXZAtUF7D9ckiCA5koYaaWaCE6EZUhOKmdHMUKFxClAhakIKDhkUSdBAAEEABAii0UB3o215n5Vl0nufz957ztlrfpyz9/7W2vtmsyi0qtK8d98526z1rc/wtq1biYmEiJhIhKj7N+buP5iIiEWImUhEmIiZpf8rxPFvcf8HKPzD3S9y/wc4fGkO/0rqzwt3X6z7jt2fZY5/TETif1L/cfr/of6DsZAwsbCwhI/Wfx0iYhISkvAL/Vfof2z7YcJfDd9A0n8RCQsJhwdExOz6f+1+hPh1uk8FPxCpH03SZyD7jYkkfd/C38V/hOy3ECHzfZlYuP+KHP5I9+XhD3fvt/9P+22YSJgpPMT0P8QcHxJ8FvOxmMj3q0CEu4XRf2sm8dIvFsa3EF9999X6v2X+Cd+n+4KilmR6i+kVCxF3a4lFpBpPJv2f4/S4cQ1K+LG5X5+F98nhM9zyVTGsWI7vmPrNwfnOiSvEft/0k7HdbP2b7vct/jWBH01/MCFi6vY2qa+Mf0zix+DwjMN3TL8fl0F4XxL/xpyVzvEhlx6gfnastk93ZIStrb4Fs6i9w+qvMz4PffYw9685HH6iH7LA9kyri815ZxcRwc7rPkn4t+5pCZy9ZhMJpYXPhZWgP1m3q+I+Yeb4wqVfTPEH7XeaC6uf+w8QNnbaMZw+WzzZ4i9xOBmkf5J4AMT/L659SWePCHG8Y9QqlbDx+6vCnAn4gLtP0l0w3V+JHyy81OLf7b6kpAuPBN8l46IOvwaffs4BmQ5B6Q8bgQ1B+gAT/DRqARQ/cDg40wKMt7DoDSbpiAi/Hl8W/EGGzd6/A04/CDO+brFnGD7ZtNdYhKVfdvrpSP/Gs59K+jMZz3v4b2ZmF1YzsUt3V3qDTPq64/Al2NQXHO4qTlcCufSKw3MltdwllDqUnSmStkq8D5nFXgxpNaVDVWDL4c+rqxYSXSR1hRBsE1KLnc1SFPX4s1MpPkiR/nLHs98sAlL3Q/xs2bbqlr10fz6diOF7ee/JLtV4QHNcAeXNnj5ev+/hRs3+rHT3j9hdBFuu/6ZxzzMx26/GehuJvnfNMxCzOlh/JVYnLDwhTldreFycDhlJZ7kQLhl4Uh63ajz6wiPtN5/Eaw0esuvXuPTXqv7cYlYV29WZ1kK/PqBvCEWeSH+QCuwnhvMs3oecnzH2OKB4ZsQ6h/uPwsLM88/PeKRnFUC80uK60o9BqC9mYrFE6pxiuGrY7GT1xOI2k3hfpjXAlF0SeW2fnmZ888KxeIVHJZReclhVJOTDF+B4W6ZN0P1MsbGJr1yy+1m/Etyy6fuGR0bwjVITKOLFCxSBjtlB2SnpTYmuArEo1Ue1CB4B4fjKT0z1hF1qZLsiiR0+f2EmYtefsEy6DcUKXPCyYErdkpgiB3sSaLe6H43tgafKwdANmVqxO3Cl38fpwFbtZDr2hPPuxe4cUQ2oeBHBi1ziZ+7OJbYbPJ3VhM+J4XBIFUe3m7ojm1UhknY93lrwSLpFLWnZQXkQD9RQLfhQhuDu1ZV3Ks71RSqiawEosCSeQJTVMqFZ0PiIkI/LXeMice3DOROL27TohRifYEREImADl0a4WFRZBp/TZVd52ntdp9AhJkKxhqIyfBE7HcCOWNXcTBEL6m4LykESVg0u66KLw/+ZK5pLBXPqdx0U7Zw+AlT0TPZKE9OoCvZGgvehpAML2102i4vsrg8vEXqzeFamu4olq9mgQoiNUDyAEE7w6U4Jz19S7QIVs2BHzSzcH+TdS+oXQXwlAoeIqHaoOzy7OyGt7r4CwVOQRW2iUKp1n4QjoOjjg40IlYMbsi8x4Kn2VQylbd//JBE2TKdI/5ecmPKY+1rI4IDQuMc1Or9tg6JHQWZ4h5A57Di/99VdpUEc0/d09U+4pNg0af1nZ13QhcJTWHVeqV7suwMoOuKSTz8Qp/+U2PGzaTbUjcYWE+qPV8maSupXYkJ7JCzAgNplwB2ehdD+6uIeq6jwTuPdKfGu7yFD2O895sAW9ss6Xk7tGx4WpIFp25ikR9FVGCKxmygVBUTE7KXbKlB9CQIQlB2RDu9QB3hNAdkV1eLq3R+LV401SDqYJFXHXIL49M2DBQkAHJwtGua8khcmM4FQvSm2g8KwD0MryWThGUB7cPno2r7fIrHM4KxfymAo0ahWqs/z3pNSb5yfN6JqFts9cF9jxCaWqQizhp9e1F4JTSFncHG4NdTDjTsowiYuNZD95YIzlg5VF1Mw4WKLN2Z3q8XzSdfAdi8REfkEDFJs6fpqii3G2Y1wcPlZNB4+UkLW8204B7Pr/gLPw0woP+BxNgDXvfkuQlw4+DjdNQw4adq4ob1LNSXjdGTeT2PPqXSxcVzRXg2GoEMoNuI87xCIu1tCcyk9gtcVf8zpRGCOH0TmDdvidYgzxO4XhLBA6E7stDVZAXssojZ2OOL7ajzUtv3HTcuJAQtWPb7Cm/KpHaU5bAE9Zeh1GNopHHSkOxffiJiOj7vrQDLYIn1H15+2bOr8fhicTaZSLd1XY3AaxrpJ1Vx6eTPc3qkB5H7/SByjxMeSP5w0k03DwHiSSQFqYbjK8EsJVDX6YODYz4Tayulqvd9UjHhFKvi4NCuUdNdwus2FJbuZNV7OBbgTG0IW1giJrh77R4v4l8QmL1SAosbbWUWK45eIu8TBKjY2BjbnWCHAiD4ix6W5LytcRQ8wRA+QBBo5TpeHmFXjTDER/piqA9ItIpJAP9gBEWFlaFkSnMkwoSBzoWfLRr2JOIWGMz4eR4XRSroxVVkvYWCC5VY4VfsezBxETFwuGzhOO4QsFBrO6VRUc1xxzKEPTe0F1AZcmjulmzl+XZ5LjsCfMLUwxHaQKHAMUH/HMq5vaJjDaS3CdKtJtbre2HQdjN1VwJDT5iqMPCL2GhYMc7HgSX8mFmCOHSfajWgExYzluklwsT6PbS5eYWw3SziY4yVNkaKTMYOgAgntQXneE+cdzP0JmDgqJFgbxnlCqQDTk/u0BymrIgVKO479gKiBh+XoqOIQMUSFP/Qr37kwZDHwrdnCLKnllfxy7cAcyd9//HZe/2zmiFElgjBOCZiy60+wTum2noihBHA+HYiDUAkLw7lIBxPb7TAp8BuYC9iWSESR0jfuPq6H3d/fGP1AgcPZkp6OPnLDV3difhqF+mnoSE3h4i2rgB2yBU1h+K1nJqoeEk1PwOoVpivQv4rgbo6noCBhTg352ZZ8XUEscen244RwwXDYe0D9kPg4WLGEYKgksJFx0eJcOes++tIxYC/4oEhj4YYxyIrQoFuN1Fqa5ZtoZzz3RI/tQX9msV4swjnDojBJ7rDxSA+xZ1Vg72Q9kR7k4V+XhM1JOLcMi05S56vrGmF1/zmNB8RhHQsZShJpgkT64gUYTHByVeJGMXdtVL9PLQhpz2cmU/8oSFEEQTxCciMyHiOkKRZeVzNp0hUhK7wIGE6srqxUCsfbUPASRoJX4poxsy4ghLwo6JPS4+l7PsIRS7FEtmAA6fovp5godJaJ9cxNGKhT2cuxV2pqphV4zCSlAo4F8B515hMMnczaElUrxnKqvyGhPRIuEGpxbsEiA9Lz7gjNMMxvOHUC/ZJlYArF211TpOM8VaDBZniXeCF0OCXj/SsE2JpqfXrosnsWemTLYXKD86T4iQIaGsrx0NFHiDcUcAIz2lgzGHYxFUbsop8gp2+pTgZWHNXAZeBEV+b+5kmUGgkvOLV8nG2trmgMNGMJtWskF8RSoUjXxW6bzc/ZM3MRI4qjO1aT6ch9FwM0FCF5SU8KoFKJRDHEadRBCKyoVJB2zYzvv7enjsXAsLPg1utWXMevA/a06hTCGgEslHHCIFlFzbFdzee2rAA7KZxcAvVBNq0XGMeGClGA52CQRQTyIpqKIwCs6dJp7hjhrgTRcOl+SB9LDCUuEhWxxkWUMN4mYZNL4S4FJKlfxGyRFAVeixhqgCTGYT9XtqtfwfOp7KRSa5idKhZSSVMhMd2HZhnqrSCKTRNqzv7rzGF3MbTp+qfoq9Rs9BTvWo6APjMxO6bCCirV8wXUGvl6cJ6RwUhJ4Z9SYD5AWc4UW984xNaNPCdwAh5SOsYpQOSG0BppN5IVUkh+ygcCOfrCoWGNgzTBGaYqq6hIRcVaEnaa+T190RjafOkgxcm0ue4DAR8hSwUgSDgGRdUl+nqL/Jxw/bLWZgA4qG6GyPhEegzZVlrNCVns0tZYKpx+EToq0ZyEdKnOEdwXJnFJbFMmDVMiZGf1caEqD7PVJHvQEgnRQ+REheN0aZiTjkVY0SbgNwN5Nu6TAJVItmcVHM0ZQz0Uj15KbSFnOEraj73qhXXTToitU/5TZ7cQzUcYJYwVLJor2e0rhnCkJke2BDED9vRjxhaTE3IjiCh4w66Ed93VHY4NEUNfLvHPO+eyxp6lYx9qsgUr9Kl7/M6sCEK1jVmwACNLmgKSS7erA7qHPqEB21bLQSJ5ylzdoVlJw0p9aVjYiMtHmog63kwrFCrNOPgTyWgGXDo9oBfWRwynMWLOR+JMeZHRLvB866VpoiftDDM3EGFZaERIcpIfU6Jlz0GQsSRL31kyPNTMHdTkGDDHhNgzILckGWSYXahsm3DKGBtKitBPrjKyrm0mWA3dmDIsrEDaZqPr0/ij65tD6CcFmwLW5a6l0zFCOHghhRtFIieC9KVlWYmKDM3cy5A5X4KSxmmxqe0LL71lMu58XvMkionA3mcpncjCWIjpe17yO47UgxEkEaaBqSKUZzCFmKU576bo30ESgyDvV7gsihGrVdB4EdvVA5U643xcgrxQEBzHajMJjyhHkaSA0ojugCJhlvExJv5VYhelswRv7ERvDsM3ZGI4uDx9+Gb6pjCFhOJSJF6g2DpOsuof1rxIdtWIYfupWgLn3uYwE8WmjK0i44IUeyiEkljwj7GucTLETuCRJ+2IWHKjZIAdK+FsfixRQVKNH8UlCou+icNZKmBqICS91KS/IwUL2Nj0dQwfy2JgQ5NOi5mTbq5rrUU3/ZwPNUrcx2z2K5JeHCktDofTUxTDeF6pyKIevpr8gpwDCL+B7ANDUgMYM5kZeOlAFUukZKsCV3zHxPArzhDiEShGxFCU3iU4VYwgKDKjA+OBFLkTZAkcyerCpYFd0i2zEFAsmIT4FrVIPKvKZgZiJteScx37C1BYgPdvOg2FgIqdIgYYkJDljVzYeL4bSw6Jxg1hUQhHNZEqYzkbnZmCgxUhxx6rCTsgEOWx7jG58wSRuYCQRMYYHvxKh13emh0dOtLMOZeXAPYrGtEoUcGZkAOQ5Pyc+IKIBnJ2d/RVKCCTkj1iivIhWMmK76lveigjEr8t4hHx0ZOwPp7g0FbNCOuPjc250hxQLKgknUmcYQmxE+g4XIzanYBsCGg5E/eRExbAkr88e1/0laIgmUxEfER10AuDydAs9BhPyBxg5j5IVjTIkeDYZpiXDmMikD7nKFqoPzPqQTwAWbJLxk6IWV2eLlFw89NYLXlRtbgUEQyZhzfYg8ue9xaAVdRJkCCjskjgpmNkrQbLF0ny1h4gC7UdI5NCDXeg6VZsQtH8rqRkMix2i3Szko5rwbWV1zrqu2ZOB0B/gGg9gKjXkbr/ULzi5a9aeo1t9nQdZs30FBIxrGD9Z6Sgd8CpoESpJKNzE7NCx6J4hSLwD5tQwNiH82smodZp6NSdhwaxjE5WJAXGDyUqBKgcxQzncazOCa9E9F0ZamWOOgptzGaDsQhkJX+VbBOKKZU5XYuMqhVOD5QyxqGEsbOYKbmEmbcENDlJWQW2BlsPizQQKCCanP0nFo4WQQ9HpCRZRP9kXA57EO4ShbwqLn9+SeeQTbQvIPFa88GgsTZz2NhsMZIHWMkSNeQsAqRvoCQRXJE5/1kvp/5thLXCeCKiMEAz1JRuDpgvnDaAPt3jmjYccFZrCdl78VZGMiBl+qdsXmgNvzi3NENRqWCh3o8yxEgIMk2ioZtFsqyt9Tjpv/RUJXk6cCI6pe6NURTCOJPqhvrRFAlvJWRSoRVbP7BF8lkUyiZULhl/UWlkq85nrf4hsB7pv2F/oYhlecIHDHQN5YWg7I9KOBsLsDqZkscbIGkZ6ZwzVjeKWBIttbu77GENfLa+b6dY85ImKncAq6N8sXEkzIiGKFmTy4vUqDikExTBM81tovPh8C3oo9GWECby2mpB7zTJsc8wvijBnAzcHz1EQqMltCtje7YK2Ft0T5rLlHfQ/ATuMTJ9NLVGEdALRFLLwUwiEMN9QCegrmrqJfEBxoxa+H6JEFCLS7NzM9AzhYOQqiwEJWJRNdFpeuJUKTNeSQSh6KaoeD322yI7hRNqGi4NToaBig1aKP0jb1HsgFFIC8VgC0oi4grFxQo8ezUrciW6qSj0NFEeTE3FpR0kAVwWDTiyYhdKrsVQ+8JaniJoywr7SnIkKe7m5I4j5lTVTWN/OvpgwYLD7h6kKDCF85M3XWFcNhHkNDPQ8xAW7JmFcphJDWpyag6xGgeBG6Bx4SLNwU/cHJb5RgtGaQE+Fmm2GUjGYLRBQHhUfJy+XnFknAAZZ57WLsVC9HOPbUUqtS4NSo+rL7vAHUf2ikE+odPNvr9YMzhGHpYYdwSZfw0lCy30lAxXCjh5JCQOLAKEs0WZLXhTm/kSNT+jc8MFXWBZaYVFPLkEn4+nwDKQOTM1JilZWyAby4z99fph278FJ1qUu0SrNwUiCArDcViuGZOAmGoEPFWkhhCR2m9o8fsZCwOazqai0mYa+BJx0sbZK4EpnRRIcOUjhrzoJ5CTjxJlibX9byIcZpgM8ttFs5rZakuowGsNj0Ks126CRNgSj3L3WbGkMRC35Ws+qX/Kx6B1sjF1NPjgkMbGVYnG5itBhwc0VClOtERKE7NMddO7qvTzLFEoigDSL4liwanIYCXrAO5CScKowSJtVocTafsXHSl/8Ayk1ywRUPMFt/RCnZ3RwJGUm9Uu1lBShOH85uzJKzqTxohUlVKQqTHrwpGVTxvngI1Y5MrOiFlYYBRKRTds/YOLiN3+AsJ/FoXBmkny/N6Js7lo/FoKKbaLR8Au2SB4bIsd0XzJjDoJ21PCT69a1VTI6Q5GlGAS+TiJSqGwFzNkgEcrhYM2zpQEzql+VzkyhjqakcCKwmn0zQmDJvSAJZk/HrVzC9voIiNC0D4Ab07RgFN6FCWjObM5QWSeXW4JyxQin9V/ks0+UnXraL57Bym3qr7SZTSoY4rkAibVMZnxDeW+1FK+QYQkrOh+afg4aA1jv3SJsd3sTEXBJEd+jw99SU5KM4YJcZGwbrOyv5VuJNDHwv5Ie0aAi0OxIBACM1wFfpohaZSyCxE5U5GK9qHsh5N5y5jtvXn4TqIPKORTcxzEdlKceAf9lZBmJShgFHPoI6eas8mT3lkA2XrtPinmZkJgGVRrmiIlWAqCtMuaYKq5gygCIdkukHHaEA2Uy9wxVqUgCjXVnCtKPXsmLYexJuvTU0u3yfqYp0odvTeNy7wdfRRES5pw27sheUUUgu9s5FSsOFJMUbFYPoYz+ZuQQYHQPxqOTcknKJyNkcT40fbVjORiAC76f1jjTRQQJUWv9uoWYhj7iOGkCGmL4kQWiCBV5sGulFa9h1QkrCTZaBxCoN9UGnBKRgntsGsPvq0MzjHqiFfvOuXrJN6h7RcB11LHsBQcVsjgS2nmLWLuYk5PiWmeBY11O0wwFI7DjPGO9mvi4FeduN6ci9BZl0q5GaN6iAroE6X8wUOgK4EAhUlEQYV5aZQLebMCxZu9FZiADh9H0QyOr5wiV+x+SFvfjl0lQtQCg92Mx2sNG5U/s3EJVjAJglQsgk2rsDqOSPPwJK98BLxZNf/FSoUI/AiBkKAegdL5ZLeKCJg0q1mNAJ+IDFfOOBbq+6Wf60nAKPWeVj+vqCmQYCQNhm/NTaPKoYmsusc/JtYoLA7Z4O0kDSQyi1i0i8hARKhgchq9Qalsus+s+Sg65Ajt9DJrYrI6mDRfw66aiZCkFb+IlAqxmLSj7U6Yik6OScPPovNVFBcj2XZy1KFzwYZQcHxj/nb4Ch6rr+T0EqKOVOIOZzS70r8YKjmz8YSXnn8W75w02IKeEcYdMKLmSLEjhjw1hY8yK868ZOxF7Y2LjDdRF2QUf1DQMSvPopL8hcrss8KlkJGSxSxER8kIx/S8UagvImUyKUM3DZOafj3Eiz48Q54TYCFkFdNC2mdZBCbyyodAHScsnJTmJYw7PXZWVBs78pEc6w5nM1t0jTNsyEqI0xwueg4LCpVh9UvBATmZXrPkEhLk9GdmlZwcjgSk2pLOB1ElOuN6FgtVJXSw4NOrrAuivXOp/hbrkaRcMlB3x/jjl8YnheENVIVsNhsyl0AQk1BkRr8NzjFsITVOA4tCBv+NaNqOnr5CBUs2w2iFxReOSeNim6jFkl/m5vmTfcpZMwTybMMYN+pL0O0zAede2DoAli5SHeuhR/NGgqFIZqVzL46ZfBKOZ9CsFO5aAm6dqOi2eCrrEVGg/SuVRfL6ZlW1auskumX3SQq/kAwDIQhLEnOEkFGKlnxDAuASuza2oHRsDJj7G4BVDglnmBADsqtNRslGJITsHfsCmdBrVfm4CYgH4GpJQR+ASUgxw0rDd1b6C2wakA1CvYSTOs5moMGLjqNFhZZ45xdZ4desxboiRFrkmgntoKHPEM2MEiESF8xxJXsGNiGPJSjQbTid4vyBzSgXiPRgiJe8HgrK+sSFUWxKcydyWpSSkr4AeU6KVzt1s+i1Sm4E80wxRAHuzBoDa9JlaRfYzkoanYg1GZCyNbMUaAo5o4H108JLyfZ4VkNiLWk5xV8IKU/mWEuzmKAmHfKJsSJAIQF8RxEM5oVWctlJL+4Knk/diaMoOMjMWFh9czFMPL2/0hCeFJuAtTiATL+otAEBV8CmnIwHkC72YyGhGe8seIRLKOS0zx+EpWaG96kKitJtmWN2oPXQhel0NGpKT88RJekxgWYLtefx2s1bDjxLSkGvmNlX4O1I8p3MOS4prEEKXFtCQVR8uHmqZTi2uZB2GQRXnGHBt5zjWdtKKJvjVSuK1ad5c9i9BJF2Np0TyqFoyvIgMvuQ7NBgS3oreFmKHW50nyqB8KDNTQ2vo8xvgaz3Z+SWQinNvfJN7eLIeYdhTXJIF63REaECrwynw2yJsaReiaZCqLECpyj4fsmEfkgPmnOTkgJGgY0WC0QxZ9eEccnV4Jap4pLrhzDcqkzJT49F4WSiZoqlPabC0fF5SJkwxKnijE6xqvsw5BSw2OPo9iVsPh5ly1OKZDVRjBcB/8pIVp0LOZDyuEGbls5ghvU9Jgr3ZoTrySGTgjgfFIARufGTB/YeZ7O3tNGZk2LVmjsnTCm5EPa1PSuSpfW9jrNwTlwgUlI1DJ9HjhSTGpChBBHeSnknxPSxYg8v9gix+HQfA6ackchYg0GxIYqdJtJpncDxRf+loKbLnO9i8Jqo1dJ7hbEygoCJR558HIdg+POBBZioaEdtLCGg9OSADihXCgHFlkRMM/9hFNgFLpaKTWgSs7FrUUBZGuwBR4N1Kj3Up+lTieoFLDkcABHl1GoOUnO/sclUmYuVpnlB93xcgsSNBVWWKRmV10RItmCtotWx1tmMjsopuMi8tKCkpJwlK0hzeU60dkVMFxTbjOPE8MmGE4n0m1X8rOzImXPWTjGNQuU+cOyXCmZ8An0UI2rLZPM+BYwtCTyS2czzSE1UYjR4wILFqy5WbGZO0fk88ho4PSVOFaCmw0dInRMaKDFAgC0/KO4QoXlz7DkE3sRKyQs8TsU2Bh25IMZRMyPbneR4sAiJwQCxymBMqb3VpxaLbTEy0qA+ECpHkpdl9tmaLVHUqKgZ0YHslmYj6H0rJYaAtvQxLwAGZ8lUr4AVivZAiSMm0T8U0iULGAYxZ0aZIpTdsCJmSC04bZ8biatHVGCEFZsIYlHFN+ZgMm4YDWOrhk00gSZLi05tSUqKMZpktqw7AAocZYGjpJ2tSaexWkhHJDKJQXwSoxdZ+V8AO3HOi6EUTcDom6vXWm7BGTEHpQe/1Tis2Hige7QgaK/LO6XAYK3bSFBvn52nDV2TO3xXXs4xETeXypwsix6hJcUCwkwDnUce+B2lTEqyVjcFcwP1iWI8jZ93IEs/rxDNFeDk1sJ2CKScE8v3T3n2G44Sr8KEQGyZHXD9vztc6ClHI7F92aK7OfcW5pBMbHa16UiQ8SqizijzQrqKK+0ChaGwduZNHDHchKGlY8hukSK1Xgr3vOHiyS39ayWLy2GVrK2NcsMITGznyHNYHjh+zD+2aOiduczKhfgGMcT7/GbVVBs2g+f0hsqCmQJg0HPVGc0/WAjhexMXJaX7R6DITTW9EM5mBe4oFTWClsnhQnF4yDDYeiaWdQpvyJBImL9gzSfmtTCL8ULEviubnwZRNusyp88tl2zaSXNc15QNFmG83dwJpboc+sguOKt4/iA7mi32X9+r7QG5YthLiIqwj8LIwoOOJ421VhWVnadNRW1et45Iiu2GZTrnSWMCaH/6xnBhWuQVvmGEoQtPOAN59Z4UmpMJZMYvKUNKc3bYtpycT06denCJyS2gpwRTkKyQYO0Pm8IPswM28SNKlbMdRHPGc4nSadGaGUtTYrQhZm2obKILjVyLCx7XCvLngpxD8o2EZBM0NYvzXTI2QgFlN1gzA1qUJAmS4kDVNxG1qpi5gHpHjo66lnNJnZjbNbLttDwLWLkliTYkpklBTjCHOpGRu4sjf8BGWTWhmU8xY+S5TbgjGoBkjOMFqjUnqkROPpWsMU6FQinD0KJoiSTbUSmbkSXlbMfLSBniJgIpGYamkO6+i9GiwHAkG7kC2SeJIGxY3Rkd15gpce4ubFQiggm5HM280jtjnF6zRidEKzjNBF1YFK1CsphYhBdF2YIb+kP8PWW3BO9XFHbUk8+0oY4XTLtPLjDxSbBSeDNGz3AImnL9AEVfFd0J6eLS5WIdxnZ6mDY1iUt4eYnMpRGcWEmCPJ94HgwSjgc2RQnNKxrNIgNylhg0lRV3LKeQh3BnKvXbZnah+LHpxjD5b1w+sjCROByuthjo+QWCJrjCiRmQtBKEAT4QaQK1nGoT57SeEFFl8SEtjheApKBQZoxJ0gIj7JZVdKlK00mrWcBawVHJHJpieD0wPQRYwN2n85YlC55ZQho3oRxNM2nhcMw5QhchYsmzGtLcU0HFxKU5MIjwGYgYDOrhApKW88dCZ8lKEp77UXrcGMoJGhO+dN/DKcXWgqLKIBfGSSJKU1J8jfZ3wqu3Fg8iCbTAGyMT1MduEJr4ecNdOLI1NUUE2eYw65AYmCRs8xhDBBTP6UbwsjVuvWQla5ypWHIEQnni6qMmDru1cCU+dYCrC+xrTvRaeI/pqGN24GddEEFTSg7gJPtgyBNHsp7usmReO5cGQaqlgdAkUnaXOeOXuPiLmhiDWCUZHhOH5Fr8TJJ15Iy3JV40rGSPUawpQiaJhpSxn6LlkOZUZkVaEonZjlaR5LjAvlOtJ+cdvzcZDqK46FKaFpCxQJTkB9Nvn6C6ZzPOK0xIUrGoA1VVx4Xmk0hY6/6+6wK4WU1vISNC3xi97FsTU4WSN2g0s+YyKkbaSyyyxXsJD7TY1lYf7K2ioWl/bjjN9jMuWQADs+QcC/TW0/WoVgOw8u7l6MEteV6nCOXHDKG4KoW5A7eME4EwGK+IpHhUTiMfwcNBMucXC3rkIiENWKM7MW50seMDycbSeUdqk25Jpy0EYEvN2Az+ih4Goryp8sok8U5T5jaH7A39BDD8XBdOnHK/cD+LJY2buQ0Y2EkIH1GnNBeuec7mblqDnM46QH6RyxoZV5FDyFpDBDeuksUwWdhHU+9KQszMfY3zKbBhOEf6I4kBdpV6Js0WBMrlsBXLUEe8YDidi0wFDy97T/bBtyUKn/FAD2SH3okA3NMyjFNKCIxpEBGfTUYFZp0FlpSxnYCMDI0GsG3SKEsJTBZCUJiU/BJZSXsKRhroRiyKPaT6MaZqYWGi+8p0W7vkIiysXLjNwDDHD1lZKILyPzPIjWENCYtSSKL2WAhilnkCS86t0G4BrJttxD9rOhCHaWIwMfvz6HA/5jIRFXcHl6W/aWZEUb7MujyN5aTOhso4YXa6nz0ATg7lBrJio+wR1GmXDJEij4280Hxe6nxKj5S98eQWEUmRMUkK32WM81QKCpHMFsVo0ATsBudnEwogEwyzBSZDkOgpFdlsJppYqhSwospOWBEq1Nvs/JpormClNGKNybhw6HPhrws4bagDJt9vDE0mgRJR5vO3Mv8SMNtIAU3zKWGxiU4u+RxbCxSmGjqUkVFqNhG6dJkHg9ugwJqU3jCGY5fojbKHS2QGxflhK20pIbnIrcoBmV5QIDZUBruczB1amajLLefb+LC8GhdLQZGqjXJ0REhCoEOrAqHwrHWiVFC1qJxPmgfU2J+d9JpOoUQy73BRQbYZYCCRGQWkjDC65ly0fotNysGJLLIOYkCi8bVOJWvmWsBsPHQEmQJizUjg69sINijb5o/NQ/EYtFtYYaKkDgBuUS6RYkSinNrkuaxH8zoMJ7eXPLrC4A3slZwi2qQlIorSwAD9oDFv7F5EWAp6TbEd0pxDkM2kHday6PSXqP2C7kqQ1ZZGpkX/wL6IEWNRjbqWUuhDqNpVZms0guZo0MVWI60PN2aTVkS258KhVRo2CkrI8S8nvgpJMuAAoEDV0BD4dqu7UYRsQxmaizk1XErJziBx47oI5OEgPGQhjbhi8wUGksTzPnmyhePE4sVkpASkQTJxcIbDU8Rkm2LkKsGCJyhWoExU/tdEhZZ8jqcleK9hkLGYZZxIhHp0D7PD8N8Gv1MzRgGGZsFNTtRBJGk0x5ilzvq5iJmIm1KFCyWMxXfYiFfD5Dd1ooq8yn3OqSc2Q65s4msa0fgC57ENmAp5saLkXDLvDkznC9C0xXTeAiJgHaJBmYO9GTlnRrkQStDfnEwovtF+xGktpPEcRvVoxing/hm2Y03vdMqnerCeikMsVo77zOyCQ5aoHiJL3WNW6OI8bpp2WCAQJaqE0wQci9VEGlYLaZuQsoQTyjy1b1lUQY9zLjJgofF2h6w/xRAW3cDEICYuxrRRwaqoFEssTHlqipmGR6G7KskkNwSFoVM2vgnhKJKHIoh6Z3nnqCwVepV974wRYqmgPIpxyCEDW38/FxE0S3pOZWdvkSu5L2vRv1glHpQtdQWUgSlBK5L7UvUnevqN5RvPBfKUl4XA6mJ9A1ubqcS3cORYoV6SJ52zrQFgP+mRpKDzs2h7EWHog7tfcmpqWy5a0rQ3Y85pYbJVjPYuL6IuZOuaZ0dYKluZNfUtmoyAg0ua/QQiQq76IBgfmllosgO0ySJZ/IJmw7O5Ivu9EVOeWF1E4Aoxx1uOSQ+qci5FfsCIdMnm4IfPQGBTy0K3YlblaVd9tsIiyV6A2IbIjF2bEj0uRUf6Kk9SV3FdN633zjnJlEwMzaXk2GsBz0mXkcRFjzZHSGaGS0Z0eS2cvRqmfKErer2eHmIdjLFXts6kjBfBSccCnVrZA0aQRcXRZAgp00odRdbrSPK8rG7zMTNsNrB3DMeLKFaZDcjo/SkIvDCZmchpXc48kn3uzjCP3q0OeoaQDwxd6H8q5szNQylpuDzpp2itLERC3gZqYCpaZONod4NkYxeImP2FyDyd1XcfOrhn9666rh0765cOGEBUCqjuoEBKkIzwrqq6WAXOMf0iAdW7IiMYgTOaVOgPlJK2jY6bY1oMAgJsbrVsG1kaf44FMzTiaWKrS7NYjuO8Fn4aYEMCZyitZsUy8jR/tAfuG5Y47CTjTWj/Ll2dmDdcuBKsYCObVGSpScYpIznQRQ+7/CtTdIsU0oY/CN9KvhQ43uDK0BJwmps3lr/xmce/9uXP3lxecewMMRSNiMCfBVYWs5naQP+kTXD7KS+ZqA9GOl+iDkj2Gjj6xYdzkjMVhybJq5wuNjWJ6IEgWqkWaXpFzkg8sKwBkfVbs0MvkWxCqsaMYPcB7IdspIKVoSRT/FAiqYJTSKIiTFPAQO+tLllIMkF5kswxKc0A+EjDT5I43AP6v9DwSzTlDqPiGKsCkejPg+5e0bIn8HYUmMvJ+bBtW78wGX3w0JYvfeZjS5s2e98WiVFKe1cavYl1YUqm3OmcY5BgR7lJHJorRxCk4hoeCJg9Ep6jYlHcEgaFQ2qQrovhyFEWr5KYyqI7v/K4SDB8SHFsSR0PRS2awTYiwlSyaYt+UWzGkDynrXcZVTXYCHPhNIeUaO28yHlXUh6YcAzkZLLosBpjmXeshq5B0AITAtb+cMDWxPBqNW7BVPDwMtY2po8+eGDH1sXDd+38yDNPr6+vO+eUWBunNsXSkYDRAWIDIbQ6Y84nzjAt7QiDGarGKjC9n56nENjkoS9qhsKWLYkwEYxhJN8jEpmJWXehCvB59uFYhZueRKtbuER1EDGyLy2ttkxVie8+sSRZ1daRXZROBFdEgYmLE9SA9QP3gDFH+JYkBLbsQsbDl6TgwKIR+cTIZ5iKCzLpg9hcyYPSXSVMZT5OnE/Xs+nHHz0kPKyXL37rF784a8Q5R6JComw8dul5RS5LxLM0MaGP8kFzLdxkUIqorjM0IwJ7MtU4bEQwom9HDafk1KB55ClVSImJ30J3t6JxpqJZ5MmTXGCcpB6H8mwvMg65ykIdVdlzYwUEbwR2t3J7sN/EnsQKJiKZ/xAj9mvzAJGwZERt5lIU5VJhpSysWTwM3iRIJEJjknDBC0nPZZ/W7d4dmw/fvX91bXrm1Imf/9ChQ4cOTjc2kHNsLYZIxWelCT8rWF81h8khTw+VswmakRtrfzNlBq0YYIYknj8tKVHlsD9h4hJnLprfix58BUgty8kU4BBpepNkaqRgQwNllmhvs7Sw2eBdlhkErusyhzAT+YLOkNMgoZfVRajn2Or/F8gcQiqySlegOrym5LjJXGQvaNsc68zToeaS+CqcZGGIMAqZNWnqDmGm9ens8fv379i+pWnb6zdubq5Wv/alX1hZXasqZ492tRYDdJ3uQs7DlxBiRFpCVGB4e4FkSBsnAS4K65X8nlkDgqS9y/q6SArEFAzuJZXrTplmFfrUnJbIuatT3Auc6CRiHMRY8UQwXcow4hLeyKXM81TXsRpLE+WR1czsWPTYhk2XEN0eBUr3zEIWSAECnGfOsCIuYEXpbC0ESLF6TAI2nVnKlc7NyD1tSKXdpQiPTnTa+nHFH374jtZ779u2lUvnz37ji89u37FLvM9LCDKGcZlUXGxsWQISFAgoarRRGtvqWi0xaJNQ0BTPAnTi6FnNSNwoMexxyZsAAeVfj6snu2q4t7KEJhllciKGn4PmHZbRAub3kiVca5qsMpcJYi2CVIXkFk/AkxUiJ8YyFvoijSByDI0jLdrQow1mRU/KSZCCVTmXNnFE6LOMHQGsS2Aqb3IPi8pFpVIVxeMRJtqY1Xfs3XJo/66m9eJ927aXL1958I5NH/3oU8sra5VzGuosJrJoEzIuGEQlhDd0NKI8+BXiUASXTGUVO3/DGWENVoSKk1IMUjJhZZ433MzbAQRgClQUtlO3+CODZ6fkLktCJdt21joNa5lssNWSY6JqnFKhBQRTl6MtebOnK1wCrnkmoCOd6G1WiJRmBBiCWsRSBWurgLCIYqYlH0rLasjhSUw+SDTVum4ef2D/aDho6oaZxPv19dn61dO/8tVP+f6pSdFHTVgUMSUtPyteQ0sN1MLEIZU+gGHslk2aDEJgg76j5xpFo87Ajg8NSlQyl66DIlQg0hl3lV4nJw6LaH9aTkdTXyQLa/m9omGqwX8MMo5qQqPgVZwoQ9bLZjSqY4vfx2ULkm2/nAZxoA4UsQha1pSIaqrgREeD4HShl6IWYLjJfYAkJ9/RgBSKqCCc7lhV9aMB6cQOyeum3bwweOS+2+tWvHjx0nkmnz9/4ZPPPHz48OHZdOqqKnfMDkMK7VzBRWtWa0WNYhdkHWIsUn9cSs6yRd6yKH9mVdezma1S3/JHfNYXeFqlxybKCZMlJ3f1Dg1MCjJFjUlGCpZo3a2t9jGwzoBucCsI5j54xLODNI5F05QUNVkFZWO/Y9gJ6NkC+ROJHR2qtMJFympA2H8gc7Plc2WWkiM067KCQ0BG5r1MOcaecUQVXY9pY9Y8dNee3Tu21E3LRK33Hdi2vLyySKtf+/Ln1tY3KucKcw3rxRk3ZHryds5O0QolO3NjmhklIbXoQVGGMmITmfpvZOczrlHClD6itFozLlZiI4ARonI4LhhJxQlIFuCUCraIVkrqlGx3wRAnLnrsyIjMpkoEeEXRZAHEq0xktCPdV3ZUPiT1oaW2IeY1x0G8QJZ5MdDSIEfM+fiodL/DTR/fr5q6mWXUH4qsLpx8ZsOQNiZCRO1THzg4qByRNK1vmrb7Zzarzx5762ufeWLr9u11UwPUlnhkCmQwQbNSrPmSF4joFFpJ9NXMc48sP4GM7SvGxeiJC1RFyPrm3kOIdWiC4rSRzWzTXFRNUWTAKVnyrFlRVmYd9D0PNxfKpuzJHY8KE9PILQXgJ2gmwmxd+Xf3W9tloA9rjT/DWIJznN6nwE5hIWOMU8Yzirm2GSRBlLl5MfCL0/ZMzFAxWatCdswsMSIijSGms3rf9qV7D+5uWl8550Va71vfNk3Ten/l2o37D2z/5LM/t7q6VlUVzWtrRCTMbuE+NyRtwwaydxVDejGpvMY0FxUp+Wwmp31l3mjTxYIygQRn2WAUGBsG8QSZ2GRXQqoDmLQhS7y6NQyKwAicRZzj9aUmB9gPWXA1/OPRfDzSATCfio39TscFEt09lC0WO591dVcyaYdnUYU9q4JbrK3NnKiY0j2oWoJ+1ANUFNEgNVg1cIbymWZIiIlndfOBe/YuLCw0dSNElatEZDZrmrat66b1bu3GpV/7pS9Wg6G1arbZpLfe1eU83PIBwCnJPVFrdTehDXZFQRi95aMYTmk6nOK7Q4hZcHIScUnJV4KKKZQ54tMg6EvvQ99QGrXheQNZLiyLW7h2qBRbgKUls0Luz0qXLUBWuG8GIkoxexpKL6MdSPQ9MVie3iTKRzZHASElgGFqkDgqnAkyi7RFfXaINN4vjgcfvO92V42urExv3FxpfetFZnXdtq14XzfNyRPvf+SRA4cPf2Btbd0BHgovhHOQ5hbXG4oUTcefezKBOEg0wGoCSdOwVoqsmdhVznMV5VLRxWa+hJ2oWrmcfTWz36XPGc1HnPMsY7lEdovqVHh+EnsDUVMgFNMpn6rUYEXtSsALRNBRmtBoU0o2OGaIIKwn4OBsY1SmqRXkAmui/DgiBSxcMjZvAPUWwnb8IHo4J+x4Oq3v2rf1rtt3Lm3Z9Kcvnrx05UZTz+q6ISHxXsQ3TX3t2o1qevmXv/bZjenMKZcBSVlCWbxtibIlEFER2YEZ8zG3Gs8zTkwQIiDFPGe6YvnQQjnsk94KJUPfCIBgHnM+4lGlVvqzQIkSfbcXsHGkCyldG9s9CuS5mF4ek+6CrWJmK5Q0gFEh6IBrKTHkwWxR0fCFmBEZgd8823l5ckKmQtXKaK4FA+ESMi1AeeIk1bSaJgz7EwVmEQvCtUIkUjf1/Qd3b9uyuNYOv/+TN44cv9DUfjptRLwX33TdgJfLF85/9bPP7N9/oKlrDtplrKoye99SVctsSMMqR6dYC2ipj9pjyY5cQ9bzCYmFfOn+vi1EDkXsIcHsgmMbIikbRpmYw+BzaeeawkDRNCL6DIUUjK1K5kFgOaVMDYGAAY+Og0ISCzCnjJI0Gzx2IGD/a2iDks74cOlw5hQgNGe+aJLLI0uWy6CUGH5c4EQXdFjKy9m+rPgNmtZvXRrfdfuOarz0wpsnfVu/cvTcytoGk3jv66ZtmqZpWt+2l6/evHPP0uc/+8nllVVXOcRHNMSdjeAKkmOs8km0wVTqoKTMZMcXH8YrLr7l1CGX1f05m6O/KRMsAruI00BTjAQC7CHtm2W0G48AXphnJE1pQAxSZYsjRWZVG0F/EqLHmLNtlWiXbJJbiMpFMLkAjbCiXiocD5Ic4D4S5MqiZlBVipzpi8DLOs2O2Pj8c+FEx1mGEPM87qngAaYAkXQndA9wOmsOH9q9b9fWDc9//sOXq6o6ef766QtXRwNuWl/XbT1rmrYhkY2Njavnjn3jSz8/HI772CSGps4e5KCbYNCHZp19GKCI5NJnDvbLovNamC3VxKpGRAqSf8lU7kzgPMDFIK8EoOeGCeClpUaCOJPsh1zh1lDeymBZ2K8OR46wOASHcJDH0s+CEK21K5pgc3aXOmU3qawn8e4TGFBF0aL1RWB1sln3cAKVo/Eai8NAe0bJPHGZIQqywOiG7XLKDTs6DN6TtI/ct/+23dvPXFo5cvT4eDRqvLz+3jkharx4L8LkfetJvMiZUyeeeGDnhz702Pr6uqscwK82kliw0BTLU7Isx1DEZqBCOvDSaW3d5HPTYiYI3AC1DIlQN+KOLIvoPZeC4gG9ZVLlpk0hEaAXIVFZyH6uALnG2ylLmco2WEYozrQGQoXoxyw+hZRZGJlKmzmiQAomwDqcI2AM8zDuWCWpsmOTYw0ZF+qjwHvS9lP2M6hvhgU1YhtceBySBYsTRCSrang6a3ZuWdi/Z+vStu0vv322bRtmHo6GLx89d+bidRFyzjGxeGmbtm3qtfX1auPaX/7Vr9Z161S2mnZMs2YZTg3HRI3UMQ3HxtVCL1a2Rw62ANhSiKL2aEQQrb1C5peyZcC2LZpqGjoanCRhiCGGfMVsB35ScvNGMwykyAjgPAVs0vi460ckeulLoCZL0ZFMT4IZHAeVVs0YL9rsRl2bJiKrlOAcSRSNODeB44FQ2pRV9fY/bJkt4D9eMm027WDdtA8e2rN5cbI8cy+89t7CwgIxDSt39cbqy2+dqli8b0Xaum3qum6aRshduHDxi89++I6DB9c31uEz87xeU7SmRUT5XLKoYCplISWkFzaz7hBYcliNgDzjmFDzArhHLLsJq2opjCAS+01UHRvTbTibNpr62ZzdaUhL8/yyE4vbbsregzaLw0BZBJ4wAtWw5EY78Tx00GWUJgIspLLhKNskt8iryoZQnCpHLmgvZQ76mbY8a/czET3klSSGkQIZOSVYt61fHA8ef/D2zZuW3nzv3KnT5yfjMbPrVtdLR043dc0k3otvqWnapmnbpr1+/ebeTf5Ln//0SkeQjuuHlYcCKW82wD6V8jCFeQFOFS251dJCFUY0ZmbwS2bt5xEBPUhZVp7L1omKtJctTk4p+OxCVyx4QekQGhjZ4nHFyBJEQRRDrCeSiDkxL4Eb2M+nUzZT7C3cXE6FqMYsiz93mXGBasSinpRpnjWGYFQ5F+hR5oDRJ6XixmJwwbytoJpIozmQqGRgTRcGKV+gPzQH9245uHf70qaln7x8tGnq+CFHo+Gpi9ffOXlRiFphYmrbVoTqut6YNedPvfPNL3x8cWmzF4/+oKxDjgm11WXxCUQipM6PNM8KRrOR7yla+KmOJ9YZTDL/BjQvi1nXmXHhqfgLhdErdJPzw5/z2OCo59AAnXpNQKDoc95T6+MYB45ckFHrhwzzEcrCEcMGSMwqZjMH7vZflBSVWBp6DEyZly1Wg2yg2uTha7YHM1h4U3oCPAfJ7h0BmBUZqR/bRTKJDziAMHHdNPfesXNxYbLhh2++e2ZxMvK+P7kHrmq9PPfGqaaRWd2IdPRoT8xN05w7d+GD9+7+6Eef6qbCyDpPQ1zuecYFtwjUZKWNHgznlAVs6oyFCptJILCjzCtFv242phDhaZnXEtW0pWGkyvXjAjFMQdwibPl8Mqd3LX4jZbZno56ysSk4qNpEz6gCkoy2S9EaMaZVivbAvVU2hgmnIs5ZB2wucUMMLLeOnNf9Ks0tWcNoti4QyCJhKDK3U+/J3HrZvDC4c//O0cLCO6evXb22PBoN0eVoMBi+9u75S1dvduHtIlQ37axp26ZZW5/6jeu/9stf8R4zqgWN7DNWuW3kEhtvzsiAk4MYFLWcsR4KaX/24nXwTZkUos/gP4ZEy2KChRUIS4GjanoJsX7K+SCiiPFpN4N80lf6MU1OdN5aGHfJuDEdKG7m3JZaT6GmHPboK2zPWKwpjpHt6kRobtMqsS7mzLw5vQ8Gs6KAJqSyR32ijdns7v079u/etrBp8w9fOurIS3e9hu8wHFY3V9dfPnLSie/6wLZtfeubpmnr5uypE5/86AcP3XXXdDpltPLE6DnhzMwVgR5JfaaAHz96vxWWRQTBogmYFOYAhdpHCEIM8NumoyTuMWbKpOjJ+F/EjmR010+axjzPvruUF6Fprro7Fx0Opz6zJuUm4F9b37N+rDGDzCEuLRkZEy8k0Q769LOyiPq7XZCKZ8wfY4Y4z/OqJypQy5FdxwlesDVrwauoI2R5/+gDt+/cvuXaWvPam8cmk5F48CrtvrpzL751amNj2rZ1l1zTKQRE/KVLl7ZWK1/6wqdX1tacq7DGNWP2QL5Iq6JD4sNIxRtxRu8No4oW1M2ZfHYRDNPiQoOmyPJIXDZWfCLlHLvgaCRUUOtzrp0vvT6RglWQUlkJBmaqFc9iiXKSJ5IJYIhiQs8BtDEpP+FfnNbAQx2ROM05WS2EADkVHFRwzCXtZ636tRSNw+Wak1i/pHQGQgGNbW4pwYFI7T+Z1c3ubQv3HNi1ZfOmV4+eXV5ZHVaDMLHkMIyU0XB48sL1905d9r6tGy9eOq+Iuqnrpr106t1vfP4jmzZtJfGObUirxh/hbAIldyHMNBxLiRGTWItMhmFhb0kp3qF5rqP+C1LoU8NJwjgFK9dCKi2WxOpNM0aaaEM0zoQGQoXCKu9v8IgRi+Fy7sgSbGREyXSTIIZxAmxLDKZi8KfKUOr+8cU0z5wqEt2w0jHDZdwns+Lu5b5cHJ0pQkb64gRYJDPVdfvQoT1bNy20PPzRS++MhpVP0Bux464orBy3Xn76xgnfStPUbds0dSMiTVN7kYsXLz1y9+6PfvTp1bXVgMABGEs5OSLAsJwOFeWljGBKGi+bkR/nbk/mbJQM9s1GRcorKQCFUvQCNOQVMri/qhBY9UMlAEB0lBUwKLi4ygT5rXpkpgLAcWCoak0G1D7pp1N2Kksyx80GzaTJHCUywi2yZov8LxyOiHqsTEVwxziwxMzKgiFqCkoR7gwbkwwfZONeZFjRfQd3u+Ho5MXl946dWZhMvBcFTjpm54S4GgzePHbh0tXlrp320s7qWdN63zTr09qvX//WNz5fNx4tbNPpLlTmYAmA2IbJGE6H1BbFuSEpYXfouHubCZBSy7wYvvCXYnOUX+pWyyAhLo1V+Sow1066jjj9UGllGnKBOXSwASZFy7CucpiWaRjNuspgEyrO8V2y9pUXC6gEGFREofnqEYKjc9YdF0OXdSnFhqVPtwjZII3okGS2FvYjRiE4aH6ZLCMk7v6NaXPbzqX9e7Zu3rz5tXcvTKczVzkVdAwlx2gwuLk6feXt0yJSN22QCkpdt7OmOXXi/U9/9OH77r1/Np2x9o4N3qtIIbbZ9dZkU1QyH0N3A+kHVJjQg8+QeT7gHWYJM5JDs+AkazTNkmfcAfkYwrT7wXFp64M9lUal9IGmAl5ITRlY2SZp1wkxGSv5YBsYZKy5GA7G9ck7FoSnMle1mRE8Cn19LDa5EKuGLQ96E0hp5CZogYWQVFHASVxEnuu6Pnxoz86tm3g4eeG1d8ejQdu2ALRHRCyEv7vqhSOnN6YzF+QEvmuIm/bChQubB+tf/fJnN6azqqpEt/IqUSMzXgZTXAbnBS6i7ibaXtk7GutASCKDdcqmWRIqzu65AOIp9Lk/nQQNVrD7NBeIJYYB7hckfNbKxZhMCWmz/0Tsi9lh5eZYCrVXKilEVTcO5niQjsOG8VAY5eZhGdjFJ7Yz9xMGxkGMoibPz5EmGxaF6ifNBmfkiwsZlIyIqPWyNKkevPu2pcXFY+duHD91djQaWpfMniDSf8bRcHDy/PX3Tl10jjvLRBFpvSei1vPFM8e+8tmPbNq8xbetspst4fKSPKlMLGV60ZwCr8UmW+SZWZQ5TmoDV7SAme9BU/ID0vOIpHFlxfvLPgCbrhiOMEEjxNj+MWIAaIdoWp+O3eQ4hiYgomPgYEybla7qJe0EDyaQElwhLIORo99TdiRHrbNmUGQpM5oBriz6hAoxuXEQkw5hY3JBRJLJBZkVT5hzdyIJF990Vh/cu23X9k2jxaWfvnrMt61KbQLue+SrV45b7597/cT6xqyu26Zum6YloaZpnKsunDv34O2Tp5/60M2byy7EV+G5HsnG7LgK/zjX/a9z7BwzOWZz10sW3FVCRLLoTrD8C7FahLc7zTEfkKxkhGerRz+qXeUM7eAChJH315z7sAD7RUQn+5JKFmMp6G9sky3zLlJmE//KIc/OqgQoy4BgneGVJuZdzB9nIebEVDKQ4XLmMdzPQpjJJUWFNlpsEPp6ZG5moE3xbfvAnbsn49F6O3j1rWMLk5Hvo6Zieo0oxwMmEa4Gg9ffO3/+0vUOt/fee++b1td1vbYxmy5f/uWvfU6I+w0Ag0d2blBVzjGJtG0zm83W19dv3rx5/dr169evr66uTKfTumnIS1VVg8FgUFUYKVmsOYtop4ONV6BaQGxuaTxdQHcIpd5q9IVE9SzDuSSFFvSmUwAKz2fWEFzxyk2SShRYyUFDMZ81bLmoRoB9MsgLZVF9mOhdAII+vdbDy+O5CJAeVHfteaSjiPXUTnEyJb5sXGcO1cVCBdFEt5mapt2yMLz7wK7Nmze/d/rqxctXtm5abNo2SUDQQTtlM8poMFhe2zjy/tlDt+/0nkVkNpsRUVNVVVVdOH/x05/46H333X/2zMlqMCDq7Cu5rpv1jVld14PRcNPSpp27d+7cuWNhPBpPxtVg4MjVs3p1bePa9WtXr15dWV6eTjcq5yYLCx0pQ8RnSnhdurNxJEpeBPMw6LAH5Geyd8OLcioeE6Ah+9V7JlNfNIToGgc3fjBMhIOdidHXAGEY1isQPopEiKeokUBdQsZtCOy4ZLoYNsAtn4LaXY6ckNAtfFlMOkt5s+u4Vk5WFyJqWFZuCNRp4FM+uafkXSqMtwoTb8yaB+/ds2PL0nCy8PzrL7k+XRmeY9rACfvtd6arXnjr9DOP3rO4tFi1FTlpmqZuKle5a9ev3zNY+/KXP/vf/Dd/d9eunSsra8srq4Ph6N67Dz72yAOPfuCBww/cfce+7Ts3uS0Lw8GQFxYW3MI24mo2rTdmzWo9vLbanjx19qVX3/rxT3762qtvXLp0kUQWFxcHg0Hrvfce7QPRjS+SQRM/GFajUP4kda2ZCQ7TJRrmcawcIIhyA1fNOtP+ygL9mQufV5SZlAgu+linIMuMlVVbBrcYX2aGEQBuXYZGPq02Jibetm3bvOXPaF7PJXCXkYEWJUpcxENRrRIgC7jtdUhUYDn+ewXOcBY0gp1Q98tr6+t/+bOPPvGBO4eb9/xf/t7v1NNpVMOJGNQv9E6h4PHeN83sP/jaMx86fNdgUI1Gg8q5yWRSDdxoOLrn7oPXq32f/vrfmE6n+27b9emPP/6ZTzx+594t6ysrFy9ePX3uwtkLV65fvzGr6+FgsH3r0r49O+84sPfuO/ft37t969at4827BqNNg6XNNFw6fWHjxy+88du/87vf/pNv37xxY8vWLYPBoG0b1G3H95KKt0I0d78U8vQAE3dLhrELqibHTh9JnDwMAoBD9v0loCI0uxx3gtjIG3zvCRdSykxJM71YzHIGCZcTxsymtR6a/UE+UECikMqmxOleVGJETys4jpKQR5ClCEUZ52QLghIo/LKLao5bxi1xBrTFFELW0w4mFprVza6ti7fv3T6ZLL7y/oVr125u27zUgTmkhWzxiHJEPrSQlXPTVl5++/TjDx1sPYsXT342m07cxBOdOXP2sY8++Nd/7Zs7F+pnHr372PET//YP/91PXn73xLkr07oNz9HBW2qZec+OLfce3Pvog3d87EP3PfXEw1t37GrF7di65Zc+9/AvffVjL7/67v/vH/3L3/md37l+/ebWrVu9b9vWR55+IN4Fu6beJK9/QRINGEoxWTwfcEN4H6cXcRuxHSalvVFATuMchHWcvf2T3Blxc9IEgrEIbmPGorD/W0LEt5rEpu48Hd+aK1ZNFiYmnVVXkpIy6Rj82KjLWE3QbOB8KnF8YSiDV1RejiYv+OxhsSm1QB6mDn9LvWeitens0Xtve+Se27bv3vOv/+yVy1euDQYVHjaU5fwAANftUr62vPrY/QeWFseuchxegHNcVYNB5Z56+K4f/uAnv/EPf/8f/96PXzl6dmXaDsfjyWQymYwXJpPJZDSZjMaT4cJkPB6Pq8FgbVofP3vludfe+4PvvPjCq0eXJsM7btsxW1++cub9+uaFu2/f/sVf+vqXvvjN69dXXn31ZSYejUbe+6hcTS1ibkJq2jVNQ+1HHS4RfRhQj5QwVnh95SknCLgAh2POVGyM4p4+5slyRpjIvFMjoUp6Li4Z2SW2sA7W0nFBKnWoWpiMCVQRWRYO1GysyhKWxLeQ+SibWUzqJ4z5avlemT8xju+JU6GqtAD4r30x49tfePre/bu3r8n4X/3xTweVyy13kWfK2Pb1g31aW5/t2LJw14Fd3tNwOHDpHybfLO488F/8t79z6tzlrVs2jUeDQeXA1ZQ7s9nuo3iRbgWORoPJeMzV4N2TF3/v2z996ZU3d21bvGP/rqbxKzeX2+Vrd9yx9+u/8mv3P3D4Rz/84cWLFxcXF8R7xOzwKaXjDSAasGThZDMQsMkIjkSEsdM/zaG/lO9hElWMkUYbUQ3Lahkmiyltg8W3XEZ86/UF/USyi5/zyfsPVo3HE+uGOy8vs0tiYTGUXTQ/5FvVLdDjM0Y3i344bOSW+KdSdBMXQT1bzTPTdNbu37Xp6Yfv2rVz2/Nvn3vh1XcXFkbWk1miQ5eytQeGtbRemrp+/IHbh4NqPBp537qq6viwddPcd+/ddbXpO3/2vfFo3HrPTK6f3aRnzS4lBXcMXU/EzKPhYDAcvnvy0u99+7lrV659+OG7FzdvmU6nGzcv0/rlx55+9Bvf/MXXXj/y+htvbNq0yYc9QACSsPXjL5S/kJzLmMuEc0xhCW4QsV8TzGNOzLJItYFyF9c/3+r2KL03KCHmkS8Zp1/lrSJq4lGqItT/MVeTycQmnkqO8DJevlR60sFyHpOY4FNymhoACwBuTNMdKKiXjba/Z705xaU1KeRxA2xMZ888fPt9B3Zv2rzlX33n1ZvLK4OqEpVoKDSfhhsrxqqqri9v3Hf7jtv3bHPOdT20b9vhcNC2vpLZPQ8+/M9/99ttM6sGlRpuKROoZLnD0SRfhInGoyE59/wbx19+9eiHHrpz185tG9ONZrY2u3pmz87Fb/3V/3hlZfb9739vYWGClBue75bMJolRVRiZfI90TEtPZxL0kkhtDPMtjme2JQRbw0MsM0QnzyZHakCEJDMfDmVAgmxVDZPTSjibmvfGY9XCZCFI/FXnQdqPgDPbCJ2HxslCIsAFYrM2kRgnPccRUApWJy+Xih+Oxq05BcgkJnS1QNv6kaNnn7h7z64ty3X1+995eTwcqHmztd60Xh7QwMnGtKnYP3LfflcNq6oS31aVq6oBOzddXz/80N2vvHPxzTffWlpahFCcdILgNsB/4cDhYebJZPze6Svf/+mrH7x3z227ttSzmphn66vjqv3CN3+9Ggy+/e1vLy4uorqXVPKv4OyHw6FqsykNJUggFcYEBxQKibQM8/E8Q6Jj7KBIUedMgoz1q2ZzN3Fi+TOZGwDNZLI1kyYTDPr9LsssrcRqsjDpTS5EdCACMbPtLbJ5LKzsSIgVlFkqJ9f4sNh6l0fUjAsG3ZwgGt2HkGDwXMpajBPz6ay547bNj92/f++eXT99+8Jrbx2fTEZgml1AA+HOsZTGpmk2Zs2HDx8cTcZe/KCqiNg51zEmdm6ebN9/7+/9m+9MJiPxEpcdY7uoEjAZKTTd8/FeFhdGF6+tfucHL913+7bbb9shPCBi8jOaXf3kF391MBj9m3/zb5YWFyMhOdkkJn+3mDpuuCGsYUQmk83HNh+Lf1ZrR8qkE3+arI3WV1V0Xwt2oWUiKc8ZPMPmSTeHrXckLjnW0i2JUEJXAsHxjItSb3i2pFNiC9ZANotOPgSQAI8bMRVQ90wwfZkLFRerhl4sbhMZo455Oqs/8sgdd+7bsWn7zt/901dWV9eCv7m+ROHiNnrSgDOSCA2H7te++MSOLQtMNB4O2HHlqlDfO/LNo0889W+/++KVy5eqwQA1DZwaJOgPHWIz4ZBz5L2MhtW1m+t/8cLbTx6+47a9e0SobZuKGr9x8dkvfmllefqd7/zZ4tKSeIAmAW9B0uEtkMHYlqW6QdT9X2BLGD40i13brHzNRMSsE1HGzhHRy1oFQScl9cH0RJmLUWUJDTIazsBhiJHdaQMUTnecejPCyqA2YC7zSpgLpUuQHiWbabYHD2vunmhiBueEKw0qIc2j8X5x7D714Xt27dh6aVX+6M9enIyH6ZWgQl/rioQ5PxGmdfPXvvT4E4/c9y/+7fOH79ozHA4rx10n0M0K2ra99647L69V3/3+DxYWFvputVCA9E/PkT2dYsXovYxHgxsrG2+9e+ZTzxxe2rzFt23rfTubyvrVL/3Kt94/du75555b2rSpbb2xAdG9B7N+KaxjNcALWbITPPniSgmJZlhUQJJxRmIoIh1U0Id24XnNZTf3XCRFsB7i05JAzKR5iDlj/JPd0xwmT2QCEpjSlDVa9+RZXWpWp+54zla/mngz67Idm//ejzRpEMxPCHRcybobsJeX3v3z0G3bNi9ONm3a/OrbZ5qm6d4EsA4xKwsbrMS0FKLKudWN6TMP7f/iJz/0T/745b94+f1TF67XrW+9dIFiXoSEWk8Xz574ymc/tmnzVt82yo9BPzhWuYmMRUSg/jovtLQ4ef29c/+f//G3Z2vLs1mzsbq6sb62vny9vnjkv/27/9WHn3xqY329qpwX38MfmKnI8EMmAoTv/jBBWISI9GGpkafAytbBZu9F2kICuJLFbmRRCngga/ICOr1JSYCVKUFBXRSjnQr9veUtp7TkuAVEp72KF0eZm4nocD6k4HBh4CdG91NiKYE/FWnfDok2f9FK/hbAGYOJjv6R9YQ9xMvJ/XfsFOFpK6+/fXIhVf8kOf9XJHjggfW5UMU8nTW7ty7+4mcf/9GRK9/94WtE9NwbJ5h8XdfeexHfh0A4Pnv2zP37xk8/+aEuRkDRb9PyJqyO4ppwznWv1vXwKQvR0tLSv/rOq//st/+YmrWN6bSp6+l0euP82c2Dlb/33/3GaDzxbcvZakAX0syJRQ1NlAVn1NOohZh5NSq3Y1glXuZwt938Na6Jpsa6OVEpRLnvil3xeK0JFuepHkteQ6JBdmcd/5GyKqQtpYDkzERFw7j8K0UbPfjSgpr9ruyPV40u8y2Bo8hGL83Z66bdsWWyd9eWhYXRqYvLZ89fHnb4j9Upqb8edz5DhqlI++WPPbB1x85/8Qc/HA0Hrhq8ffziyup6LGicY2Jq6mZldX316plf/Mqnmla6X0RGbnLTRIQA8i0cdV+KmTkirdVg+Bv/5E9fevUtFj+b1vWsblp/9fiRRx87+Lf+93/z2vXrg8Egep2zodymSzwC/HxL/ZHMY0RCSCO+WAiH5OjeQ2b/KZK82JID8k0ByIYMZhv/UtDR2hgEq8Fjzmal/ddzUNI5zHIXIzAQe95LJq2LeSZyS2apYC5OnF6Y42Revoc6M5RdV/yknZfbtG7u3rdtcTJcXFx4/b3z3vtOtaoMdRUmmPJJYl4vO15dn953YMcnnzn8F6+cOn7i9HgyGo2Gl66vH3n/vAh5ISL2/X3qvaczJ0988ql777v/vtmsDiqmoAWjnL7Bqf0N0h7X7SnnOrPe4bC6uTb7e//02+urK03btq3vrp21Yy/+b/6Tv/Lss59cvnmzqqrcqhkKSYkaeh1MHylrcEuowyba0kXXB1Zv38Q1l0xUSv4AmrPAXHBMlDBzDUh1hDItMV7nLcicVBwO78Ig3g5jtyMfGAMXU7iFL/ijCBVc8th4zht7k1wnns2yqCTRQ7xSYDYBfvvxNpaBo7v2b18YDWkweuOdUwvjYdvX6rq8E8Jf7PQbHH8KL5XjZz54sNq0409/9MZoOPReHFPj6Sevn1xdXZvNaqZu6XsR8W1z7fqNbRP5yhd+YWNjqhL14qsODG0bLilpTbi+EyBiEi/j8fgHLx/77k/fGA2rWT1bX1udTdc31teq+sJ/9X//Py4sLpl2SEDPrmS7ohzEIomFwzyuX2iSUmtyVoUIcDipzwdMZ5lkKigxbk1oVyZUcs5MZGHCwMuy37LgF0tna/Yx8nuDVT5ALLCErDo8GWthX8f94zPBXXqUlt6zJD1ybgopUHCJAa45H4kDgmfXcvcwZnWze+vCbTu3jsejkxduXr5yczAYWE5i8leSLCSiRxjWZ/Wh27Y8+tChF98+f/rMxcnCuPsOw2H19olLp85fI/Fdc9k2TdvtAaquXrrwlc99YnFpk4SOk6PJKMYek5G9cpoRO9DQOlc5R676zT/40fVr16X1bTObbqw3dXvjzMknn/7AX/krv3bj+rXOqZdvJXWJp5lEtBSnhxxJUJyo9ymQSrHWBN+zZD1o0mR7sIPIY1E1AFCqZzmryyMRLXn4av0k7HU8RcWjxVrMz3NzFTAm0ZyUd3S0uFCTXJV2optgNl8A7QHCXxUqtuPFJ0DaNQhTBpmoado7b9s6GQ8WFhdffOOkBxNCNiUlzUtvZREh7598aP/OXbv/4vm3utO8e1UDx9O6eev9c4PKNU3rnBOh1vuOUXPx/LkP3rPzyQ8/sba6HjRCCJ0VfoLgNg4D0s6Vgl3XDS9Mxi8fOfXt7/5Emo21tfXZdDbbWJvVbX3h2P/uf/u/3LN3Xz2bdW9TDB9A7MReUw/YznoCLi9gFcQiLMH2x2QoxUYH6iSxL1HDKixKHk+WEZMXTQZKiCsqTF31ccklFpKkcGyEFt086RYjhUef8qxaCgjBjr5+gnltaAlRYhIJpWctdCsWbp5xq/UcwbnHj4bu4L7txNy4wZHj5yejYcclVtA+WPGAd1H6TBt1s33z5IP333FzzR9979RkPMJwOueqN9+/sL6+0bZt23bBDcJM4v3q2nq7cuEXv/a5jdlM2dfHMQ6UENkMRzDYi4l6xikTcfXP/uDHly5cbJvZbDadzWbNbHrz0tmDty/9h//hX11dWxtUlUC0qX6P6XwQRPLDqkSb0kCgYJViDAMsmF9p7AVMu0V73RJhKkUhVFnZqYuI2g6cW1WryVv05ALnFDFse2bw5HfoDap+RNZIv0BIK9imKLVD/GtQ0Ak+s1syWwW8JYPgI86qBKzTcucyKvcIs7rdu21h9/alpaWFY+duXr+xVlVM1M8AbLZcKtAYAv6EmOq6uXPf1l27th09eenGjZWqqjrAp7fNGg3PXl55892zJFQ3rXPdAMu33hNVZ0+d+MxHHjhw4I7ptOsEhMWMn1RoF+TewEUT+KTOOSKejAavH7vw/efeGDlu6mY6nc6m042NtbXTb/xHv/6Vu++5p67rqMSNrIhcMaca/5TRpzNtOau1WSVVMs6eGYNkkg4KMahMjMZ2dB87O+ZOWJ2GoKINJMSWBYlmDylbPE/vA9b0HJtgKhCQi6IERjTLPCTY4XyLYAGc0kfvuGgaHMkbYBhaEAj0dB0knYW6sm3aQ/u2Dapq05Ytrxw5PXAcTEi6o5Qdu47B4+KvV85xj7471++40aB64I6do/H46IlzJL7q/3zV/b9B5bzQj18/OZ3V3vuqckRUN53Nlly+em3HZPrFz/78+tpG5RxDc6a121H9luD/iFZ0nw0nZMT8r/70pZsrK13jXdeztqlvXLl4287Rf/DX/+rq6mr3MdQNTgw0WTV9EjVfjRxoVukF6i73RFS5zjzSJZuX/lmyq1xVVdWg/3VO9a8DOru58vq62WszebasJMNVVKb6vX+CTS1mjfn3tRS6bgnTIBZtrNcw6HOTDh6cn0TvP0HaoKijgC2hDgBUsThQLOMSXck4OkYTTIMiMbN43xFpbt+7vaqqG2v1c6+849tGyBOReE+YEZ0Ayr7njCJJEmraZsvS6ODebS0Pj7x3uqmn6+tV08GQ3eRLiEhefPvMybOXHrz79qb1zrlOpd80jYi/cv70N7747G/+i38tOlY7CQ19morOZnVHou4na0AVFpGmbZumqapqMp68cvTsj15464uf/UTrfVPXg0HleLR28eyv/6Vv/P1/8I8unDs7HI20uEOUCyMnSX3ckSnftC9H2djuM7MXEXJeeH19Op3OBpXrDCza1jdt27HTK1c555qmmTXtoKom49FoWAXyjTOyEPD+SBb3gJKrd8wGKjUFm67HWDNoiNT8StFnJbhCcMFuI7gDSDIc0R9e71QRE2gXx0kKN7D/wyLiXIcngYwnhoVZE7w8GbL/w50/xKxpD+7ZtHf74mRhUtPokcP3jcfDyrnBcCh9fdI/ye4sJ+a29b5tujree0/kq6pqm2YsawsLw5lUBw4c2L59+2Qyqeu6aWrHXFWD1ksz21jfWL90fe2+tmkaPx5XRFTXNXlxbnTx4pXHH3vw8ccfeeGFFyeTSYeTqpF2L3il0Wi4e/cOdoO68Wtr6963VTWoKte2jffiquFw6Jj89WvXNzY2hN23f/jGz3/kUa6GMhp2Z+2NG9f27Zdf+8u/8n/9L//Ort0LTduwZPewpv4QG+Yfq2MKyC/MPJ3O7rnzti985tkdO7bs27N927YtrlqopWIS8Ru+mRExuxEPJsTVwtg16zcuXLx89fra86+89Yd/8t3RaNSzHCESWtRYoBebSKp4+sxXfWrAoYuFOFT9zJxOEPUNqKhaVK4QQeLMlLnVBbV4TC3QdaQm/yTvThC/xzsWpGtsokiI+WdoiBC505ulcxBZXZ999slDHz58YGOjvu22PUuLS03bCvNwMHSOvbRM7JiHg6orZ9g5L9I2jfeehB078Q2xVFydO3d+eWO6e+f2fXv2ThYm5Fxd123bDIfD8Xgk5DbW16bT9etXrw6YFhYXJwuTtvWOeTisJpOF4XD4yAcf/q3vHf8//Bf/9dYtS7NZQ4XIMJ7VzW07lj7/7BO7du48dGDP7p1bh6PxeDKpqoGrBrPpBrXNe8dPv3L01O//ux+ePH2+GlQjJ7/xt7/1yOF7B6PxaDgaT8aTxU3bt2+9VG999kt/beXmjWpQ9eeBZAZzoKaUxGZT/MUgZwrbxVPrW/HtwtCNR4Pd25eefOTur/7Cx55+6jFXOUftoKpcNRB2bjAeLiz8xXd/+Ju/8++ef+P4lWurG42vG89Qf9O/j9gSqgzOdFqiQVVGjqEJWgMrExXgi+XV1m3boEZR03QL2lDyxsCeWRtT6wrKEGiFKFpf4OCLzQ7sp7IWQ4iNcqyOUrCkdA0oi//WLzy8f/fW5an/l3/402HliLlpPQFzUIS60WlvaMzkAg2mhx2935jVH7h3/+c//vByPfiHv/Xt8dD5tp3VjReqnBsMKvF+VjedJ9yvfempJx6+qxF2zI5pNBqNRqPBoNp3257JgQ9/4Zf+xo1rV9i51AomuhiLSN3U0+mUfbNry+Sbn/zgJz/2wcFwNBgMxpPJbLrx9//5t//0uXdW1pvReNz5zK2urf2lzz3xn/2Nb7TkRqPReLKwtHnzoHL77n7wP/s7//T/+9//D9u2ba2bBp+tsrTplb/kybNOOI05p0zcmbqJJyHxvvWteJGmbaez2jd1xfSppx/4W//x1/fv3z+aLLlqwNKSn/6Xf/df/ubv/UUjbjIejUbDrjcwuJ5IlnJnjA3QHCVZ8pR4mwKZucC/5gxTT2sK3NyJqFro6dBzlQ9J1cG9C6IggsGmR2YzxxDquzpR6hmlZexJxVgXZehs/Aocs1MIJv1CTDKdNXfs3vzAnXt27tj8/oXVH718bCbVyrRdnfq1qV+dyepU1ma0NqPVabsybVemsjr1K9N2eaNd3fArG+1y9+sb/ubq+h237Xjs/tun1aY/+O5rG7VcX2tWpn59Kqszubne3lhrVqft2kxurq6Tbx+5b3/jxfWIDTnmwWDYNM39991z5MSV555/YWlpyd7j4X8q54bDIVeD62vNK++cO7hn09atm9bWZ841/90/++4f/OCd0XgymUyc4xjldenqjU88cd/mzZvYuaBJ4ErqO+958Ld//0/bpgb+BTw5c/gR6PbgBMUTL/JFu3VYVW4yHi0uLAyHwzffO/Pe+6c++/HHRgtLIu2WzZO//f/4x//T7/zZ9h07lhYno9EgdPCJ1VIc+nLiNrPkUmZm3QAiM1KQSp46TOsVRsC+j9B9gEE5zfYKqWWEuKomNMVxTcZX427smXiZkrKkCxmScXew1WSGfxfT2oTPGzlPsYGS+w7uco6rwfjVt88uLIxHg2o0qMajwWQ8HI8G49FgPKwmo2o8qsajwWTY/e9gMhyMR9VkPJyMBkNHw4qcq7YsjYcDdo6HFY8qNxkOFjp3k9FgMqwWxoPJeDgauvF4/Pp75989cTEq8bu7SKStm/bamSPf/OLHquE4mVqTDWfv7i8m2rw0mTby/BsnN6b1rl1bf3rkwh//xVu7tm8aVK7jXHfH0Xg0PHdl+Ts/eJV927a+buq2rtumuX7t6iMP7P/C539heWWlt2gUnRpcoJHpcxUi2lkM0tmT/oSom3kvLS396LUTz7981Leydcum3/72S//kd3+wZ/du8b5tPVCuuJj4rUm+gJNiRLdhF3O2BiO9OFpnMXbYMA5UliEJ73aSe6uLDvlQyDCT4UbLHJiTVN63lWFLjmtyGpgKZTqHILhEez+w/iTi1vulhcGBPVuWFkYXr28cO31xNBoiPy8iiWJEjyFyT8A+lZwjobb1HYvB9+eKC2T0RFd1jm+uzV44cqppmrppve980ahp26ZuTp888/QjBx979JG1tbXuQIyxP3oC00thHZMnquvZzC381h+/urgwblsflR+gKnZ/+pMjy6urnelvXU8776x6+eqvf+vrw9EoupUkZ04daMcqUjcljLjwnKwyTku/hGg4GLAbvHvijPPT1Xb43/9Pf7S4MEIFQPL4Jgp3Y0nrImp6PS+QyKb4AXdY/7WCkEaSmSQ+8eQOjTymYG6qPiAutRRbrHcIpt+xnReoNNpijwG7i51Qlq/QvyQusncdU934A3s2L01G27duPnry0sa0dqyiRlTyZSZDIefSpJydeL+6PlvdaLZu2bSwMCFm56p+NNvfej1CL0Ls3GvvnL25vOa9737Re9823nu/vLbhZjd++WufndVtl6MRxh2s/f/7scZg4A7s3bZzx9YfvHTs/eOnl5YW4h9xMIcej0dvn7z02pETzlHb+qZumrYloSsXzzz9yIGnnnq6mwkk7QfEQaaLVRT5IFFklOhR+cWojHbniHk2m21eGH7nR68ffefEpqWFXvbFmgWdrEjEDsIssKfLBMOOI52Uiwp+ycYGjLdbjIiysIsjDcajh3CE23uLfSEd+qkSzNj6NSI5tER0ytQESMtN7ChmTNkgM5JIQ0ZxLPfs306Oq/H4rWMXJqMBzC2TG083sSFISCYtS4yfZ2PWzOp6y9LC1q1bw32YCIL9SJiZiIaDwbnLy0ePnRsETVbT9KaiQnzm5PEvfeaZffv213XDMGtkfRQzUdO22zdN7j+4azjZ9Cd/8cp4NPBeYGKYPN0qx03rf/9PX1hdXmmaxnupZ7Omma2vrQ6mF//aX/66p36kl3JIzEWv0lI4HmdiPBtEq3mAIum9H1R85+27/XDyP//+d1laAPvZDFRF5b1LGoyr0juMRBlkmUzcnzlcklvN4cyrRlOd0HHc3212F9cy+DJwNLlFCXPJtZ4zoppK2pGM2JwCmc0wQeZrM/r6pLcuU3SrwKer23br0mj/nq2T8ejc1dWzF66OxyORJLNS5KvotOGUn0HcJN1wbH1Wr61tjAd84Pbb2rZ1rv+UTOgH2AmCWYheOXq2bZu2abqfuMsVZqKrV2/cvmvxk5/8xMrySiyyMb6lly45Wp/W9xzYcfjeg0fPLB9558TCwjh/390O8ELD4fDHr584+t4p8W3TtuJ9U9fey5UL5770mac/8IEPbGxsxJFWPJhV/IooE1VTcMRbg7XNVPypm7bdtDB85MF7jl/ceP6lNxYWF+IFOIdgmUhRkEiiTznFNsDGFvYS58RIK23L87HBCY+ppzvFlEhrSC7GAEIEaTtZBEVI82O6lYJFZ1uRcoiLM3rV8AhHwhYjdd+GtIpIXbcHdm+ejIeblxZff+d8XbcuSUxI8y5YHS6pugVOOVM1cFeury2vT329/oEH7m0a7+IBEbaNSKiXiAfD4ZvHL544d4WY2rYfKvtWvPdNK8uXTn79Cx/vxOHRQz4xk2A0fviuvdv37HvujZNtXSM7BqMeOqx2OBysrM+++9xbLK3vYlzrpm3qlbXZ1gX65V/82vraujMrDHw6IHa7RJHCqU4uFmPXOY49cOeeB+479P3n37xx4+ZwOEDQKKGAWdudklZiNj1gNPDbpZhYWD3JbgnmyEmYhiZtmRFkvNmcCpwzAJO1Hi2wLaJPJym7gYzAXEigiuwUPVdTCi/pMxcz/lMMP+3+bOXo0L5t0orn6six8+NRJYHViFJOxAalaHMQluWgqq7cXF1Zm63duPzog3cMxxOxdRo5F5m5PKzc6vrs+TdO1nXTMYK8eCFp26b17enjx546fNvDDx9eX18PXCNV5nUahv27N33w/gPnrq4+/9JbS0sL3kdTK2ZdyXGQEX/3uaOXr9xkobZt63rmm9aL3Lx4+he/9Inde/Y2Ta2tfVSCr0BRYGpVbDn7D+kYUAghorae/fyTDy3t2PMn331hULnUzkabIi7KUbCOti5Y6XZHAbkU0imVapm14ZcViOXoKfYAnCveFTneEtC0z5My6yRUBIC00uQkcq7fJ3OiK3pdlCrB1SwA0zWN375pvHvb0mg0uHh17dLV5dFwaJKzRCHf4ICGtPTkMSWOeWPWXrmxduny1X1b3b333rWxsRFwDLFid8fC7Fz14lunL19dFvHMjsiJeBFpm+bq9RtudvOrX/zkxrSuqgG5JMGLZ9TGdPb4/fvuv+fOF948ce78xdFwiIxIBq/9SPkcjUanLt547pW3m3Y2nc7quq6b2jftpYsX7to9+NIXPrOyul5VFXRO5SmsFNmKJmJF1wh13W5Zmvzc04+8ffrmq2++u7g48V50Bpc6tUzQrWDaOwQ3cmpIStAPq8JfqLiehApB6mnfiSgc36F7lgUlhe06TSeWMa/rTQGC5o8TZBM2TPJbmiNrL3U3jGWYLWGDxqBp2zv2bhkMqk2blo6cuNQ2LRDr0I6DwWcPtUIceB4RaOzKnOqdU5dX1uubl8985bMfa1qpKpcuLqcp1ULDQXX+6spb752pHPkg1Giatq7rpvVnTx77ymee2rP3trZtEg7d0xDFez8ZuYfvvX2wuPUnrxxzjnr/Ela6KefCXe5cl0HGXH3v+SOryytt03rv68a3vp1Opzcunfr1X/3SwtKS920HGDIEDmphUDD2yf08QsPYa/RhrrQ+nT324MFHHz38h3/23LWr16LgzghsKM/r5qR+is0GQ0huKkGkoIOSXPpckGuyIZuKESzAR3Jc4C1zPq/NiP2MY4Wo9PSiyikkSzgwRWTNOuX8kAHM1ciIGe4aEfG+q3+2j4ZDz9Xbx8+PRwOf4tTjrWXCoZ1WJ0qkn7igrhgOq5Pnr1+9sXbu7NknH9x3+PBDG+tT56o+XtbkOHP/ay++dWq6Me0GW90T916k9VeuXLv7ts2ffPbjKyurlasYiIXMvDGb3bFn24P3HDh+4eabR48vLSx4HxMmoUjueKvBv0CIxuPhC0dOv3vyXKdW8G1T1zUzXb546UMP7P3I00+ura134WUS06uYkuQRL0dj8FOgL6SOwrfts08+yKOlP/nzn0xGA4nDeVGDkqhDIQzgMYpso+4DwmwhpRfiB9J8LUW7seWBgtkERmLHhe6U3BMwK7WpdOppEvuIudeE6VY8Ni6kC0erPh0naLFhAc0GRSIdM82aZueW8fYti+PR8NLVtYtXbg4HlaTHCrA2F56MgDF6vIG7H3Pg3OpG+8a7Z6dNe+300f/Fr36hbsUpLQ5qaZiJhoPBO6evnj531TlufSu+I05L633j+ebls7/45WcHgxEeSN2HaZr24bv37N+/98cvv7e8vFINKgYLqeTvpE447tj5y2v1t3/4uvi2rpumqevZbDbd2JjW9cqlv/KrX+2AXyqUt5LU3TrTl0TZ96IQpfuNpvW7ti1+4sMPvvjWibfefm9hcSGNTeOXAFEVTJj0EZdoEgLhvdpSQoAAnxrO2DQziHwUq8g2BlZi2Z+4jtSqzVzyGWUbcbmkkAwtH2ZQpjB+tzgUtPnVKjWQ54homJhFj8bjPe5bf9e+bcw8GAzfPH4pnlSFBsyEl4gy5aUIOlFCO4fDwcvvXLh+c+P0mXP37pJv/fJXL1+9NhwOBZMO4oXp3KByG7Pm5aOn2bezWd3ZUEQI8tyZ0x997NCDDzywurrKEKDRer9t0/jR+29fq/kHz78RvHVd2JcuVZ2wr126f3jgBuTbpq29923TtE3LzNeuXv3szz/x0EMPra+tpYwWTUFDF52CQxQbhYqQiHO8Pp196KED99136I/+7IW11bWuzYBDBRBCYOazAhrSwC12arAldVy8CBF5lLRTmiWA1NaCKSA+R407itigEggpktpyTUIpHk/KLjst21w4+2CFH7MV//zMPkwKwzG1nwOG1Yosjod37N02q9uG3DsnLoyHAxuJrAxA7b5gxQsT8OchIhoNq5vrzY9eOc7V4KUXX/jrX33q537uE9dv3Bh3XANJd0z8+tVg+JM3Tp69dKM78XxQPDdtu7y67qbXPvvpj25sTKtuQMHMxOvT+t7bdxy+/47X3rvw/okzC+OxD5RXNLHhHhNFQTl7otHA/dyH753VtW9b8dI0jfe+bduN9Y0d49k3v/755W6NMr4dDB3WIc2RJKJJu3EB+db7pv7MMx+YVUvf/dGrC5NRJ3VIMrI5Fg9pcZuxGhWmQL1pSU5cAlWuqZAL4naVCQv7zuH0BcoxvfKxxo+gK2Ar6YJK3xDCREhXegIX1Vwowgx5ORlWJbMqnEDUdbNn+8LiZDgeDS/d2Lh6Y204HGRmEoVpRCIo4TyYswJNaHFh/OI75195+9T6Rv36c3/+f/ub33r4kQ9ev3FzOBrCdeyojwjm4cCdv7Ly6tHTQjSr245iTSLk26Ztzx5/58uffHT7zl11U8fv4tvmkXv3bt+56y9eOOq7Dj6V6NFFr+DDVznemDUPHdr98AN3vfLupfPnL3ZSybZt2qZu6ubCyaPf/PwzBw7c0TZNdLchPAu6c5RVvgNlFRq2Xmsb073bFz/xzCOvvHv5xMkzk8mkC/DTxgxzh/x2pEBW88QoRDEBKGjVJlKMojZqebjByAorSYiSL1DozaHk7/tzMeQFyTtzSTlhgpOBEhpgQS3VtLNiVwuzxIZKNIGSRDw1bXv7rs2tl507Np26cC0a2pmqR0rz5Yxwh1kRDJlt7Krqj3549PyVm1dvrL778nf/3//5X3v88ceuXLk66GXyDkxu+y/13OsnNjambdNW7Nq2bdpWxJP4S5euHtoz+cRHP7y6ut71lrO63bFl8sCh2y7drF9/69ji4qT1Phdh9+wd1cx3B4v/+GN3bdqy9be/8+orb77vm7rTtzV1U9ez69dv3nP7jp4figcTxE1JOG4V4xY8HRIJwXsi2tiYfuzxe+84dPcffue52WyKF60g4zWLfpNEQYBmV5XPCSliVuKqvt5R2lJ1AMcDTNkYZiny1vM9GGMJ8DOTWxi2kIrGFu4Hya6n5DqvrSRxuq26bkazFU7jBwGAiDENJR5OvvV+cVTdtmvzaFAtThaOnbk2HDglPKRS2mR+PWSCDYDBmIiGVbU6bX/3z9+4vrx+8fL1t1/4s//n3/r1b3z9a5evXve+7bYB3uaDQXX05KVjJy9U3FVA1La+bnxTt7PGr16/8q1vfmEwGHUvvW7bR+7Zc+jA3udeP37l6o0E/wtC4/DjA7wya9pdWyYf/fBDZ69Nf/zCGz99/cSs7klIbds2Td0Sr12/8Etf/vnhaEzJFzo6iWagsgjODGILG0uc1vtNC8Mvf/rJKyvtd3/w3Hg09F4UJQdi1TDYArOuCVNugYGknf8AguF4GIIQhk3CpAjg9N3x7cGXAn5ZooQkZtBzP7ROOFIivvUuMQFu0nWSaBgNemhbTTAng5UY8QjOD/3WFxyDR3gL/FnTLGw6qw/s3rx5cby0MLy+1l64fKNyOjoPQGk0rOGSibVqz5B4wyxMk/Hw8s3pP/7Dl4+duXbx6vIrP/h3f/NbH/0//+3/9eKmbTduLjNRb8cgQszDQdW0/pW3T1dOZrMZu06lSh1r7dzZsx/50P33P3D/dGNDiEYVfeSROxe3bPvBi28bJ8VuFAOIILO6xHk6bT543/4H7rv3R6+dbJv69fcunL1wzbmq9VLXTdv6tvEXz51+6qHbnn76ya7x0KaeMTNdWKVaIAs9HReOeX1a33/nnicfu/97P33j9Jmzk/FY6To4ORBhZpf5pmivGB0K0uBXd5cJ75RSNZGy7BluBE2UExhohLy5iGG4xErksC84QY+afC/J213pFOPUFczENC1JyGccwHQFq+RPYYSRI34qenQinhzTfXfscExLC5NzV1c3egceTiEAYMZugj+SK4AC+QSyt5QQjoQWxqMry9N//EcvPvf6yZtrG8//6DsP72l+4//0H/3KL3+NB6Nr1260bTMYDqqqYueqwfC1d89evrrc6WNIqG2ajj2xsrYxnp7/0uc+sbq6Pp3Vu7dO7j904OKKHD12bjIeeRGNgiiBB1AJRMQPKvroo3fLcPIn33+RmS/fWP/zH7/mm+lsOusQ0aaerq1vuHblr/zyV1oveaQPJS+mklurvh+YuanrDx8+uLR52598/2VWg1GKJ6uKbRHwCSKEosLOtsSkgt1OiU0hqrgXBTcZRrWquRhmq77rARgciPosjNAaZqa9IZILTOcx4E4M40fUJ1LqAQWERqww6GSD/lKRQ3rlXPcMZ01z247Ffbs2zep6NBpdvTmVti0QS0N2to5iS0E5imcIFnHIm3POuaoiduPRoCX3Rz957zf/6KU3j1157Y23L7//0l/5zP2/8V/+r37lF7+8c9eelbXp6urqdDobDtz5K6tH3j/nWGZ13XHj+hfmqgtnT3/ts8/s2L1zY2Pjobtu27Fj+1+8cHR1ZdVVDux4ZG7x1g1A6nb/zk2PPnToyImLr73x9mg0FJE/+fGRi5evCXkR3/rWt21TN1cuXvjcs48duOPg+voGOxNMTgmKj6gi2/FO92jqxi+Oq2efPnzuhn/p1aNLi5OQ3a1KfoFiKPZjgtoQNXClNJ6bV7JjwnZAL4REtMgOlI2CUgTGSIEIb4XbtJpMJsRmehCE70wsTAY9SxJkVmVGmQXLmcdGGbTqyZXJZoIU8dMqaaVp26ce3Ltt0+LGrN6zZ9exSxunTp0bjUbwt1DwHXTgWZoYcwc4AvqWMl0JNQl9FBjzcFCdv7b26tFzZy7eWN2YrVy9uERrH3nk0Gd//ukHH7xv67at7KrpdLq2PvVt88i9t7MbOMdC3OHlVVU1dfvQQ/e/+u7Fo28d+atfeWr7nj3/4Le/u762UVUV3q5sIoQkSV6ZaX1j+olHD37hk0/+3vfe+ukLbywsTJj56s3Vu/dvv/eu/d2cuHIVEc1m0ztv33Fxmf78ez/avGkp2h9xuPchwBxE6IlA3w/yl9fWH7t373/617/xnRdP/v4f/dnS0mLHf7ZTp/74cGQ7ybJNIHPBho5TrBqzNvvEFMpMOM7GfD1a7NnEq/CvA+1UAec7mkvAGoVxWLSnYMjMKeGv+iVyrtUvONpJbh8QhC+8Pq3v2L3ptl1b1msvQsPhYNuWTV7EMXezV21zJCJlA24KluhIrIoxlDE5i0VVgyS0MB56L++dvf7e2WubF0Y7ty7s3jq+a9+OO/fv/bnDez7xwdtPn7v0xtvHXnzjxNFTlx5/6JCIOMfeE7PMZrPW+5XLJ7/6uU+snn7j6YcPvnTm5qmzlzctjKChTLpoJvbKJIqIxQuNBvzhwwdrN/nBc2+Ox2ORrg/hP/3xW08/fv9kYWEwqCpXTapKhC+dO/2rX/vkP/wnv93M1k3Pkz8Z0ZYcwMv1zz754Ghx27/59v/sGKK0LZOFhaxyCuNT85eq9QDpHgJkJpxS8IfLqphUP7pAbFRug6KKFRkY4Fs5ZGsTF5ualOGvkKbGhb8VDJAkSxgH/CkJkTWVkIVIPDnHddMujavH79vbfaFBVdUb6w/ed6hzkaW2xdF6vCTzPL+0B4ziH+oPdf1FlICFiJ2ThcmYiDYaf+LiyvHzK88fvUJyhMUPK66qajisbq5NXz5y6rEH7+hl+9KKVG0r7PzxY8effeyR7x88+Hf+/h9fXnfj0SBaQyZiSMDdGJchERNPZ7N79m1/7AP3vXH86tF3jy+Mh03bipfhcPDae+fffu/s4w/fIz4K9P3ly9fvf+Sez3zqE7/1W7+zZcuWri1BGz/kx0SBBhjK8qye7di88JHH73/j/XMvvfLm4sKkO/7FHJMJFY8qqwAtBucVNn5QlKLntepAsT6jax1hPgEGbcQEHhXCZ/Mo0KOe0bAOGdYYb5ZqMjHW/jw/i95GmQMIDQWZYV0IFHEFsnRX+DYDR5945MCWpTGzVEzj0fDGjetPHr7jAx/4wPLy8nA4iNJxCAzI8lx1W+XUp2T9s0Uj7c4Uk6Mipns7g8otjIdLi6OFyWgymQxHE1+NNlq+uda04t56//yVqzc7DL1tfdM7cMnNlfWBn23Zd+93nn/v1Nkrg8oJlKah/5Gk+2YFVbZN++ThO/YfPPi9596uZ9PILhwMqlnjf/LKe52VTzeCqOt6Oq3Xblz85a99hrhKIAc8Zm/feO+GFge8a+uzw4d233vv3X/+0yMrN5cHwwFrCpsA3hAFD4Z52hURmS9QoQLg5FKMTtop21a7RWQsI/uO4TBldVO5XJ9PTAV9QEBwBbWsZKdrxehLiAjWSq5gmJqAD2UDyrg6Wy+r67Ol8eBTjx/ct3OpbdO5dXN1duLIi//5f/qXduy+7fKVa+L9oKpcIKhw6RaLqokkckWTeT02DIIQo4lN9s1dUdJFYLDjyvFwUA2Hg8l4eO7y8gtvnmxaP53O6qbxIszUto0IXbpw7i995WO7du92TOKlkAsq2VEgQkR13WyaDB578OClGxs/fv61pcXFvlN3joRcNfjRq8dOnz3vW980vpk1bdMK0aWLlz/+xP0ffuLx9fWNqIcW40cC7JqQpdED6oOKP/3MYV7Y9r0fvzIaDcSDQE9TDAXoN/GYgKtGiuID5NQk8ryeRmsFIl5fHFmnihzBhVgYHabI1WQ8IS70JMDSo6TNmm9bmBOtKFMAqIfEVNpnbOqqWdPMGi9Ck5F75O7dHzm8bzwazNrWsWuFWiEm74XPX7q2fTT90uefXZk25y5dX9+o67oZDJx2Y8kCuhIHyGTLpiQFJSZU8bs624QTasoAC9Ztu74x/eB9+4fD4WDQMSa6beOWb1x/6KH7j5xeffPNtyaTiQeWvP2YFGYCLMy8trHxwMEdX/30E6+8e/EPvv3jpcUFH03dSCrnbqys79qycPi+20WYezdrblt/264t9WDzH/7xny/2AI66yiWFKyZrgm4FTOtm347F/+Qv/8Kxi+v/8J//0cJ42McTZ8TeeesjeLWXrmPCea6RYjJlyb+soXbOcljRx5+NVUNKGu6/TjVZmBTuI9ssx9Ae4iybmzOuB44xssdgV306cxnHgtLRbnduHj12z55H7tr18KGd+3ctOeeEuHJcdQZsjgfOMdNoOLh89drK5bMffujgR574wAP3HlxYXDh99iJnAo24OrPGK95fbPmjqCsO28LFrRAd/dNv9hd915dfu7n2wB079+3dhipXJm5bv23rpu377vm9P/zTcR/hobnx0TKNoJUhaermK5946MMfeuRf/smL7x0/Mx6NzFivbf3K2sbHH79vsrDQydO6CYmfbdx7/wO/+2//Ym1tlXHqFmLTBcRucUcx8fLK+rOP3/n1L3z8n/3xC8+99ObS4sQyk6CyZpu9Q8WxQpyrsiYyh3ZZuRNxguXsiITZbJIerGHJDnRU3Ye3P4ClgCop1Y8wjrhZtcYC4/nevwnRLPCG5rkPI3lhgHVT38KRl6vXV85evL4xa5hpOBgwkfetwA/FzIPKsaum03pj+sLWxcn2Hdu9GzlX9R858MmNDQEV/Yk4zb9VZG6yz0xMuuSvDkypbsl2d0NVuY26fu2dM48+dEfjZTis2ralzmB0ODx35tRHHvnoXXcdOnn82HgcLwGM6I2a2D7+Zjprdm+bPPnIfcsz98bbJxcn47YHjyhWNaPR8P2zV189cuIjH36I2Dmuh8NKxF27fuPwXZOvfeUL/8P/+A+2bt0cgm0gY0JNBPoH1Ph2POBPPvWBDV760YtvL05GrReAK0QrRM3UIq8BMplkxh012g8FNIXygYkLw/zOZFwVQYIKyt70NGIuxANY/RqryQXshA5H4etIGMVxkkQwkq8TCkbztkLvfBomJ7ESdUwXb2ycurTMRJ3HKg7VE/mJgZdJfHF5jS+sMfPCZJyw9ASAkTA5DqHhHEX3kt/oCa8wSWmWJdkN2LsUglTmBen64NX3zp+9cG3P7p3ctoOKO1IN++b6zRW3fvnLn/u5/9dvvLW4uOSbBkfoAqr/fjTPPJ3N7rtj38EDe3945NS5C5c3L046MzoCSUnleOrlL15698OP3F0Nxzyipmm7nXv1wslf+eqn/ulv/lbM/NQQNSs5uRAzT2fNvXfs+vCHHnz13XPHjp1aXBiLz4HTpHmVkjVCCWktl+mQv9u/tt6mFySunGzvbDkUPP37F9D9Z4qciAdauLIc7DGdo23gd1IJAIKOjxJSXrQQBm/8TvkaKa0ZnKpuG8hQkOGg2rw4WVoYL4xHk/FocTJeGI8WxqPFyWhhMpxMRouT4eJ4tDAeTkaDyXg4GY8mo8HiZLi4MFbotKDdcITdgGfaU0HMMUSZ25cq+6EJEEyh652znCPi0ai6fH3t5bfPdPO77ku2Tds2vm3l9In3vv7Zp3bt2l03tQ5pVnSWIArx41H1+AO3SzX83nNvUn8TkiMXSamOnRANBsNXjp45c/4KszRtU9d1XTci/vLFC4/cu+eZjzy9urrKHU8bjUFFkKTZAZpN23748MHt27d/5wcvTacbqZTHj4nODQUpb87ETd2SzBMQon+4aGlfdpKyfWxotZ9YcYFkn4SNzm5IwSRAhhrROruLUcoT0GuCt0u0WI0DL5BDm+NBOUdE/zVKkYAcHK4ddQm6/Wd04Vh28S4Q0viGGTSm7cwFNCI7otCrhvskVx1ymB4XCAOTBoeF+bk3T66urTvumJXU+p4jffna8oFdCx975om1aOOjHg7qmGhat/t3bXrkgYOXluvX33p/YWGSUF60/SIeDasbq9MfvfI++bapu3ztppnNpnUrG1e/9Y3PNz5wq3tXRhT2pRfaNH5h5J58+NDVleYnL7y1uNDVaSmtWSCejgwTQXIiusUQf4ZfBc7EFQlconeP5E2cyjoofRZ4ui69pL73FK1EjcQ1ntvRiLZCjMQyNqJkHdBIoCwWJGbp7lP7E4eArxD4Fa2qnIo1zoNnGevT2FzBJzBQoJlXR5f4PkiUw6ZO/t8WD+oO5g4yGA0HJy9cf+fERWZu246r3AtXZnVz8/K5r33h59lVomVBfc5u+FyOuK6bhw7t2bdvz6tHz1y/fnM4HOjKIfqccpdj+b0X3z1/+TqJ+LZt6u6byrlTxz719H333HPPtDd6oYLPWjgn1zemd+/f9vBDh144cvrUmQuTySiREuOnTJ5pQuKBQcSKW4yWV9ErMbwkTzKvKCo5qjOanc7xXzGFfBqkMLiHumDIBhNmSRquyJVWwdu5lTowjEuGddGYAdk5WGpG4XdPBFUqZ8CfnEmNc8Gks//3sPjEWGkxwgK9wjjdVeAX2wPfiTtNNu0+wTMQq21uEWZW+nrnnPf00pHTbdPO6ro7+72Xzkb8wtlzH3n0roMH75hOp45VDDOF5A4Sqdt208LgiQcPiBv94PkjlXPRX06pucOgbjQanrl044XXj9WdSqZtvW/r2ezy5atLbuXrX/r0+nSW5Lz6dXrp6fTet888evfWbbu+88PXvG8Z/DLx5u6fKPiDkLI9kuQ6a1yxcrtc5aNZVJCx9TQjyeYLYsf76X0ql2yXCBoisPQiIA1CTwL7Fu2fDXcZJwBdm0SIgAFhbkETmzgWNExThmjh8MVpFFmXZwb6aBJCKPK5ENAGU0QiodwuGYX0Xi+izlh1UAfn5jhKduj92OPN1eCN98+fOX/Vt9I0bXdWNt6Ll2s3bg5m17702Z9bX592ugLmQok1nTUHdm++6+BtZ6+tv/XOiYXJWMXp9heRxGfjmEX4J6++v7KyOqsbL52at67r9vyp47/y1Wf37N3Xtg0DlJBQIBEhmjXt9s0LH3/iwUvL9fOvHl2YjHrEycQTJc93YTveD0NhUt4bhqNpz2lRDlZiKQGKJ1ZMmBYpJCKIsQzqNwCItQRjewmjbJEtnFsGSPjrHFMcVTObQKpbRkQp7WUgGHJypsfM4jSB6GF4w70wU70UOgxljiFBsUlzN9xuLps9cUTfYBwiuHg7DH44HNxY2XjhrZMivm19430rQkJN287q9tzpE1/93Me3bN3Wtq0dQ4R/9749fNeeTZu3vPzWqeWVtWrgctCC45SCWEiGo9GRE5ePn77ELN5LXTd13fq2vXrt5r37t3z62Y8tL69Ek9Ok+kjyl+n9B3fdfee+5984fvnytZGyw0iAJLOwjytM1DgtM98FxkT25oBCL4XdoZBaBLLn5/EmIUWk2bBmr7nsFAZqqxTKd8N6zcZcPQmkhCLdMv2u+3Ie6h62RpCMqjKYoKE7lXLsIQLX74IvECvJTcSF8m1uNKvR4BUxiESu58z1oH8srnr57bM3ltfatu1ycZu2nU5nIv7SlauH9kyeeupDa2vrKVQLxqZ13W5eGH7w/jsG44WfvPx28j4y8SXMgArzcMAbs+Ynrx5rZ3UXcNZ637bNtG5vXjr1zS98zIsT8Zydnd3P4kSeOHygGk7+7EevVg7u3BSTzgKB9711b6xbo4sUFaQ2AsRlxu0rmSY2/B7i5JDbJGUgVazBkKGpdS/SKStOx4Yal+vKGSlzxe4dHesSixJsNzKAERiCet1BwlS26ziPkcHQKD2QQTBYKS3Y9Mtaeg2k8sQSZJ0Lkp6KUSMDHuqcI3ajQXXm0o13TlwgIu/btm3rum3qpm2b2axZu3z6m1/6VN34ONqMwmpmntb1XbfvOHTgtnPX1t89cX4yHgUvykKxGL5vJcKDwfC5t05duHzTt23TNOK9ELdte/LE8Sce2vfYow9vbExd5QwozUTTWbN359Izj95/5vLqa2+9PxmP+lk17Ok4ncgOQeNHTcrTIzt0JUyPQu1AEdQIVw6YPQNMZZA9M4PTUswijCNOxICaSDHSw3u8cSSzgpaMOUepN5FE62WKNisog5eSlQBCgMRkIS8tuGdDT4wEhsRQYZhcy5xbSGxFwcWdYr4ZoJ/J0Jx0Dk1VOS/y6tEzAZVsWt80vm3qpmnas2dPfezRg3feeXBjOk0uzF68F+99xfzk4YPbtm994Y3jq6trVeWMSzebEKw+wIWHg+rStdWfvv5+V9h3Tuqz6XR5ZW3Y3Pj1b321acW5KhE/wxPY2Jh+4K69995z18tHz1+7vjyId048l1IEkw4ex/lLTB0N81ANkAhQ/JXBlGhChRk8Sm6IkickMaXwRRO1Daeq0yE5GWaYVdyExp/hHom+FdCASMCOwtLsPGhZciuAkNcht6qPcrhYswshdJWJdK6PurJsUhtrgzSVlmELOfQYCzCZbggEzAQcI4xLQlwNBu+cunz+4jURqetGPJGQb71v2wuXrg7rq1/+/CfXO9usiBOTr5t259bJg3ftoeHk+dffHw8HPr4DUbtM79w0HfvBy+/fXF71ra+bZtY0nUvTpfMXvvSpJ/fvv31jfT0wJYNc1vvKyRMfuJOHox+88FZP48MpCXhn5S4czEgTSK2JmNikWEeJhX5YjTaIb5VIV5SmcD7mLqGT5EQsay1lBUs+xyjOtkVZ2WXpOiRGNxpNYbuYXrYE5H+vgYjOUFBwPWYC5z87HkXw24noIHN0M5w1NYDThps30hg5sCHiHI+JRsPBzbXZK0fPzuqmFRLxjkWkrZtmNmtPHX//S598csuWrT7i/0xMvDGd3bVv6+4dW06cXz528kLnnRiIakaEZ/etEA2HwxNnrx49dkZ841vpLESJ5NrNlV0Lsy/8wieu31geVFU0E2CijVl9cO/Wxw8feu/stVfffG8yHnvtwebFFtnA4JbQcnE6MnREnJEeZ/kBUGqoFctz1iDfYksIlVrZ8MvOnnAaCjT1BLjHquO6J4ekmYK6E8XQH3q+mIRUesqVk/N2+y0uCc5uL/MhCbLgjGkj2uGIMuxKx5SkIPvSSFHNAgyxj2E0TOyqF4+euXZjPdqBeE+zumFXnTt34dDu0Yc/9NjKyioSsEcD9+ChPUtbtv3k1ffW19YcOz3B0LWbmELAVZVrhX748vvr6xtt27KQb0VE6safPfHuL37hme3bdwgYbhDRrG4ef+D2g3cc+Omrx27cuDlI7p/hiMQePJ7UHqGeOJDV4TMY/aaOpLyYUc1iFshLBeMp0lmNVNKl6H/6qLcshNJKgwm8DQ3Uawu1ON2F5J84URadtsl95dN3KWhTku1NnB7YoABWMiLVoaCXDut7VhDLx9+3aR4EicmJ5aY0qBqNkWx2E5PXRoPq/JWVd09eqJjatm2E69aLkG/baS03L535wqef3JjW8Rs1rRzcu/XwPftXNtqfvnxkPBp0fNJ5TVokg4SpGInQYDB89d1zJ89daYOSqK7rejY7d/7iQ3fu/OSzH1tdW3fsOu+3pm3HA378oTtn3v34pbc7sxYoAJN4DGgGog/RGOgZWdVUwhElE86mGoXRCJFsWF2PsWecdmGa54xZBKMcEg+KOQGmO/4ZsRaRZkps+3PGPchK/gZQBs6NzcO1fZB+OmGckzB4RbSQOWyQjv4BtTtpt2GZI3JgY52secCQkM5YB3NvW8SvvnO2bWa+bdquF26bppk5504cP/aRh2+/8847ptMpO+78Tx++e/f+vTveP3Pt5OmL4/Eomk6T8r7QzveprGRmHg6r5bXZ868fp64P9m33TWezdrpy9Ve+9unuTuj+zsasuef27Yfvvf3IsQtH3jnZMY50emogrdiU1TxOQoxhv2Iagz4rM/RjX7JEAPdSpegwFEzJQB/pKzcLh7ow9mPFor7lTEExAUv1AJOJu8u1MnFWy4YiFZzK8WE4mP2C3VtW7AKKrF3Yo56aim2tljLZr8yWoCjRV49yolMy3hOGPc8gSePBYHDs7NUTZ65wN6DyrXhpW6qb+tKV6yPe+Oynf246ravKNU07YH9o/04eTF5++7R0NiRMEH4Irtwm31mD685VP3n95I2bK0zc1B0kKsx89syZjz126N577+nqrq4TeOaDd91+4PYX3z7TzSUkmlQiWxpm/4FcLfoczg9QS89R4e2iGMcFChCxsk7WKi5OfsoZwU6PdvGWdpwU75hEBberZIA3ZUEXIpoRwZFbGzJOdetofgS2P2EMIEYjJ5f92PrRsH41rBpcHCMqxK0r4H/mMFFBacqvrz9CPCA/HFmKjLhTAJcGg2pto37p7TPrGzPx3rEwSdMx5Li6ePrUVz/95OLSJhKZ1s2BPZv37NhyfbV+5ciJ8WQEOuaehqzGAZweBbOiTY2Gg/NXV9545zS1TdO2vX9o21y/cbNqbv7yNz63vjF1lZvVzeKIH7lv/1o7eP61Y+Nh1emVBcjy4POvYD3DjI2T10g+ZoKeGN01wWEHiYrgbCAK6DOsOITojQtWQWmgBPguginIVkupR6bYZyHyqeKA4VDedrOehYsh7HEG7mTUVk20jnYtXNgCMfgHnj4j9QE4sdD76hSGwkzRDFls6LTZOpKirQBrFaB29OQ9ctXgyLFLV64tT+u6cy/xXpqmJZLz5y8c2rPw2KMPLy8vk8gj99y2Z9e2Y2evnD1/eRzICFAWikLf0x3mmCkyBbuUL2L+/svvrayudS+6bbsRRHPmxPvf/PzHDx66U9p2OmvvuX373Qf3vvnO6SNH3x93DQBsLtbccRY2lF+OWaViUxrRMS7+jkq+yl0gLf/S5R6JSsEmsQ4XzTkV1UiHvsQlPVYKbWXIZcxPw8gdB9ccNMnVs2PgIHOiCVHJb0jm9Ox4mmKsDunCgxMDOxQ8kj4zJ343lYZZhZhcIZW4SSZOlucAC2x6HLYwARPxcFhdurF+7MzlpmmnddO2HfWykaZZ26gvn37ni89+aGM627ll8tDd+5Y2bXrj/YsoEdEWCo4ZbXFiQydIERWi0WB45PjlI8fOR2Zm0zS+9ZcvX7tti3zhc59aWVkbDdxHH71n1+69P3392Pr6unOub/zSi9NNhz4h+qluXNMwMbZtpRnlItlfxFajNklyzlWtr6mEE4hwfyRoXk2XERaTTpKtObJIM0v9/muZRpGtXYrBT0iZ54oxqCjugDSZDxtPF7cCQWnCIpYDR4nexxKdEHHeIXMmJUEcBNxmTowDs7HtIIwVEwR12MlRxTF7oreOX5rN6lntGy/eNyS+aZtZK8eOn3zq4du379p3122b77pj91rNrx89NRmPWp+KWWi8vd7QoiAF0ElUlZs17U9fP9HUddu2XtqOlDGrm/PH3/7Fzz/dUrV1sXr0oTvX/ejlt04uLU58nHUZ3C36frKilkgRGWFQCAE2HXyyQFcK8cnR9JYxKJrnj4sSOSxvgpiTLEudvs5A6KJ8DdmQtkWzgPrtUjCRQpf01O5rok28BKW4ByQFy7DCdkV69a3quTRKIemEYS3BwUXJAhqNTO5WTNVjoENxNsQRAp4cq1hC65QgNBhU7525dubiDe/Fi7RevJfWi3h/Y2VjoWq++oWfv2vf1m1btxw7f+PchSvDQWV42pGpnuh5wkXbnfj5q6p65eiZS1duUCcQ8F48OXZnzp7/wJ1bHv3g4X3bJnfevuvt4xfeP352PB57L/maS/iPV+u+FBAThmJwHeoTRbN4eA4FAGa7UhpUgl6boBVG8CTdSBK/sXA1mYzNiElYgZTZMUf4B3HIoQMOOKVuKV4NE2fNgHTdOCuBZTy9cumA5Ay5njgFEhX1lG81Wma24bKlQwYBBEbDFFtTFWfyMLoOpZgj2pjONi+O77htm299ZCp15WUl8pFnPrhx49LW7dv/9XffOHn64mg0kMTuYOOVQ3aenf3gQtKnSk53bJncd+fexgt3yCBL6/2OrZt37r/LbVx86omHf/97b73wyluLk7EXg8gRxqsqLr7yBRJA8zL7p+DBkvTksaS2Nj5cpKMbFYmUekLCEEOroJHIyqwmk0mvadbfH/Mx86fJiD5JWHCxgy8tO8ZFpKBMzL+2owEYPGiAzKIOGnUha/KhHXO5QPWZe6+mLxdQrkDVmkMMZ7PqxDqvxNhQL7y+MfvA3beNhpVzLrijukFVra+vzdZuLE7GNY3++R/+hMXbhD+ZszSYwTpEx2kxM1HTytra9EOHDwwHg26NOcdVNVhZXjl8/8Hd2xbdePM/+lffX765XA0cobWwZGtMKAcdDYbMnPQWhupLQbsQXprYKwTovZoTJCX3qrmVUfTXVSbD0lO+CZ1TCqRRZu3fiI8Ccg9wSwbM3HKShImxBS/DVZAHKBrbQJaCNupKTQ9lBBLtcz+XQJKHkJucugheCATOkMHedbpuosGh0jxehsNhdfHa6nunLhFJEAkQMbW+adr2wsWr3vs33r9w7frKYDiwpyMqqTO6E6sk274AcF0rPBqevHj97WMXmqYVL633Teubtl1dXX/vrdcWh/zOiYvvHz/dQa4mNzuWpQKqWdMldgw/Uosqm8zA2WoD5kUDRrCTQG7JaKquQ8fsvwMLIW9xuyYYbCEpbyEiT0ePgQUbVcbeMJ+QcXK5EEkJsvBpxHAK1ePi7LiBYJLEyuwNYQyIQ2gUiQySON0MnNzMXqCL6FPwA5vgGxIzYxaJXsip6+Ys8CZiN0L8+nvn1zZms7qpm7aLlW9bP6s9kwxHox+99E4nNWTLe4lf1FPRbyloMCBZlZxzVcV143/86rHpdDZrGu99XTf1rNmYzW4urzZt+4MX315ZXe3CLSOYCKwfcOgownesDQOF8qs7xdYTIU4kc9g7SSEtglFDbMP1zIlg1Iuc3xhOQ+aRksYFUL9/X8iJF9bbTdKqNpMLnktfAxQTgPYCvpX+gyXv9FPRhF8ETCJIkm99SOMQ7FZ1WSOF7xtIwGLNPMoGFAztCkqbCVIlBoPq5IUb5y/dFKFZXdetn7VN07azuqnr9srN6bsnLixMht57a6uTUQhyOo1yLATHtcFw+Mb7F85dvNYfNL5t2k7uK7UbvfzmscUo/0VkvXC6CkIMeNYE4JmiHKovxr0QZb7SJfp9DP8iiIuMszLpufVe8E0LldTxpFF+xcx06iDvIojIaI5ZGYDaJ86R/QC3iC5NtYZapURqkk/avWzLSG3Vj8mSaNqAtz8KJeNtzHnRFR+eiNyS5ZT4//HqQl4+zUteNUApIGSdqePGrHnn5KXumK/rWV23ddM2bbMwHrzx3oWbK+tVVeHyF6YsSMacbBwg4MgHcoBg83BQrazPXn3nbMXUNK3vdMpeNi0unL22cfLMpcl4ZA8hDCjTNUtWkzKh/2zKYEA7CYg14oIWRNkiCplSrPtJBKOEYLfHE8Z6okkOIrFjxUwK883+c6GC2WZvQY5nb7tpiKhgwGI6BQQLREcUFSAnMbOwdMuJbQ5MDyOqvvqZfa81e81Vb0nmJSUWB6fZjiTiC/emkUGxxsr0gYmranDk5JXry6sdVasL3mrbdjQevfbO2c48HRtfmH4ocJ5Rrqn0QGDfF+YazlUvvHX6yvUV76VtqfEyq+vxePT8q8fW1teZ1dRFMZ8Dtsxm+MmpmCn1raxYg+AqJF7ImC1CMpwWymIbCHl4EgFoKwiWkACYNDqGDk0qeh6DsSRd5M4UIjD8SK2JmnOnPJvkWWmaNlZRgUylGyq+b04sOZu40ZVP2olprliAkxeqLqk5rU8yE7O8wAaTFVMjUXRq0mwXVKsrmWUXq3r15saRYxebtmnatvOWGjh34drGu6cuTsaDYMYmYvIQSVXSYBYckm2VXiyRdIR4NBqcvbx89Nj5tmlnTdsd0g1VP3356GhQYdoy5/NbjooXXGrazCycR8BEiEde9GWlBFVrwEKz1iHOg+fjPiI0N/HJcOaVL5BJrCjB/UhEhQBDePTh3TqOzlOM6em6vGZ1dWYyXDMeR78hygnw4DBj+k1WKYMwoWIziNbUdhxgQTtllgQYEaWMDe0GodkWNtuZYTLPzEdOXF5bnwmRF6qbdnFh/Nq751fXp4OqYpUuYj4PW25GfCmudzlgmHJEgpBjboV++sbJ5ZW1pmmbph0NB6cu3Dh++sJ4NETQVdJYXN3S4fs70mNgLRPQvoRRE0JZ0YnEF+YCw169qURsYZRPiuXLMVuWESEGI+KCwSPhwJgyJBu+tyclnjch9GD0JSraOMXtQN67GZL02A+rPRrjj8Psk3PQkjlhQgV33uDmBUDSrfz3op5LdQUl74MCHQievWM27wKrQQ6ETSIaDKvzV1evXl+rmOvGT2dNI+7N9y+MOim6HnuR9uDPAcPI5KCEwkuEOjiMoYbDwVvHL544e8m3Tdu2o9Hg+dePr2/MnHO5dsLmCOfcx2ihmbY834pbW5yvchiJEgpVFAobXG7SB8MuSLSHSZTxqD4OUGxHJbssO0XPia6RjCqGjolbBXX4eAPmd0L/mbjkR8Qoo4vM2uiQSoL6Ant9slZhMPQUxHNa3URdY3SqwWJJWAN+MgeIIXTeZvt/ycGkYte0dPTkJS++bjwzXbiyev7K8mQ09AKfOtCpxC55NqIRI9EOlRJj1NPAuY1Zc+T4RWZp25Zc9erR06NhVfIvy5Vuwpa0JWnER8kzQPEK06PMv4X0iG6MRUfLEA3Mpd40883RbmzhXbOxTYnec90NQJljkQjSfjMD50C8hoZDcAoGZ5N2mmBwICttNbFQog6RtGtMQH6SIBrEhDO8WHR6lGQTGldAV4zqLrcC59TXFAiOiTiFjVWcmXUVyWBQvX3y6sWrq178lk2To6curc/q7u9Hh1yslhPrG+5p9OWMmG2CZrrTuTNU7T6Cq44cv3RzZY2Zzl1ZPXHmctcAmCrUI/NRbjVwVa4orChQOrSO4SRO4QzJQJ/RNSQ3wYE5D+5KZs6HVWS82iQOhXpfwRA5oA85A4cDeovSG0CII7cblZRGtRVqnBJ+LswmLCkdwOYgL/Y4GV+5AGJSDP6WJG1B1j6BJ61pb1ECiOVc+jpJuSHwbgnUDtbMJ9wAxDwYVMvr0/fPXl0YDgZVdfTklUHF3vs4gWC9t8KL6aWDwCPm1KcWRpqBkuuImEfDwdnLN4+8f2HT4uTFI6durqxVletv73i4iBlzJIAMciXSWsNiIYvgVSdSUilxsprT4gaWzFg8Kx4AOTHqY8qgS7S9cUyd8jxGKrHxLZnjJ8rG6LrXtTOO35JiTtk8Ko405WpOLYPJd0n6YQVgAaUakhSsi9WfAJtFYnKBrmnTJE6UuRwDsZqBVsPlelFKVBRb1GIpH7s4Vx07c3U8dCcurpy5dHOE8L9kF5HqCBPPVezgW4GQqIZzzlXOtZ7eeu+sY3r5zVODqvcJFYyYjfsgnoSijwVRqHTBqaGAMuOAFSQhrAcraj2Q8rqxbvuF79a3jjhmQCNNIuKYECNEuWYxyW2gOk9cBjU0jsFm+kCGUptZH4EFEkRhlqkbBYh0MOcHF/5eiCZMWBsrKh6WPiyGgZLkwgIFbWAGzs3KtFwX01urNhydRB2zm4xHF69vXLq2+vp7F9umxaEPhyM5nbowZGCFnUUTb1F5hpLU+qmNZx6NRqcvrRw5funMxWvj0dBjTBwbmlSBKSYGJonMmdzoEmvREEuV0mgwEUakSNfKUwzIzJU0+qHc15WhQ5pQVuPJJL0dhL66EpHNmSWiphCs5jP2ASULPUI5IuCCjF9YG7SA3JNj1SRzp1cCfn2cGXeGCD5m4/mZnMEjUI9YjaT4NFAVF9d/oaxLNySDEyyWw6Fyikdy62lat6cvL3svrLDS/BrhjLuRFnzo3VWmomRm/Oy4clVLfOn66rXlaeWcaENvcw+67OfnfB5o+iCdSsuZbXg+YuH8epUUjydRG5UIJVSy6ETIBX8YCaeiMBFv3bqVc329GQFJno8kBonLWA1coAWntErJcGYAj7Cf5+w2L9b3qpISMirl/u4XJsWKSGTEGBic7jqJXTirDM5o+qJJl5zofkwsAUiPYJgyKAqQl6AZWZTzsauqKtrK2dQRmw+RyhBOQ/vYMQgwalRx7T0O8rjrB2xxQtZOJti6GJohYM0hv1FSqpam2OsoPkqhbeDAJ5Ayj3+4aK+vx6wiSZMJRDQ25BpBZ7g4swdfHI1uWsWUcTlNOinO7iu25VtyYUtFPEN9SSkWRTJGXul+NNOvjC0A9xbSUQTTTlnQyBGTXwFzFtLyQz1y15VrKjQldPfqlTt2hAMDYtfZvziuHCeMXOzAjmWO+kAXwjnsYqZCzkG2juPhoApJIDmOy/loSPBWERMGJmggnoWZFooY5cksEbXkrKNg0jRPpkJl0PtJQJ9nRjqwDIJ9rqaRJscBTKXPqADmomfU48WFkw9MNGKj8qVwx7OaZUhOG0TgqlQaaTN4Es1CZCzE09IJeT5AaepTBgV8IWOyNMKpRJqDpableWujdTmuN3TucwEBXJYi8AWOB0a6QKCL5JJyH91/4z/h4CTD6yY2BCv0Qbb2d0r5Dwg9K4JqOvW1aRCxRiRY2wAZ9XH8o1xgQ4RcZbk18UuCJjhgIKreFOAkpZ5GrBiGVAWhJ5bITJaETCTeEfdfGmgEhLEudkxrIlbF3gT5GjFfRxnc6dxspkLCuXLhQroTOGlitqASa8rcMlkL1h1rG/Wk8IR2Hh908C9g84yAG5tc8VCpaO/1EDkIWk29viRNVBg1GOYngkGsajVVJ4V/RiyvF0dnSUOnSmvO0gvZ4tVzYaeyVj+gQFJQIOhvL5iLx+auBB0953F9ym/HLt95nZB+hHbQx6W1jiwddf2L/n0JKLd6tsH4KcnNLRVCEOa0sy4MOQhDzMA/Z76V67UgscgcpUAYhc5QtE8yz33zoh6eMICh6V9dSoo2Y11mNl4QRhoGdrHa6R8H16wEq0WLQLC177UeUWar8s8UqyWbAkmZrmLh5wwwdBkrnwtFGit8zUzV2BzzZk3a4ok5zzzIdDCMPsxzEN54KKlJogbrQl0lAOmavkFbbolhgqbgi5JkUjXg4HLMassr9/dCrBRZbCibuehHQ8GPoOgRnqTdgm2YwUoYHLLBOCUterYzJV0G4QcSw5YHH62C25hkJDO2TH0kIgiZL8P27+dBXslILgu86AaL8JEGCdAg46vLuWE5Q1cjEuRktqPJI6iRSGpRBaG510AZ/ElCI8nXqUiphOmj6snYrsCJChbPgh6UaSivylZBdEIQLe07ZS5Z86kNFDtF0UqP7IdVGQSc9xfRVDCZxtkbEli8DIlo8xgNYgmCnOE2PVyWwHtWiDORTkKR0ks1bq1i3rjY+sUIRyKXNu4EEXW6MdTkSl+LsKIzboExEyvzio6zbVbXoH67UpqRBmaZYLQuueibQur0RmGkMRpJrqF4xol6yqVxAaOG2ngZAi8q7y6Q9RVo7EyUn+YsosZT2ShA5lwAOnNZ0WOU16lYnmvBAkSVWyXrfM4Tj8lU1IzBmqKFjuaBJlypH3FK4if317L68bRWR7Vu6Dpg8gMSFCOMBhsYcJi5U5Jt7dgugPjXq/FkEqniKZ0mYQBMypXIXN+iHUYicm4DEZBnzQm55RyXvZVhCdu5Slc8JRCD8dC0SCDrSl4VUnFGpr87k/75cUYxJ/Mt047oPlsYBRVGhyM2bx4PNMko2/OMalLCbqqIREvzKGbeMCmZP3ORqvgzekw94iuG/ZT5WQwWTrpxJtwR2i96TrKMHr7OablEWM+NHUNvjj5XzIyYh8zBQeO8hU13C/NHVvY+Bu6CPlUU4YfLBYFy3Iirv7+zBMfLNllAh74ndiQuLU6Esh4nEl0phwm7J5nzVtlya8OykrAS06CB8RlSNoSeg7UUzyKJtn+SR2xKoiAk7oVjpcxIyJ3yBmEqWfgXmMxRHDR/vQOJUFnvwUDI/LGogys+aC4ej4zmipSlkRoQxWX3AsQk2bfAehIWDhJFAJUsRFTfITFkhHWZY+3HyOLPOuEljQJgTlUqSaxIn5F5kWgx4eK2nW9yNwDnCzMJ5EJoSCoeJENUyfgsiY7hEbU4QKekKxsphF4Bd1EflpCGLQQ0ExO/iexC9eEEz0R7B6TeI1GipdhbcIE7mLisBtWPko9ieGhSaVCKB00QlAhb8FNYsKLsP2YahEFHFWazYpwPxVIbOLRVCu0uazdVrDNkR7Gq9oPgJdw/jBC+ZKwojmNjOHpjpc4YDUxiViQ4GNsBayz0uxcQzH0SDmpWvwbXxAwRRa3V3P9GvXR0ueBI0FDTs8JFEDyO5jPBow0/U2bxhJo63KTQVXYBCGLZcZTNxFiMSUEqNEG2l4J/GWNMiXMRmRTyMlhl9YgC3gLnUqyjGuNNFTeD04TguM7FDunYWg4qVu/8F2rEjcU2n9KyzZz47e+yOtWDKpyBi6IQv364LlA359aZTNG7Rh3+lClfJGtRUH7DedVAiPNRlhVnSlmdm07m2RcrCzGersJksnTMQhebLAsXsMGu0GRbs1mEtFRakukZl1mCaHLG5WwTBk5xWrmcVPNGrAL6rMSiSOkuSVoprH2Z8ad2RJT5L2YMH0UiU1cDclgzgiCnHl/Cuc55vyhsuI2mcofcSeXPFoBZEbHrnorYuhhBbaGmFNV9YkFbWptpQmVi7mNKvMqrSuYfiUphmwaxjBvWkYC5CaIgqwm+pAodYZTLq6G3spYFW/9iGwOQrwm2YC72n5ztU9b7TyyFJO1K1mAQ65FLKe6ccUYhyGUojCG6DtKxsm0IeBZKYUV5JRQE8IYHGkjJBYc5ETSECazIsM1EbUFJyvSAjolO8gpup5qbWJh6Y1IDhR8QWj2ZA20UqU/BBQmAWZx2J3cgxuaH9V0kSaHGBVqNulzs1JBADYjNBYYxSvBOE1JuL4l5nzg9nOETKthJcRCjgx/UCApcKLesUnjImJ6LJPvy9FO9XSk8MsFZvK6+BNt0LACEYkqkUR8ntzeRHHTmeU25emQ6U48KmJmk8GFO1KtEkpPUHVBgceMJapQvqqrQyv04LjYhZZnCMC+vM7cLMka7YkPAJXBMkhGiPosV+m2Dyo0lXipIrXs79FxRwh9ND9hWMyDpRIxIiIS87kHU80iGgwD8E/IUU4PG2H+VGKn5XAkHdWI2VHeseJyFJEcU9AYQzanQP0A/yeQELJHa2NVkYQKyLUnwsOr6lAIjDQLnAMNSXkScnzWAukarJM4LKdKHtRjMODaxEb1ioTQiK9VEXFA+FJ0Q5rl/ZmhGXvmWYxVSzoaz+iMFg0eAlsAWLK+tyfjWEWBGum5I8V2Kahsrv8S/T+SoeWMOnvNUIXFX57tx4Wct1KKMVCUQPpiak6iguGEomiB1z6qCop6iW25OLLERsXiQSEL7Xgzt5ujwaHpgIPNrPSFTYSKVPQnSdFg2Jun2T4gNubH9HKUIQLaw2lx/Sr7FUMfYFIrM208pIoQBWYLRERY3/dJkNhNTaOH0bxO4EiYSDTBg+//xXpI9NgpAFHlR5oHvyubEgt3ZBNIwxJKaWxM8C6CWWL48ALRa+492fmBqln56RiezgGzEk9bZYirGPEVmteioMMmMkw2PW5SqiCOtN3ToMGZg9FHQ4y5klWsAEZys84AWMhzyiH2I8SYDQaroDiobZMmc44rQLzYFItkTMuPsa5K7ij3VHgR8iyo4+IRHCAE8arigI2cUdyiHq1v4nBSOXqQ2ZAwnnoNTRSQg1oQCfPBcTNUfllIiD6aCQeXiZDpY0OOmvEhMNoVBGM9hW2qnC4Xg3Zrkm39oVhOV8DMm9J6tU0AGJAvSbAxZSRn8cgFKLiW+Fo561kJ5XUHz3KGvEEq4tJNB3keELkrEcvdSz8Cs596sV5niLWKIgViHBDFzI6ZMZcGk1obY/c/Qd88j94XlaORb6gNbAyYVAEzWCZALrS60UEJaP4sXOjPpSEUd4qa/kZtT5jFivKF20eLjjCyHlmdUGpkCos9auqhEcXhwaOdVscgcqxMTWIYKL0TTStOoiBmalhJbFdkO+GqSDX/DycDojsnZF5U+TDKmLM4jQrMoGzx91QLywmx/UnOCiEixAUW6UEKWiq6pmhwFhrDYB6kpckpfZuPeZNtR0wV0qg+jKYtTUs3GR/MOhoCW3plcSjNpgeQBp2cR6IHAwTVBeXPH45RNyFGoWQELcqwOJzAvUwcaZ8aTMKpkbQ6c5XywMWyMMaWWRVo41Eu0HfAgiRolnWTDpKEy6F0DJKIGAlZ50PMkFUxsEHQJPkusGI5MZb4r8OdhiQEmzZalJkmACpg1ceZrR/O6VDPrRcDd2ARxNrxI7HJLWGVUT6a5GmM6LEneXSRpTrk/y3GAsOQcBxdV8H4pENTTOJ9zK0UYmqpgIykpt8BCgINfQia6pjQyE1Ytpmj1QtwbYpsYQ+Au6BS17KKvJJJgrzu58rpWYikrWZaYLbAVE0FzO8W4pLDxIzFgmKH5Zw18BrRLoV5nc4lox0MJ9Ko8RiJV/AzTGGW4YnLrYqEPNlKUTD+tSh1LFFP2MBkAmYs8Ai4e9szochaNQFKl7MTK+gXlTMqmBGcY0XhEs+jM5JxTArdVjQXDDyQrYoawJI0ys5Al2kfRYh4vhuSfgv6K53gqKI4HRx8ppM+BsRAQuwOjVzK0MIJrSVBSIjRAQWVFC+ponbfBEt+J8QgqaOFJBdmIF4XzRSMmKXbfic4vqE7grEziEl7KVBLoZ8tVOOPSiW5M05OMha4YxF2KJFHN+AjTm2o8HgfMWiiy27A8E9Hpr7DEuGDVCH8r9OYqKVgpcpINiQHBYxxGAEmK3nectaesrcMhuqQ/suMITfmPcoxDT5UM28zfTsNDDN953pSHdJa7qZJVbcC3ojlbpJ+5PJkwXSff4nMlxnDe6YYZtxTOCYEaKRt9sAoDTNZFIjzHxzp6Vtu7lbkUNFVUWJmwZAUVUHG8rc8p7lwhmPt8RUggQSDYMl3SuAShB80Zy+c1xiTCOk4nEYIALU4kNIKWlc5EZu5oGRn2oymbGeUFjBawol2NdQ+h5vY6jTLxn9NURMBq0oqSNYmgnOv27zFuI2vIo7vf4nbyZLcTzC8Yg+lySmbyLuTcnilKs4E/bq8FTgK7LDwTVB7mLI3nYH+ksu3HendaopKTbZmf1Dc+jliE1eWRZ6BpriOYvUhssszALRFIUqFCVouF3RHHB6sxsTTWV8Y32ZZLRS++GHRuNWlTqfZIdLOIV6SjxSb2hXXjAYwDeYcUBCHR7h5zqFRPaHapZlXMqfs1X4IMopoN5YEDpi1RY5nOhBlHWgQ8L0bBDBOkZ00XR1txVpEVgKRMCiRdRHGpCkeaR2RDQqUSGmUv5RNCoNAUo8JwjC4cNk0m60Zi6hNKlblEUFHNYSwZ2V4LGfVB9Ofm5DQmtlTvHxPbabECnQwzqPDwoQFlEGPFNAqxpO7o0ptOI05kwvwUY5MaIEwGvuUM4wX3XIuBI1IEBy3ODJVFNKtKHTVXIuBggENBvvVQLDcxZhXIZ0X0BHrUMucwK+vAqS/aBKoMqyTl4cQF41sPo7LriDkZ9GkmplHKJ6CVO05vBN44X7O2bowwVjaIhIGA5LiSijiKsJ5ju1shC0MQKpC5NDd91gopVwngZokeNmurvGjIyZo4KpSPgrNDKdmMgYZLoUSYjsLmihMRmftT9eRxdXezRUZs5mfRtc9c6CyFaXZ04GIRxhxs86Mb6olg8O4t/hExiT+IJicvCMXjsAWgpbQrKmDMQ0FKmDEzQlzN6lNzCJO5hG1pqbkLmBRLlqFROG/MVNeyzi1lSEcgZaREyOnlwOVPU0m0R7GgC7jYG5bfLR2+pEyVC56EehooMSAiiRZZsfzhx1dCRs3ETZWngtuZirqJXD4jYs4wNavsQ6JEjFK/EPwDqBRcVEQmxjtnytmzS1Unjjn77Kw1dKTYkXrIAGQnB5pQpjxnO5YCMJHh0DdgWpWJZ8dLlVllxDK8JmWbYUh2EHRdyL3DDBI972CDW6gBt8Y42Ex/GGpZ0aPJTPQIELHIPNhGEVMKnzLT2XAfaKdmxNCEMxYDBktl5owwU6D6iAGoMDaKuSh4R+I5h4pOwCbKnknKLjHHjJQE02n71LkURABlgAeHfHFUsHGhrpaCn5/DVqpIZlJAJzTzaQRHYGJsa2DsLwj90YSF7QmjLbMB+pmnuIz7jMD6XSnq0n0Ag/n5rhmauyYG1J3bYHGBJsNWdqDNCubdGcLKvNoM8IUMsxdJMGIiqtVxB0F1qsAOP2mxwBdzJMY8Ms/W3l7h18VDQey1DJcfxCCgAWUJ+AYMn1RQAiBJrOUtZEzosXJwQesgcKRxCbcNDINEGIitYwg2NRKrlPllx+jUuxyJgnFVsipIM+BsCwJJglBYRiNo0UZlOnovjDlkTsVsK2E2YfRgPZBC0VVMTqjOGYT29kPMNwtMRzzM7fXzELMODD/CWOgkqxsNkUYHVEYDUc6nZjEuT+m/In+FST3/ZLGjytKwXs29paIPk3+dZDRrVoe0Pi45qnBYLG2XiQuhYeY1OOvhrBk3KX1dCrJMHPf2prmF21OsdrPUTGh7JrtUNKIsaixIWaIJDoMNWJ8kCpJQV1G8Vy6o9llfm4k7wxL9eKRATGLwvONCi8MlnhbcslKiIwOrUey1IAoViHU65m2hVZ1WI2D+V5biJulHY4siJDySIxUz+voGFXE42w1Js8yLK5mBCEnmd5cHk+W0P+F5FpXQBGdQUfpYcVUr35NQvzMbE3JMJuaEOaQMzBgzlnKvlBqKrBl3qSUhUhEEVn4sQkIe8qcsMB4pblK4ZZmsTwgUrjDfYu2UEWZoSXcbBA/I2IiGL0LG24ehsYnzlUyYotoJNIOFhEyGc5qDNA2nycLIylSfBBEAVkpt+PN9pIFDW0AT49Dd0srjQQwbT6HVWfSacTMDLa6O7k1sI4nxDrcaySe2APdcoFvNO0TNxKJLvkih04CwJFEWKzoFI6SyMixcNFdhhSKbHCxWxnD6iPdJ56SDXE3LWzZuoiLXnU1tlJyUCwdKMvCQ7PrgaIwhyhmXLWQoIjkyaU9Nzg87iC/M+gtldyioxc9j7FQ4A5dUi7Ywy4JwrXNxyRsdYlw5MxJmnSsiGY6pFNmS1VWSYc6iBiWhYumaYH3M5fiCqDvXUv6ANizozxqoEmwyixDHRdgO5+cS7u7gB8HK6UJSu6JLTbFAUf+vvmBfkclSBVsRA2SAd6/GYOeohpPDl4KxIruco3OdasmVn3K/jwpq+IJeTc3AdJqDkHbaLQEiGWJ2SywaO8uydE0MWBaXuHJ54qgsF3vBMYtGZJSXiFGJMlYXki/+nmKXje66Iqaa9CmRmhPJRfJSftzHOZBkohJmLsQ1ziU4lbICcU0H81KXPoBziJlw1niRvl8UNMP21mVjx1Bc2VQyMhf6WeI41l5MQJyIR2pSuTCyR4OloeZNUIkbp/IBhFQtB+SCIpRVkBQKz7H+nRdqGw4Pzp9JiGYWGFkwbPbM9bfE5kPyALqgSS5YZCA72u2lPFOZ2FGBZieU84LEiL4pdVEMBPnw55iVqj+7bwV5m5yiKRhzjKPrD+QJgcMSONhZIbYRYbHZw6gTL2RmCFlhmj58C72c+fG49HOXHdjTZYBmSZLPXGH1c053ZGi3bEADI2QtlqqBs1tREe2sc7mo5AQFceUQpM1ij+94DZnJDfxKZiyQhn5OuwNIEn8rIDE6Zar0bfOidHXtuIyHow5MFNPU2LHGa0k9UxXzZsDXBBUQEc+xE8MZG5lQd7VM0aSPzC0o9upjYz5v03f15lLchpy+mEAwsxOEioREe3kkPXc0ywhO13atSx4sYn4IwSfN8a8I0pgBeix4OBcOXYFigQxLJ4sSYl1EsAnWA1pHUrrpdSm2lUxPU+Jd39MuRU9B0fYrHZiZEjTuc476RGejXBFglhDV1J+2GrfUTiOpSzYbSUciiApqYR0srLMioBJhqKNTDBEpKhvnRYG+aplLJBd7U3CypCxBx1ZVDbQy0wuqIXL0bsiudBHpran669PhCxUR9fyggkf3DWKHuSGpGGLFqJHkZKfAfQwML3ldK9FUYYQcMJ5yXnVYq8CeRJ1henaR5oQTUraJH4V4G06shxBVKkLA8stp8lFp6SiLcWUdZCQhuNjSmwxTuBTmGTymwU2YwMAuEQ9yaQmCrskjRUFLYHYhMufwVfdsARCOqm1O6Qlx7CrYxhd3TGJT55zpYN6olG5FNQvGpmLVprhLOOFMfWRMl2POjtGsR4EwTjawGOOw04SlSmhMi85nSlgTSSOZwZ0mHMbK0jAH1Gkiaf3NbRfB7CfAa6IcaeGoFFHvIk2C8dRHkCtBwkoeoEwB00hJpcDioYA8Co7DJug0onlvQTOSOGMpVFvtDZo7L2DNY03TAGSXAX4Svo3o0ZmVGehrPXHcRVu+JGiql3Z2Z4HEs8r46eBCYORBKUs8KaT0pMui9PwEFOXGlQR8syIFVjJqpO6htKKBVYxjaANhVI7WXLGwZZhZA+qbDkJkZKU6zjhHGY6D3iSif36xTPL0HB0lYF65UhftSbWDeKluhIBZtrpQyVyJiPNvZA0U0TtLDQIFOQoZ0RKOzzSZihZFOZYhKgEDBzoConXdKUaqH4xjBYffWlJ9C/Nk89pSepo5jFR4C2IqLJauZWHd5DkUHpEorfycVAtStZUK3knjSpZcoCRAkmAwJmV108HMj5VeUSxPPJkA5y68OlxDY0pmnJ6O424pDeI7N/EI0bZZDL6UpoMu6IhYnRwWoSehUgsFlDGRbgNCYcvOzOOBkiKUUgrttcRcoPAVlIiFNdhP0CSVjckRig1+Beo3EbCaFJ0eheQkYZpj8V/6KDLnjyJZgq0/sxTMW3qvfHSLZHvBzTOHiwQi0UBWf5VFMlii2UEWnIPzMiNWkE5lyoqpEPCowZRE2ODkV5s0YhQNiLCGYwAjE6YSm1qXIEvRkiQF1hioEQBF1pnrMNsWmhtW339xx8ivSfsYQBc2RElsrLJJJhAJzbjfaJHlZ4jPtfu8obFJ1gum3N6SZVO0Ey5Fs8RVVVBFCHBhGFVMaSafwleQM6NvRDGjWymbx5VcRTLSRcl9JpJi1BNT0kjWJvxQIUfFayxPddSz5qOihoiVY6xGQwrWARyZK9rZ0wnc2gKR0wpalpLYNsewMPVGYtJ3OeoX/A5h4KDE9jmCa5ozyi3HEhNClypa3qLv1XwU1kWPscJAQcNlbW2YWXie8iV1hcLlnYeXjmV1FebvVEiGkAKEnf6oMWCEIAkYyuvgTn2jRiYkzzM2ScxZjyQrhY+FZkln2JWzMzhlv6g0UWg9VeAelpnZo0T/fPv4HcAK0QcR2LAo5iFdy2cUeCXA5mAcRAXUjPUcSlSlbgAShu6D5pmlApIZqN3JDxH0E/ZyR28rMcWzYGotSm3U+Umc5ORFpQou9Hkpi3qiFTnVhWQlJGWhSEr5yqhkDYHKTQUr5BQb0iBUgQkL4S2agcqq8EzHodVekoUUWIkeBaoUUVRU6MrFZCvD/7BK286AHc5S68TpQpagmsImVB17na8AmjoYzA78LCWHLFLQhVAmq6BM6KmIjZyHL8SZV87jTc1USQOYagIsUCXuhqBW7F3jesRROCsyU5i8kKEwlxZuvkd0Sgzn3jiZ2aNarUY4FKNwhVA3aw01khlDYoPMaQWILK+wED3LxdFJnOuJzSZkKEt4Tj402/G5jZnLpng8r2IDJiXoe6Vjg+qWCwm84HKo7dE1kSuV8QqsKltII/OWYcAjKSoJL6xy5FtBfFp2fr4F7AIq9HAV6HQTNpderOj0hag48VzCIjRZ0ZRxiITgDCUH4LKG1bjUETNa9yX7JgkpOYD/9TIPmRdXwahhLXYuIMfTcmNDfAT2PI4P1WQo7RZtdZUNNjUamqGGxlBSD6Qt04z6ueOcKzvhmP0xqsS4ynKY2eRwUV44FSdJYqdKYVycym3JA+LJsHaxQZXCrZzGwNkm0hwTDtjCnMa9PGfoh5ciP6t34ZxQlzpCbeiiB70icUw1N4+G1BjGxCEEw2TWNAoslqBvzX06SpEo5taQjGalSBpMyllRtSrKjVCMtV1si2NrQFwyLVBFNhp9Fo4gTsiWK981ojmnGKkBrP3CmZQxW4vlQAqANr8COFYhzACQrVyOzr2xr8C3Fuy0jB9/ZI2J1bwa+RZHiYIy1iTVYQlSweMXT1wNxS0SEz/W0SHC+rPW4MbdSiSrMvR0kyMuFKFs65wo4axlUGsbtovy+9cjssQVUcMRJFAagYEE2biTEAmnnImh7uX5x41E6/RUKpYjH4xfPMT7SsQcmGADZPb8CFhADReGqlzy6DX7QHQ4jmqvRO31GMguYDKtMQsgTCpyi9YHAO7R/0qWZMOGASYCXB1KDHUpMoUCwmqlAjilYiFWNDkB1nvsbsWSiAoGb0zl8YVQKc0XslBw0sumvYUoGQRTWbv/GVkMG+G1ApWVMjg4z2l/XybpHKUkBkRw1voj+M32DOLE0cH7SKWdiyFFR4RUSGWkY+vqWAu3RRJTRxP8OAF2aICPbhyiqgozMWY4v3F+H48rTdxSqF0Sg4p2k7OyI1bKKDJ+BwZQ6N2cNJSQ0QHAUjgubZixoieFsiGx9gNRfgwIFWccByHKjeh0sVTKagI/aEmhSal3M8ZkQuKTJSEj1ArpCKT9/EwfLEDKEk1f1R2UqNG9JdiRyhPgOU7L4PHH+i9SATIpNzU430zlvYMAewgLzjxSjPkBlMzWcpbn4NVgudy/GaAFCRWsASOxTwxPDzXeSFGNGnGWedQ4jSFBnl45v54jmMfZjSSYUAXAAKHQPvf6BlpZn+CmahiIIRaye5NzigOOooPiMoYoiPWJYUCJWIMtZkQD7nPKDo9TTookA4IIgLAJESrYJFO5KzX2++iDhzXsLT3Iys2mzAnPZpJeECPZ/ZoXmkjbTNwHo9VjKmWcqpxz4ChIPi4iIM2FHo0NV4wVoKhH7Ur/Kz+jA898Fw0kDpefte8P2kjMXmYsFvDeSFM5RZLW0I8YvE64sIMlYTu5aVp3drNiPrJucxXMisw9bVWKEI0dwwmWIaIhfEank9IEaQ5XsZSRR7eYqKhb1lzYZOpuiSYuceV7ifEI/RzARgVBgq02W8g5N0lokeTwwmzJmLb6FhtUKPOi0rs4LdZGP6U4EEybFCPsLh8ZSD0RTSLiIskvx08VIQxy33Rqu0aosgFiDoCHEaheCJEq6QVfM1zVrP1E4jCNtW+cwghFmKkElYSribW5UXFpYvkqamTBpdNIqTOF44HCZrAxB0bnMJTi2E0mxgtOvQgvD72Dw65w+hBOjGW6VTGlp3CQ0AS+IpLXffGmlFt570R+NjO8JCnuQ0L6Heupe4YwgfGCaB5YwIc4a0b1/aJGdeqe1F24sogBAxTJRwgSaWRs/BEYc4s0gVokGq4gYVsg1Ewsl0Z0rgETAgXqO0NuYHlgDC5CFqdiFg7OL4aZWA7ChSEal1wfcoNETmKXnhYpoM81umZ97IYAMPDtcZpqSjn2FqeflE01VZpxkKpRJOrhbzKbFF9DcIuJxKnAKYpRRTgTnOacLVM2qCxB3S2palsEFSny/+/rWrZbiUEYmrvI//9wuYvYIAkm2572JPWMsRF6dNy7jlCS+D1yS8ktvSinM3GPgm785tHrNLeNBO1p9Cs300+UO0FGrSGweJ2Td0KxlZt0MGMGgmmNGX8p6dXislXXuuf0BVhnFQL/zjsN81QJxdBw9KbWiQF5VwjIPqU/fEg+fdb4ibexcSsxEntkTVqXnPHi29rR9SMIwc2vMc+rJWVSJpNZ7Ki3CRx+OceTQ2YxBcC7i5M82DP5SDiYwdIeaqulAiDpUMGetIP9iosp4JVVtLuNlu2hAjI3a+ePfZomd5XDsFPQLZ64SSwle4knFLZaGKbWcHMpk2abKm31KJMBBKMdyCw42ZS2O0ag5hd4hjcSMh1qLnVLveriIpq+nSN/jAdC8j04LL6bPIH/KBdeDWGoGrLy165xlbLrnUbSNEynFUvKnEHylLxN5GJ5lphmdO1BYOa0E2z5jXJo1Zg15z502twYSkc4kSAna6vOqvvO6BtvK3RKgqvI5Hstp6TovsI357KPFiebACV89Egvb9RqikyDPuh5W1wvOW4JoeOgceQTY88tgNKu9As1IjW4coHyjx9vauYcFqfERkhwfSpZMparR1yhejsqX1kReYFMW6zAoH4CUiAHWJWxBhrtlpdCgEDm9jtqBdfmHlp1c15NwgfLnCDkpgeg+wBCEsUXHF5caGtoRENnQiz5cAJsIOmwefFn2VrGeDF3+33lV+fD/30+nw72aGegN25ZGDkJwPhxOCUVnteJHEkbgMHI1NRkwL2S3HIL2sWM79LHgx+IeEGHxGXCVPkOAENdg/F62UKO61jdOQ4RJFXRZ9+1woC+5zhRQgD8DCEdT7PSJBpeWviYkP+R5FfiUWoU/62gnO/4taTu4A9N/20C5P4uQdd6LY9nu4iIL2wH9Yn91OQ/b1GdsXA8ciFuE6q3xxDnZr618XdOMx31WZsfTAuqFEekDPKX6IrtSe+qv4OlIZdQEIUr/uR64iSxsBac5qq7Ho4YPZk0Dk+eVXme3IMrK4P1ObemBQulsS7LtOtirB7AmubU0k508yKqTJgSwJCcR55CdVmeowaao65H2b3agpXimh8VTWPINMoce4u0nvw/xNkMJxL4vNcAAAAASUVORK5CYII=";
+
+/* ============================== READING ============================== */
+const READING = {
+  title:"How Sleep Shapes Memory",
+  meta:"Original passage · approx. 290 words · B2",
+  paras:[
+    "For a long time, sleep was dismissed as a passive state — a nightly pause in which the brain simply switched off. Recent research has overturned this assumption. Far from being idle, the sleeping brain is remarkably busy, sorting through the events of the day and deciding which memories are worth keeping.",
+    "During the hours after we learn something new, the brain replays the experience in compressed bursts of activity. This rehearsal strengthens the connections between neurons, making the memory more durable and easier to retrieve later. Scientists call this process consolidation. Without it, much of what we learn would fade within a day.",
+    "Different stages of sleep appear to serve distinct functions. Deep, slow-wave sleep is thought to be crucial for storing facts and information — the kind of knowledge a student needs before an examination. Dreaming sleep, by contrast, seems to help the brain forge unexpected links between ideas, which may explain why a difficult problem sometimes looks solvable after a good night's rest.",
+    "The practical implications are significant. Students who sacrifice sleep in order to cram are often undermining the very process that would fix the material in their minds. A shorter period of study followed by adequate rest tends to produce better recall than a sleepless night of frantic revision.",
+    "Crucially, the benefit cannot be postponed. Catching up at the weekend does not fully reverse the damage caused by a week of late nights. The brain needs consolidation soon after learning, not days afterwards. As the evidence accumulates, one message becomes increasingly clear: if you want to remember, you must first sleep."
+  ],
+  questions:[
+    {type:"mcq",q:"In the first paragraph, “dismissed” is closest in meaning to:",options:["examined in detail","treated as unimportant","strongly supported","carefully recorded"],answer:1,why:"“Dismissed as a passive state” means it was regarded as not worth serious attention."},
+    {type:"mcq",q:"“Overturned this assumption” means the research:",options:["confirmed the old idea","ignored the old idea","reversed the old idea","repeated the old idea"],answer:2,why:"To overturn an assumption is to show it was wrong — i.e. to reverse it."},
+    {type:"mcq",q:"“Durable” (paragraph 2) is closest in meaning to:",options:["fragile","long-lasting","recent","hidden"],answer:1,why:"A durable memory is one that lasts."},
+    {type:"mcq",q:"“Crucial” (paragraph 3) means:",options:["optional","occasional","essential","harmful"],answer:2,why:"Crucial = extremely important / essential."},
+    {type:"mcq",q:"Which word is an ANTONYM of “frantic” (paragraph 4)?",options:["hurried","calm","anxious","rushed"],answer:1,why:"Frantic suggests wild, panicky haste; its opposite is calm."},
+    {type:"open",q:"According to the passage, what was the old view of sleep?",model:"That sleep was a passive, inactive state in which the brain effectively switched off and did nothing useful."},
+    {type:"open",q:"In your own words, what is “consolidation”?",model:"The process in which the sleeping brain replays a new experience and strengthens the connections between neurons, making the memory more durable and easier to recall."},
+    {type:"open",q:"How does deep slow-wave sleep differ in function from dreaming sleep?",model:"Slow-wave sleep helps store facts and information, while dreaming sleep helps the brain form unexpected or creative links between ideas."},
+    {type:"open",q:"Why is staying up all night to cram counter-productive?",model:"Losing sleep undermines consolidation, so the material is less likely to be fixed in memory. A shorter study session followed by proper rest gives better recall."},
+    {type:"open",q:"Can weekend sleep undo a week of late nights? Why / why not?",model:"No. Consolidation has to happen soon after learning, so catching up later does not fully reverse the damage already done."}
+  ]
+};
+
+/* ============================== GRAMMAR ============================== */
+const SVA = [{"type": "mcq", "q": "A box of chocolates ___ on the table.", "options": ["is", "are"], "answer": 0, "why": "The subject is ‘box’ (singular); ‘of chocolates’ is a prepositional phrase."}, {"type": "mcq", "q": "The quality of the answers ___ improved this term.", "options": ["have", "has"], "answer": 1, "why": "The subject is ‘quality’ (singular), not ‘answers’."}, {"type": "mcq", "q": "Either the teacher or the principal ___ going to speak.", "options": ["is", "are"], "answer": 0, "why": "Two singular subjects joined by ‘either…or’ take a singular verb."}, {"type": "mcq", "q": "Neither the manager nor the secretary ___ available today.", "options": ["are", "is"], "answer": 1, "why": "Two singular subjects with ‘neither…nor’ → singular verb."}, {"type": "mcq", "q": "Neither the players nor the coach ___ satisfied with the result.", "options": ["is", "are"], "answer": 0, "why": "With neither…nor, the verb agrees with the nearer subject (‘coach’ → is)."}, {"type": "mcq", "q": "Either the manager or the assistants ___ to blame for the error.", "options": ["is", "are"], "answer": 1, "why": "The nearer subject (‘assistants’) is plural → are."}, {"type": "mcq", "q": "Rice and curry ___ my favourite meal.", "options": ["is", "are"], "answer": 0, "why": "‘Rice and curry’ works as a single dish (a compound idea) → singular."}, {"type": "mcq", "q": "The teacher and the students ___ waiting outside.", "options": ["is", "are"], "answer": 1, "why": "Two separate subjects joined by ‘and’ → plural verb."}, {"type": "mcq", "q": "The captain, as well as his teammates, ___ delighted with the win.", "options": ["was", "were"], "answer": 0, "why": "‘as well as…’ is not part of the subject; ‘captain’ is singular."}, {"type": "mcq", "q": "The teacher (and her assistants) ___ always welcome here.", "options": ["are", "is"], "answer": 1, "why": "Words in parentheses aren’t part of the subject; ‘teacher’ is singular."}, {"type": "mcq", "q": "There ___ several problems with this plan.", "options": ["are", "is"], "answer": 0, "why": "The real subject (‘problems’) is plural → are."}, {"type": "mcq", "q": "Beyond the hills ___ a small fishing village.", "options": ["lie", "lies"], "answer": 1, "why": "The true subject (‘a village’) follows the verb and is singular."}, {"type": "mcq", "q": "Ten thousand taka ___ a lot to pay for a phone.", "options": ["is", "are"], "answer": 0, "why": "A sum of money considered as one amount → singular."}, {"type": "mcq", "q": "Two years ___ a long time to wait for a reply.", "options": ["are", "is"], "answer": 1, "why": "A period of time seen as a single unit → singular."}, {"type": "mcq", "q": "Half of the cake ___ already gone.", "options": ["is", "are"], "answer": 0, "why": "With ‘half of’, the verb follows the noun after ‘of’ (‘cake’ → singular)."}, {"type": "mcq", "q": "Most of the students ___ already left the hall.", "options": ["has", "have"], "answer": 1, "why": "With ‘most of’, the verb follows ‘students’ (plural) → have."}, {"type": "mcq", "q": "If I ___ you, I would apologise at once.", "options": ["were", "was"], "answer": 0, "why": "In unreal or hypothetical statements use the subjunctive ‘were’."}, {"type": "mcq", "q": "She wishes she ___ a little taller.", "options": ["was", "were"], "answer": 1, "why": "After ‘wish’ for something contrary to fact → ‘were’."}, {"type": "mcq", "q": "Everybody in the two classes ___ been informed.", "options": ["has", "have"], "answer": 0, "why": "‘Everybody’ is singular → has."}, {"type": "mcq", "q": "Neither of the answers ___ correct.", "options": ["are", "is"], "answer": 1, "why": "‘Neither (of)’ is singular → is."}, {"type": "mcq", "q": "The committee ___ its final decision tomorrow.", "options": ["announces", "announce"], "answer": 0, "why": "Acting as one unit (note ‘its’) → singular verb."}, {"type": "mcq", "q": "The staff ___ among themselves about the new rota.", "options": ["is arguing", "are arguing"], "answer": 1, "why": "‘among themselves’ shows the members acting individually → plural verb."}, {"type": "mcq", "q": "The news from the coast ___ better than we expected.", "options": ["is", "are"], "answer": 0, "why": "‘News’ is uncountable and singular despite the ‑s."}, {"type": "mcq", "q": "Mathematics ___ her strongest subject by far.", "options": ["are", "is"], "answer": 1, "why": "Subject names like mathematics and physics are singular."}, {"type": "mcq", "q": "A number of complaints ___ been received this week.", "options": ["have", "has"], "answer": 0, "why": "‘A number of’ means ‘several’ → plural verb."}, {"type": "mcq", "q": "The number of applicants ___ risen sharply this year.", "options": ["have", "has"], "answer": 1, "why": "‘The number of’ refers to one figure → singular verb."}, {"type": "mcq", "q": "Reading long novels ___ her favourite way to relax.", "options": ["is", "are"], "answer": 0, "why": "A gerund (‑ing) subject is singular."}, {"type": "mcq", "q": "To admit your mistakes ___ a sign of maturity.", "options": ["are", "is"], "answer": 1, "why": "An infinitive phrase used as the subject takes a singular verb."}, {"type": "mcq", "q": "Every student and teacher ___ received a copy of the notice.", "options": ["has", "have"], "answer": 0, "why": "‘Every… and…’ is treated as singular."}, {"type": "mcq", "q": "Each of the rooms ___ its own bathroom.", "options": ["have", "has"], "answer": 1, "why": "‘Each (of)’ is singular → has."}];
+
+const TENSE = [{"type": "mcq", "q": "Water ___ at 100 degrees Celsius.", "options": ["boils", "is boiling"], "answer": 0, "why": "A general scientific truth takes the present simple."}, {"type": "mcq", "q": "My father ___ to work by train every morning.", "options": ["is going", "goes"], "answer": 1, "why": "A regular habit takes the present simple."}, {"type": "mcq", "q": "I ___ what you mean now.", "options": ["understand", "am understanding"], "answer": 0, "why": "‘Understand’ is a stative verb and isn’t used in the continuous."}, {"type": "mcq", "q": "This soup ___ wonderful.", "options": ["is tasting", "tastes"], "answer": 1, "why": "‘Taste’ as an opinion is stative → present simple, not continuous."}, {"type": "mcq", "q": "Be quiet — the baby ___.", "options": ["is sleeping", "sleeps"], "answer": 0, "why": "An action happening right now → present continuous."}, {"type": "mcq", "q": "Why ___ at me like that? Have I done something wrong?", "options": ["do you look", "are you looking"], "answer": 1, "why": "A temporary action at this moment → present continuous."}, {"type": "mcq", "q": "I can’t meet on Friday; I ___ my dentist at ten.", "options": ["am seeing", "see"], "answer": 0, "why": "A fixed personal arrangement uses the present continuous for the future."}, {"type": "mcq", "q": "We ___ to Sylhet next weekend — the tickets are already booked.", "options": ["fly", "are flying"], "answer": 1, "why": "A definite future arrangement → present continuous."}, {"type": "mcq", "q": "She ___ her keys, so she can’t get into the flat.", "options": ["has lost", "lost"], "answer": 0, "why": "A past action with a present result → present perfect."}, {"type": "mcq", "q": "Have you finished the essay? — Yes, I’ve ___ handed it in.", "options": ["yet", "already"], "answer": 1, "why": "‘Already’ is used in affirmatives; ‘yet’ goes at the end of negatives and questions."}, {"type": "mcq", "q": "I ___ him last Tuesday at the conference.", "options": ["met", "have met"], "answer": 0, "why": "A finished time (‘last Tuesday’) requires the past simple."}, {"type": "mcq", "q": "We ___ in this city since 2019.", "options": ["lived", "have lived"], "answer": 1, "why": "‘Since 2019’ links the past to now → present perfect."}, {"type": "mcq", "q": "___ ever ___ sushi?", "options": ["Have you eaten", "Did you eat"], "answer": 0, "why": "A life experience with ‘ever’ and no finished time → present perfect."}, {"type": "mcq", "q": "Look at your hands! What ___?", "options": ["have you done", "have you been doing"], "answer": 1, "why": "Emphasis on the recent activity and its visible traces → present perfect continuous."}, {"type": "mcq", "q": "She ___ three cups of coffee this morning already.", "options": ["has drunk", "has been drinking"], "answer": 0, "why": "A completed, countable result (‘three cups’) → present perfect simple."}, {"type": "mcq", "q": "They ___ the house in 2015 and sold it last year.", "options": ["have bought", "bought"], "answer": 1, "why": "A completed action at a stated past time → past simple."}, {"type": "mcq", "q": "When ___ the meeting ___?", "options": ["did the meeting start", "has the meeting started"], "answer": 0, "why": "A ‘when’ question about a finished event → past simple."}, {"type": "mcq", "q": "There ___ a cinema here, but it closed years ago.", "options": ["is used to being", "used to be"], "answer": 1, "why": "A past state that is no longer true → ‘used to’."}, {"type": "mcq", "q": "I ___ coffee, but now I drink it every day.", "options": ["didn’t use to like", "am not used to liking"], "answer": 0, "why": "A past habit that has since changed → ‘didn’t use to’."}, {"type": "mcq", "q": "While we ___ dinner, the power suddenly went out.", "options": ["had", "were having"], "answer": 1, "why": "A longer background action interrupted by a sudden event → past continuous."}, {"type": "mcq", "q": "This time yesterday I ___ across the Atlantic.", "options": ["was flying", "flew"], "answer": 0, "why": "An action in progress at a specific past moment → past continuous."}, {"type": "mcq", "q": "By the time the firefighters arrived, the building ___ down.", "options": ["burnt", "had burnt"], "answer": 1, "why": "An action completed before another past action → past perfect."}, {"type": "mcq", "q": "She wasn’t hungry because she ___ already ___.", "options": ["had eaten", "has eaten"], "answer": 0, "why": "The earlier of two past events → past perfect."}, {"type": "mcq", "q": "He was exhausted; he ___ for six hours without a break.", "options": ["had driven", "had been driving"], "answer": 1, "why": "Duration of an activity up to a point in the past → past perfect continuous."}, {"type": "mcq", "q": "Her eyes were red because she ___.", "options": ["had been crying", "had cried"], "answer": 0, "why": "An ongoing activity explaining a past state → past perfect continuous."}, {"type": "mcq", "q": "I’m sure they ___ the match tomorrow.", "options": ["win", "will win"], "answer": 1, "why": "A prediction or belief about the future → ‘will’."}, {"type": "mcq", "q": "That bag looks heavy. — Don’t worry, I ___ you.", "options": ["’ll help", "help"], "answer": 0, "why": "An offer decided at the moment of speaking → ‘will’."}, {"type": "mcq", "q": "___ open the window? It’s rather warm in here.", "options": ["Will I", "Shall I"], "answer": 1, "why": "‘Shall I…?’ with I is used to make an offer."}, {"type": "mcq", "q": "___ leave now or wait for the others?", "options": ["Shall we", "Will we"], "answer": 0, "why": "‘Shall we…?’ with we is used to make a suggestion."}, {"type": "mcq", "q": "The phone’s ringing. — OK, I ___ it.", "options": ["’m going to get", "’ll get"], "answer": 1, "why": "A spontaneous decision made at the moment → ‘will’."}, {"type": "mcq", "q": "I’ve decided: I ___ a new laptop this month.", "options": ["’m going to buy", "’ll buy"], "answer": 0, "why": "A prior plan or intention → ‘going to’."}, {"type": "mcq", "q": "We ___ get married in December; we’ve already booked the venue.", "options": ["’ll", "’re going to"], "answer": 1, "why": "A firm plan already made → ‘going to’."}, {"type": "mcq", "q": "Look at those dark clouds — it ___.", "options": ["’s going to rain", "rains"], "answer": 0, "why": "A prediction based on present evidence → ‘going to’."}, {"type": "mcq", "q": "Careful! You ___ that glass off the table.", "options": ["knock", "’re going to knock"], "answer": 1, "why": "Something about to happen on present evidence → ‘going to’."}, {"type": "mcq", "q": "Don’t call at eight — I ___ dinner then.", "options": ["’ll be having", "’ll have"], "answer": 0, "why": "An action in progress at a future time → future continuous."}, {"type": "mcq", "q": "This time next week, we ___ on a train to Chittagong.", "options": ["’ll travel", "’ll be travelling"], "answer": 1, "why": "In progress at a point in the future → future continuous."}, {"type": "mcq", "q": "By 2030, she ___ from university.", "options": ["will have graduated", "will graduate"], "answer": 0, "why": "Completed before a future point (‘by 2030’) → future perfect."}, {"type": "mcq", "q": "Call after nine; I ___ the report by then.", "options": ["will finish", "will have finished"], "answer": 1, "why": "An action completed before a stated future time → future perfect."}, {"type": "mcq", "q": "Next month, I ___ here for exactly ten years.", "options": ["will have been working", "will have worked"], "answer": 0, "why": "Duration up to a future point, stressing the activity → future perfect continuous."}, {"type": "mcq", "q": "By midnight they ___ for twelve hours straight.", "options": ["will drive", "will have been driving"], "answer": 1, "why": "How long an activity has continued by a future point → future perfect continuous."}, {"type": "mcq", "q": "I’ll call you as soon as I ___ at the airport.", "options": ["arrive", "will arrive"], "answer": 0, "why": "After time words (as soon as, when, until) use the present simple, not ‘will’."}, {"type": "mcq", "q": "We won’t start the film until everyone ___ here.", "options": ["will be", "is"], "answer": 1, "why": "‘Until’ introduces a time clause → present simple, not ‘will’."}];
+
+const FRAGMENTS = [{"type": "mcq", "q": "“Watching the last train disappear into the tunnel.”", "options": ["Complete sentence", "Fragment"], "answer": 1, "why": "An ‑ing phrase with no subject or main verb → fragment."}, {"type": "mcq", "q": "“The children laughing in the playground next door.”", "options": ["Complete sentence", "Fragment"], "answer": 1, "why": "‘Laughing’ is a participle, not a main verb; there is no complete predicate → fragment."}, {"type": "mcq", "q": "“Exhausted by the long climb and soaked to the skin.”", "options": ["Complete sentence", "Fragment"], "answer": 1, "why": "A past-participle phrase with no subject or verb → fragment."}, {"type": "mcq", "q": "“Written in a great hurry the night before the deadline.”", "options": ["Complete sentence", "Fragment"], "answer": 1, "why": "A participle phrase describing nothing that is stated → fragment."}, {"type": "mcq", "q": "“To finish the whole assignment before the weekend.”", "options": ["Complete sentence", "Fragment"], "answer": 1, "why": "An infinitive phrase on its own is not a complete thought → fragment."}, {"type": "mcq", "q": "“In order to save enough money for the trip.”", "options": ["Complete sentence", "Fragment"], "answer": 1, "why": "A purpose phrase with no main clause → fragment."}, {"type": "mcq", "q": "“After a long and tiring day at the office.”", "options": ["Complete sentence", "Fragment"], "answer": 1, "why": "Only prepositional phrases, with no subject or verb → fragment."}, {"type": "mcq", "q": "“In the middle of the crowded market on Friday morning.”", "options": ["Complete sentence", "Fragment"], "answer": 1, "why": "Just place and time phrases; nothing happens → fragment."}, {"type": "mcq", "q": "“Ms Lina, the director of the university drama club.”", "options": ["Complete sentence", "Fragment"], "answer": 1, "why": "A noun plus an appositive, but no verb → fragment."}, {"type": "mcq", "q": "“The most surprising result of the whole experiment.”", "options": ["Complete sentence", "Fragment"], "answer": 1, "why": "A noun phrase with modifiers but no predicate → fragment."}, {"type": "mcq", "q": "“And forgot to lock the door on his way out.”", "options": ["Complete sentence", "Fragment"], "answer": 1, "why": "The subject is missing before the verb → fragment."}, {"type": "mcq", "q": "“But never replied to a single one of my messages.”", "options": ["Complete sentence", "Fragment"], "answer": 1, "why": "No subject before the verb → fragment."}, {"type": "mcq", "q": "“Because the roads were completely flooded that morning.”", "options": ["Complete sentence", "Fragment"], "answer": 1, "why": "A ‘because’ clause is dependent and needs a main clause → fragment."}, {"type": "mcq", "q": "“Since nobody had told us about the change of plan.”", "options": ["Complete sentence", "Fragment"], "answer": 1, "why": "A ‘since’ (cause) clause standing alone → fragment."}, {"type": "mcq", "q": "“Although she had practised for weeks before the show.”", "options": ["Complete sentence", "Fragment"], "answer": 1, "why": "An ‘although’ clause is dependent → fragment."}, {"type": "mcq", "q": "“Even though the instructions seemed perfectly clear.”", "options": ["Complete sentence", "Fragment"], "answer": 1, "why": "A contrast clause on its own is a fragment."}, {"type": "mcq", "q": "“Unless we leave before the traffic gets heavy.”", "options": ["Complete sentence", "Fragment"], "answer": 1, "why": "An ‘unless’ clause is dependent → fragment."}, {"type": "mcq", "q": "“If the weather stays dry for the rest of the week.”", "options": ["Complete sentence", "Fragment"], "answer": 1, "why": "An ‘if’ clause with no main clause → fragment."}, {"type": "mcq", "q": "“As soon as the results were posted on the noticeboard.”", "options": ["Complete sentence", "Fragment"], "answer": 1, "why": "A time clause on its own is a fragment."}, {"type": "mcq", "q": "“Before anyone had a chance to ask a question.”", "options": ["Complete sentence", "Fragment"], "answer": 1, "why": "A ‘before’ clause needs a main clause → fragment."}, {"type": "mcq", "q": "“Wherever the old road finally comes to an end.”", "options": ["Complete sentence", "Fragment"], "answer": 1, "why": "A ‘wherever’ clause is dependent → fragment."}, {"type": "mcq", "q": "“However hard the team tried to recover the ball.”", "options": ["Complete sentence", "Fragment"], "answer": 1, "why": "A ‘however (hard)’ clause on its own → fragment."}, {"type": "mcq", "q": "“Which completely changed the way I saw the problem.”", "options": ["Complete sentence", "Fragment"], "answer": 1, "why": "A relative clause beginning with ‘which’ must attach to a main clause → fragment."}, {"type": "mcq", "q": "“Who had been waiting patiently since early morning.”", "options": ["Complete sentence", "Fragment"], "answer": 1, "why": "A ‘who’ relative clause standing alone → fragment."}, {"type": "mcq", "q": "“The match was cancelled because the pitch was waterlogged.”", "options": ["Complete sentence", "Fragment"], "answer": 0, "why": "A main clause plus a ‘because’ clause after it → a complete sentence."}, {"type": "mcq", "q": "“We waited inside until the rain finally stopped.”", "options": ["Complete sentence", "Fragment"], "answer": 0, "why": "Main clause first, time clause second, correctly joined → complete."}, {"type": "mcq", "q": "“Turn off your phones before the exam begins.”", "options": ["Complete sentence", "Fragment"], "answer": 0, "why": "A command is a complete sentence; the subject ‘you’ is understood."}, {"type": "mcq", "q": "“Please hand your assignments to the front desk.”", "options": ["Complete sentence", "Fragment"], "answer": 0, "why": "An imperative with an understood ‘you’ → complete."}, {"type": "mcq", "q": "“What time does the library close on Fridays?”", "options": ["Complete sentence", "Fragment"], "answer": 0, "why": "A question with a subject and verb (does… close) → complete."}, {"type": "mcq", "q": "“Who is going to present the findings tomorrow?”", "options": ["Complete sentence", "Fragment"], "answer": 0, "why": "A complete question, not a fragment."}, {"type": "mcq", "q": "“Although it was raining, the ceremony went ahead as planned.”", "options": ["Complete sentence", "Fragment"], "answer": 0, "why": "A dependent clause plus a main clause → a complete sentence."}, {"type": "mcq", "q": "“When the bell rang, the students hurried to their seats.”", "options": ["Complete sentence", "Fragment"], "answer": 0, "why": "A time clause plus a main clause, correctly joined → complete."}, {"type": "mcq", "q": "Choose the option that correctly turns the fragment into a sentence: “Because the shop had already closed.”", "options": ["Because the shop had already closed.", "Because the shop had already closed, we went home.", "The shop had already closed because."], "answer": 1, "why": "Attaching a main clause (‘we went home’) completes the thought."}, {"type": "mcq", "q": "Choose the complete sentence:", "options": ["Running to catch the last bus of the night.", "She ran to catch the last bus of the night.", "To catch the last bus of the night."], "answer": 1, "why": "Only this has a subject (she) and a finite verb (ran) → complete."}];
+
+const RUNONS = [{"type": "mcq", "q": "“My alarm didn’t go off I was late for class.”", "options": ["Correctly punctuated", "Run-on"], "answer": 1, "why": "Two complete sentences fused with no punctuation → run-on."}, {"type": "mcq", "q": "“She loves her job she never wants to retire.”", "options": ["Correctly punctuated", "Run-on"], "answer": 1, "why": "Two independent clauses joined with nothing → fused run-on."}, {"type": "mcq", "q": "“The exam was hard, everyone passed anyway.”", "options": ["Correctly punctuated", "Run-on"], "answer": 1, "why": "Two independent clauses joined only by a comma → comma splice."}, {"type": "mcq", "q": "“I called the office twice, nobody answered.”", "options": ["Correctly punctuated", "Run-on"], "answer": 1, "why": "A comma alone can’t join two sentences → comma splice."}, {"type": "mcq", "q": "“It was getting late, however, we kept working.”", "options": ["Correctly punctuated", "Run-on"], "answer": 1, "why": "‘However’ needs a semicolon before it: ‘…late; however, we kept working.’"}, {"type": "mcq", "q": "“The bridge was closed, therefore we took the ferry.”", "options": ["Correctly punctuated", "Run-on"], "answer": 1, "why": "‘Therefore’ is a conjunctive adverb; use a semicolon: ‘…closed; therefore, we took the ferry.’"}, {"type": "mcq", "q": "Which correctly fixes the run-on “The train was late I missed my meeting.”?", "options": ["The train was late, I missed my meeting.", "The train was late. I missed my meeting.", "The train was late I missed my meeting."], "answer": 1, "why": "Splitting into two sentences with a full stop fixes the run-on."}, {"type": "mcq", "q": "Choose the correctly punctuated version:", "options": ["He studied hard. He still failed the test.", "He studied hard he still failed the test.", "He studied hard, he still failed the test."], "answer": 0, "why": "A full stop between the two independent clauses is correct."}, {"type": "mcq", "q": "Choose the correctly punctuated sentence:", "options": ["The sky darkened; a storm was coming.", "The sky darkened, a storm was coming.", "The sky darkened a storm was coming."], "answer": 0, "why": "A semicolon correctly joins two closely related independent clauses."}, {"type": "mcq", "q": "Which uses the semicolon correctly?", "options": ["I finished early; so I went home.", "I finished early; I went home.", "I finished early I went home."], "answer": 1, "why": "A semicolon joins two independent clauses without a conjunction (‘so’ would need a comma instead)."}, {"type": "mcq", "q": "Choose the correct sentence:", "options": ["The road was icy, so we drove slowly.", "The road was icy so we drove slowly.", "The road was icy, we drove slowly."], "answer": 0, "why": "A comma plus the coordinating conjunction ‘so’ correctly joins the clauses."}, {"type": "mcq", "q": "Which is correctly joined?", "options": ["She was tired, but she finished the race.", "She was tired, she finished the race.", "She was tired but, she finished the race."], "answer": 0, "why": "A comma plus ‘but’ (a coordinating conjunction) correctly links two independent clauses."}, {"type": "mcq", "q": "“After the guests had left, we cleaned the kitchen.”", "options": ["Correctly punctuated", "Run-on"], "answer": 0, "why": "A dependent clause plus a main clause, properly punctuated — not a run-on."}, {"type": "mcq", "q": "“The lecture was long, but it was fascinating.”", "options": ["Correctly punctuated", "Run-on"], "answer": 0, "why": "A comma plus the coordinating conjunction ‘but’ correctly joins the clauses."}, {"type": "mcq", "q": "“We arrived at the station the train had already gone we had to wait an hour.”", "options": ["Correctly punctuated", "Run-on"], "answer": 1, "why": "Several complete sentences run together with no punctuation → run-on."}, {"type": "mcq", "q": "“I love this city, the food is amazing, the people are friendly, I never want to leave.”", "options": ["Correctly punctuated", "Run-on"], "answer": 1, "why": "A chain of independent clauses joined only by commas → comma-splice run-on."}, {"type": "mcq", "q": "Which correctly fixes “The bus was full, we waited for the next one.”?", "options": ["Because the bus was full, we waited for the next one.", "The bus was full we waited for the next one.", "The bus was full, we waited for the next one."], "answer": 0, "why": "Making one clause dependent (‘Because the bus was full’) removes the splice."}, {"type": "mcq", "q": "Choose the correct version:", "options": ["When the film ended, everyone clapped.", "The film ended, everyone clapped.", "The film ended everyone clapped."], "answer": 0, "why": "Turning the first clause into a dependent time clause fixes the run-on."}, {"type": "mcq", "q": "Which of these is NOT a run-on?", "options": ["I woke up early and went for a run.", "I woke up early, I went for a run.", "I woke up early I went for a run."], "answer": 0, "why": "‘and’ with a single subject correctly joins the two actions — no run-on."}, {"type": "mcq", "q": "Which sentence is correctly punctuated?", "options": ["The shop sells books it also sells stationery.", "The shop sells books, it also sells stationery.", "The shop sells books; it also sells stationery."], "answer": 2, "why": "A semicolon correctly links the two independent clauses."}];
+
+const MODIFIERS = [{"type": "mcq", "q": "Which is correct?", "options": ["Walking home, we were caught by surprise by the storm.", "Walking home, the storm caught us by surprise."], "answer": 0, "why": "The ‑ing phrase must describe the subject; we were walking, not the storm."}, {"type": "mcq", "q": "Which is correct?", "options": ["Looking through the telescope, the stars seemed close.", "Looking through the telescope, I thought the stars seemed close."], "answer": 1, "why": "The one looking is ‘I’, so ‘I’ must follow the opening phrase."}, {"type": "mcq", "q": "Which is correct?", "options": ["Exhausted after the match, the players welcomed a cold drink.", "Exhausted after the match, a cold drink was welcome."], "answer": 0, "why": "‘Exhausted after the match’ must describe the players, not the drink."}, {"type": "mcq", "q": "Which is correct?", "options": ["Having finished the exam, the holidays felt close.", "Having finished the exam, the students felt the holidays were close."], "answer": 1, "why": "The ones who finished are the students; they must be the subject."}, {"type": "mcq", "q": "Which is correct?", "options": ["To play well, you need to practise regularly.", "To play well, regular practice is needed."], "answer": 0, "why": "The infinitive ‘to play’ needs a subject who can play — ‘you’, not ‘practice’."}, {"type": "mcq", "q": "Which is correct?", "options": ["To improve your writing, feedback should be sought.", "To improve your writing, you should seek feedback."], "answer": 1, "why": "The doer of ‘to improve’ must be stated — ‘you’."}, {"type": "mcq", "q": "Which is correct?", "options": ["By studying every night, she achieved better grades.", "By studying every night, better grades were achieved."], "answer": 0, "why": "The one studying is ‘she’; she must be the subject."}, {"type": "mcq", "q": "Which is correct?", "options": ["On entering the room, the noise had stopped.", "On entering the room, I noticed the noise had stopped."], "answer": 1, "why": "‘On entering’ must describe the person who enters — ‘I’."}, {"type": "mcq", "q": "Which is clearer?", "options": ["At the zoo, we saw a lion with a huge mane.", "We saw a lion at the zoo with a huge mane."], "answer": 0, "why": "‘with a huge mane’ should sit next to ‘lion’, not ‘zoo’."}, {"type": "mcq", "q": "Which is clearer?", "options": ["He served coffee to the guests in paper cups.", "He served the guests coffee in paper cups."], "answer": 1, "why": "Keep ‘in paper cups’ next to ‘coffee’ so the guests aren’t in cups."}, {"type": "mcq", "q": "Which is clearer?", "options": ["She returned the dress that was torn to the shop.", "She returned the dress to the shop that was torn."], "answer": 0, "why": "‘that was torn’ should sit next to ‘dress’, not ‘shop’."}, {"type": "mcq", "q": "Which is clearer?", "options": ["I read about the earthquake in this morning’s paper that killed hundreds.", "In this morning’s paper, I read about the earthquake that killed hundreds."], "answer": 1, "why": "‘that killed hundreds’ must sit next to ‘earthquake’, not ‘paper’."}, {"type": "mcq", "q": "Which sentence means she spoke to nobody except him?", "options": ["She spoke only to him.", "She only spoke to him."], "answer": 0, "why": "Placing ‘only’ next to ‘to him’ limits it to that one person."}, {"type": "mcq", "q": "Which means he did nothing more than taste it?", "options": ["He tasted only the soup.", "He only tasted the soup."], "answer": 1, "why": "‘only tasted’ limits the action to tasting — he didn’t finish it."}, {"type": "mcq", "q": "Which means she did most of the work?", "options": ["She finished almost all the work.", "She almost finished all the work."], "answer": 0, "why": "‘almost all the work’ = most of it; ‘almost finished’ suggests she didn’t finish."}, {"type": "mcq", "q": "Which means he came close to falling but didn’t?", "options": ["He fell off nearly the ladder.", "He nearly fell off the ladder."], "answer": 1, "why": "‘nearly fell’ = came close to falling; the other option is ungrammatical."}, {"type": "mcq", "q": "Which means she had barely any breakfast?", "options": ["She hardly ate any breakfast.", "She ate hardly breakfast."], "answer": 0, "why": "‘hardly ate any’ = almost none; the other option is not grammatical."}, {"type": "mcq", "q": "Which means she did nothing more than glance at it?", "options": ["She glanced at just the report.", "She just glanced at the report."], "answer": 1, "why": "‘just glanced’ limits the action to a quick glance."}, {"type": "mcq", "q": "Why is “Students who study rarely fail exams” unclear?", "options": ["‘rarely’ could modify ‘study’ or ‘fail’ — it squints between them.", "It has no main verb."], "answer": 0, "why": "A squinting modifier sits between two verbs, so it’s unclear which one it limits."}, {"type": "mcq", "q": "Which sentence contains a squinting modifier (one that could modify either side)?", "options": ["The plan we discussed worried me a little.", "The plan we discussed briefly worried me."], "answer": 1, "why": "‘briefly’ could modify ‘discussed’ or ‘worried’ — it squints between them."}, {"type": "mcq", "q": "Which sentence has NO modifier error?", "options": ["Covered in snow, the garden looked magical to the children.", "Covered in snow, the children admired the garden."], "answer": 0, "why": "‘Covered in snow’ correctly describes the garden, which follows the phrase."}, {"type": "mcq", "q": "Which sentence is correctly constructed?", "options": ["Walking into the hall, the decorations impressed us.", "Walking into the hall, we were impressed by the decorations."], "answer": 1, "why": "The subject ‘we’ correctly follows the opening ‑ing phrase."}];
+
+const PARALLELISM = [{"type": "mcq", "q": "Choose the version with correct parallel structure:", "options": ["She spends her weekends painting, reading, and cooking.", "She spends her weekends painting, reading, and to cook."], "answer": 0, "why": "Keep all items in the same ‑ing form."}, {"type": "mcq", "q": "Choose the version with correct parallel structure:", "options": ["My favourite hobbies are fishing, camping, and to hike.", "My favourite hobbies are fishing, camping, and hiking."], "answer": 1, "why": "Match the gerund pattern across the whole list."}, {"type": "mcq", "q": "Choose the version with correct parallel structure:", "options": ["He wants to travel, to learn languages, and to meet new people.", "He wants to travel, to learn languages, and meeting new people."], "answer": 0, "why": "Keep the infinitive (‘to +’) pattern consistent."}, {"type": "mcq", "q": "Choose the version with correct parallel structure:", "options": ["The plan is to cut costs, to raise sales, and improving service.", "The plan is to cut costs, to raise sales, and to improve service."], "answer": 1, "why": "All items should be infinitives."}, {"type": "mcq", "q": "Choose the version with correct parallel structure:", "options": ["The room was clean, bright, and airy.", "The room was clean, bright, and it had good ventilation."], "answer": 0, "why": "Use three parallel adjectives, not two adjectives plus a clause."}, {"type": "mcq", "q": "Choose the version with correct parallel structure:", "options": ["The film was long, boring, and a waste of money.", "The film was long, boring, and pointless."], "answer": 1, "why": "Keep the list as parallel adjectives."}, {"type": "mcq", "q": "Choose the version with correct parallel structure:", "options": ["She writes clearly, carefully, and accurately.", "She writes clearly, carefully, and with accuracy."], "answer": 0, "why": "Use three adverbs to keep the list parallel."}, {"type": "mcq", "q": "Choose the version with correct parallel structure:", "options": ["He answered quickly, politely, and in a confident way.", "He answered quickly, politely, and confidently."], "answer": 1, "why": "Match the adverb form across all items."}, {"type": "mcq", "q": "Choose the version with correct parallel structure:", "options": ["The coach said that we should rest, that we should eat well, and that we should arrive early.", "The coach said that we should rest, that we should eat well, and to arrive early."], "answer": 0, "why": "A list of ‘that’ clauses must continue with ‘that’ clauses."}, {"type": "mcq", "q": "Choose the version with correct parallel structure:", "options": ["She explained what the problem was and the way of fixing it.", "She explained what the problem was and how to fix it."], "answer": 1, "why": "Two parallel structures (‘what…’, ‘how…’) are balanced; the other option breaks the pattern."}, {"type": "mcq", "q": "Choose the version with correct parallel structure:", "options": ["The report was written by the team and presented to the board.", "The report was written by the team and they presented it to the board."], "answer": 0, "why": "Keep the same (passive) voice across the joined verbs."}, {"type": "mcq", "q": "Choose the version with correct parallel structure:", "options": ["He designed the logo, and the website was built by him.", "He designed the logo and built the website."], "answer": 1, "why": "Don’t switch from active to passive; keep both verbs active."}, {"type": "mcq", "q": "Choose the version with correct parallel structure:", "options": ["Bring these to the exam: a pen, an ID card, and a calculator.", "Bring these to the exam: a pen, an ID card, and you should bring a calculator."], "answer": 0, "why": "Keep all items in a colon list in the same (noun) form."}, {"type": "mcq", "q": "Choose the version with correct parallel structure:", "options": ["The course covers three areas: writing reports, giving talks, and how to negotiate.", "The course covers three areas: writing reports, giving talks, and negotiating deals."], "answer": 1, "why": "Match the ‑ing form across the listed items."}, {"type": "mcq", "q": "Choose the version with correct parallel structure:", "options": ["Cycling to work is healthier than driving.", "Cycling to work is healthier than to drive."], "answer": 0, "why": "Compare like with like — gerund with gerund."}, {"type": "mcq", "q": "Choose the version with correct parallel structure:", "options": ["Their team played better than us.", "Their team played better than ours."], "answer": 1, "why": "Compare team with team (‘ours’), keeping the structures parallel."}, {"type": "mcq", "q": "Choose the version with correct parallel structure:", "options": ["She not only sings but also dances.", "She not only sings but also she dances."], "answer": 0, "why": "‘Not only… but also…’ should join parallel forms (sings / dances)."}, {"type": "mcq", "q": "Choose the version with correct parallel structure:", "options": ["The trip was not only expensive but also it was tiring.", "The trip was not only expensive but also tiring."], "answer": 1, "why": "Join two parallel adjectives after the correlative."}, {"type": "mcq", "q": "Choose the version with correct parallel structure:", "options": ["He is skilled both in writing and in speaking.", "He is skilled both in writing and he speaks well."], "answer": 0, "why": "‘both… and…’ must link parallel structures (in writing / in speaking)."}, {"type": "mcq", "q": "Choose the version with correct parallel structure:", "options": ["The plan is both practical and it saves money.", "The plan is both practical and economical."], "answer": 1, "why": "Join two parallel adjectives with ‘both… and…’."}, {"type": "mcq", "q": "Choose the version with correct parallel structure:", "options": ["She neither called nor wrote.", "She neither called nor did she write."], "answer": 0, "why": "‘neither… nor…’ should join parallel verbs (called / wrote)."}, {"type": "mcq", "q": "Choose the version with correct parallel structure:", "options": ["The room was neither clean nor was it tidy.", "The room was neither clean nor tidy."], "answer": 1, "why": "Join two parallel adjectives after ‘neither… nor…’."}, {"type": "mcq", "q": "Choose the version with correct parallel structure:", "options": ["We can either take the bus or walk.", "We can either take the bus or we walk."], "answer": 0, "why": "‘either… or…’ should join parallel verbs (take / walk)."}, {"type": "mcq", "q": "Choose the version with correct parallel structure:", "options": ["You may either pay now or you pay on delivery.", "You may either pay now or pay on delivery."], "answer": 1, "why": "Keep the two options parallel after ‘either… or…’."}];
+
+/* ============================== VOCABULARY ============================== */
+const AWL1 = [
+  {type:"mcq",q:"“Economists use several methods to analyse the data.” The word “analyse” most nearly means:",options:["examine in detail","ignore","summarise briefly","collect"],answer:0,why:"To analyse is to examine something carefully to understand it."},
+  {type:"mcq",q:"Choose the best word: “The new policy will ___ both students and teachers.”",options:["benefit","consist","occur","derive"],answer:0,why:"“Benefit” = to help or be an advantage to."},
+  {type:"mcq",q:"Choose the best word: “The lecture introduced a difficult ___ in economics.”",options:["concept","percent","approach","benefit"],answer:0,why:"A “concept” is an abstract idea or principle."},
+  {type:"mcq",q:"Choose the best word: “Several ___ contributed to the project's success, including funding and teamwork.”",options:["factors","methods","concepts","percent"],answer:0,why:"A “factor” is one of the things that influences a result."},
+  {type:"mcq",q:"Choose the best word: “Water ___ of hydrogen and oxygen.”",options:["consists","requires","varies","occurs"],answer:0,why:"“Consist of” = to be made up of."},
+  {type:"mcq",q:"Choose the best word: “Prices ___ from shop to shop, so compare before buying.”",options:["vary","establish","interpret","derive"],answer:0,why:"To “vary” = to differ or change."},
+  {type:"mcq",q:"Choose the best word: “The English word ‘agenda’ is ___ from Latin.”",options:["derived","required","varied","occurred"],answer:0,why:"“Derive from” = to come or originate from."},
+  {type:"mcq",q:"Choose the best word: “Heavy flooding often ___ during the monsoon.”",options:["occurs","consists","interprets","establishes"],answer:0,why:"To “occur” = to happen."},
+  {type:"mcq",q:"Choose the best word: “Different readers may ___ the same poem in different ways.”",options:["interpret","require","establish","vary"],answer:0,why:"To “interpret” = to explain or understand the meaning of something."},
+  {type:"mcq",q:"Choose the best word: “The company was ___ in 1995 and has grown ever since.”",options:["established","derived","interpreted","varied"],answer:0,why:"To “establish” = to set up or found."}
+];
+
+const AWL2 = [
+  {type:"mcq",q:"Choose the best word: “Hard work helped her ___ top grades.”",options:["achieve","assume","distribute","indicate"],answer:0,why:"To “achieve” = to succeed in reaching a goal."},
+  {type:"mcq",q:"Choose the best word: “Over the years, the museum ___ a large collection of paintings.”",options:["acquired","assumed","maintained","created"],answer:0,why:"To “acquire” = to get or obtain, often gradually."},
+  {type:"mcq",q:"Choose the best word: “Don't ___ that the test will be easy just because the last one was.”",options:["assume","acquire","distribute","identify"],answer:0,why:"To “assume” = to take something for granted without proof."},
+  {type:"mcq",q:"Choose the best word: “Free tickets are ___ at the front desk.”",options:["available","similar","significant","involved"],answer:0,why:"“Available” = able to be obtained or used."},
+  {type:"mcq",q:"Choose the best word: “Recycling has a positive ___ on the environment.”",options:["impact","function","evidence","assumption"],answer:0,why:"An “impact” = a strong effect."},
+  {type:"mcq",q:"Choose the best word: “The study found ___ that exercise improves sleep.”",options:["evidence","function","impact","assumption"],answer:0,why:"“Evidence” = facts that support a conclusion."},
+  {type:"mcq",q:"Choose the best word: “The heart's main ___ is to pump blood around the body.”",options:["function","evidence","impact","percent"],answer:0,why:"A “function” = the natural purpose of something."},
+  {type:"mcq",q:"Choose the best word: “Police asked the witness to ___ the man she had seen.”",options:["identify","acquire","maintain","assume"],answer:0,why:"To “identify” = to recognise and name."},
+  {type:"mcq",q:"Choose the best word: “The two designs are very ___; only the colour is different.”",options:["similar","significant","available","involved"],answer:0,why:"“Similar” = alike but not identical."},
+  {type:"mcq",q:"Choose the best word: “The results show a ___ rise in sea levels over the decade.”",options:["significant","similar","available","acquired"],answer:0,why:"“Significant” = large enough to matter; important."}
+];
+
+const PHRASAL = [
+  {type:"mcq",q:"“I'll have to ___ the meeting until next week.” Which fits, and what does it mean?",options:["put off — postpone","put on — wear","put up — build","put away — store"],answer:0,why:"“Put off” = to postpone or delay."},
+  {type:"mcq",q:"Choose the correct phrasal verb: “She ___ smoking last year and feels much healthier.”",options:["gave up","gave in","gave away","gave out"],answer:0,why:"“Give up” = to stop doing something."},
+  {type:"mcq",q:"Choose the correct phrasal verb: “Can you ___ this word in the dictionary?”",options:["look up","look after","look into","look out"],answer:0,why:"“Look up” = to find information in a reference source."},
+  {type:"mcq",q:"Choose the correct particle: “We ran ___ an old friend at the airport.”",options:["into","out","over","off"],answer:0,why:"“Run into” = to meet by chance."},
+  {type:"mcq",q:"Choose the correct phrasal verb: “Please ___ your shoes before entering.”",options:["take off","take after","take up","take in"],answer:0,why:"“Take off” = to remove (clothing)."},
+  {type:"mcq",q:"“The plane will ___ in ten minutes.” Here the phrasal verb means:",options:["take off — leave the ground","take in — absorb","take over — control","take up — start a hobby"],answer:0,why:"“Take off” (of a plane) = to leave the ground and begin flying."},
+  {type:"mcq",q:"Choose the correct phrasal verb: “He ___ his father; they have the same sense of humour.”",options:["takes after","takes off","takes up","takes in"],answer:0,why:"“Take after” = to resemble an older relative."},
+  {type:"mcq",q:"Choose the correct phrasal verb: “I won't ___ rude behaviour from anyone.”",options:["put up with","put off","put away","put on"],answer:0,why:"“Put up with” = to tolerate or accept something unpleasant."},
+  {type:"mcq",q:"Choose the correct phrasal verb: “The teacher asked us to ___ our worksheets at the end.”",options:["hand in","hand out","hand over","hand down"],answer:0,why:"“Hand in” = to submit work to someone in authority."},
+  {type:"mcq",q:"Choose the correct phrasal verb: “Sales ___ sharply after the new advertisement.”",options:["went up","went off","went out","went over"],answer:0,why:"“Go up” = to increase or rise."}
+];
+
+/* ============================== WRITING ============================== */
+const WRITING = {
+  descriptive:{
+    range:[120,180],
+    intro:"A descriptive paragraph paints a clear picture of a person, place, object, or moment. It works through sensory detail — what you see, hear, smell, touch, and taste — organised in a deliberate order so the reader can follow it. A strong one opens with a topic sentence that names the subject and a single dominant impression, builds with specific, well-ordered details, and closes by reinforcing that impression.",
+    modelLabel:"Model paragraph — “The old book market at dusk”",
+    modelText:"The old book market came alive in the last hour before sunset. As the heat eased, its narrow lanes filled with the smell of dust, strong tea, and ageing paper. Towers of second-hand novels leaned against every wall, their spines cracked and faded by years of sunlight. A vendor called out prices over the rattle of a passing rickshaw, while buyers ran their fingers along the rough edges of the pages, hunting for a bargain. Somewhere a kettle hissed, and the warm, slightly bitter scent of tea drifted between the stalls. By the time the first lights flickered on, the place felt less like a shop and more like a living memory of the city.",
+    notes:[
+      "Topic sentence names the subject + dominant impression: “came alive”.",
+      "Details engage four senses: smell, sight, sound, touch.",
+      "Arranged in time order (as the hour passes) — a clear organising principle.",
+      "Concluding sentence returns to the dominant impression (“a living memory”)."
+    ],
+    prompt:"Describe a market, a railway station, or a kitchen at its busiest moment. Write 120–180 words. Use at least three of the five senses, arrange your details in a clear order, and finish with a sentence that captures the overall impression.",
+    checklist:[
+      "Opens with a topic sentence stating a single dominant impression",
+      "Uses at least three of the five senses",
+      "Details follow a clear order (spatial or time-based)",
+      "Specific, concrete word choices — not vague (“nice”, “good”)",
+      "Closes by reinforcing the dominant impression",
+      "No sentence fragments or run-ons"
+    ]
+  },
+  howto:{
+    range:[100,150],
+    intro:"A paragraph develops one main idea. It usually has three parts: a topic sentence that states the main idea, several supporting sentences that explain it or give evidence, and a concluding sentence that rounds it off. Every sentence should connect to the topic sentence; anything that does not belong is cut. Linking words (for example, however, as a result, in addition) guide the reader from one idea to the next.",
+    modelLabel:"Model paragraph — “Why morning study works”",
+    modelText:"Studying in the morning is, for many learners, the most productive choice. After a night's sleep, the mind is rested and better able to concentrate, so new information is absorbed more quickly. In addition, the early hours are usually quiet, with fewer messages and interruptions to break a student's focus. For example, a learner who reviews vocabulary at seven o'clock often remembers far more than one who tries the same task late at night. As a result, building a short morning study habit can make revision both easier and more effective.",
+    notes:[
+      "Topic sentence states one clear main idea (morning study is productive).",
+      "Each supporting sentence gives a reason or example linked to that idea.",
+      "Linking words signal the relationship: “In addition”, “For example”, “As a result”.",
+      "The concluding sentence restates the point without simply repeating it."
+    ],
+    prompt:"Write one paragraph (about 100–150 words) answering: “Is it better to study alone or in a group?” Begin with a clear topic sentence, give two or three supporting reasons or examples with linking words, and finish with a concluding sentence.",
+    checklist:[
+      "One clear topic sentence stating the main idea",
+      "Every sentence supports that main idea (nothing off-topic)",
+      "At least two supporting reasons or examples",
+      "Linking words connect the ideas (however, in addition, for example)",
+      "A concluding sentence rounds the paragraph off",
+      "Correct paragraph layout — continuous prose, not bullet points"
+    ]
+  },
+  narrative:{
+    range:[120,180],
+    intro:"A narrative paragraph tells a story about an event or experience. It is usually written in the past tense and arranged in chronological order — first this happened, then that. A strong narrative has a clear beginning, middle, and end, uses time markers (at first, suddenly, in the end) to guide the reader, and often includes a few descriptive details and a final reflection on why the moment mattered.",
+    modelLabel:"Model paragraph — “The lost ticket”",
+    modelText:"I will never forget the morning I almost missed my first train alone. I had arrived at the station early, feeling proud and independent, when I suddenly realised my ticket was gone. At first I searched my pockets calmly, but as the minutes passed my heart began to race. Just as the train pulled in, a station guard tapped my shoulder and held out the ticket, which had slipped from my bag onto the platform. I thanked him, jumped aboard, and sank into my seat with relief. Looking back, that small panic taught me to check my belongings twice before any journey.",
+    notes:[
+      "Opens by setting the scene and hinting at why the event mattered.",
+      "Events are told in time order: “early”, “suddenly”, “At first”, “Just as”, “Looking back”.",
+      "Mostly past simple (with one past perfect, “had arrived”), used consistently.",
+      "Ends with a brief reflection (a lesson learned)."
+    ],
+    prompt:"Write a narrative paragraph (about 120–180 words) about a time something unexpected happened to you — for example, getting lost, meeting someone by chance, or a small mistake that turned out well. Use the past tense, put the events in order with time markers, and end with a short reflection.",
+    checklist:[
+      "A clear beginning, middle, and end",
+      "Events in chronological (time) order",
+      "Time markers guide the reader (first, then, suddenly, in the end)",
+      "Mainly past tenses, used consistently",
+      "A few descriptive details, not just bare facts",
+      "A closing sentence that reflects on the experience"
+    ]
+  },
+  cause:{
+    range:[120,180],
+    intro:"A cause–effect paragraph explains why something happens (causes) or what results from it (effects). The topic sentence names the relationship; the supporting sentences set out the causes and/or effects clearly, often signalled by linking words such as because, due to, as a result, therefore, and consequently. Keep causes and effects logically separate so the reader can see what leads to what.",
+    modelLabel:"Model paragraph — “Why cities are getting hotter”",
+    modelText:"Many large cities are noticeably hotter than the countryside around them, and the reasons are largely human-made. One major cause is the loss of green space: as parks and trees are replaced by concrete and tarmac, there are fewer surfaces to provide shade and release moisture. In addition, vehicles, factories, and air conditioners all give off heat throughout the day. As a result, temperatures in city centres can stay high well into the night, which in turn forces residents to use even more cooling. Consequently, what begins as a small rise in heat can quickly become a cycle that is difficult to break.",
+    notes:[
+      "Topic sentence names the cause–effect relationship (cities hotter because of human activity).",
+      "Causes are introduced with “One major cause”, “In addition”.",
+      "Effects are signalled with “As a result”, “in turn”, “Consequently”.",
+      "The paragraph shows a chain: cause → effect → further effect."
+    ],
+    prompt:"Write a cause–effect paragraph (about 120–180 words) on ONE of these: why many students feel stressed before exams, or the effects of spending too much time on social media. State the relationship in your topic sentence and use cause–effect linking words (because, due to, as a result, therefore).",
+    checklist:[
+      "Topic sentence names the cause–effect relationship",
+      "Causes and effects are clearly separated",
+      "Cause linkers used (because, due to, since)",
+      "Effect linkers used (as a result, therefore, consequently)",
+      "The logic is easy to follow (what leads to what)",
+      "A concluding sentence sums up the relationship"
+    ]
+  },
+  compare:{
+    range:[130,180],
+    intro:"A compare–contrast paragraph examines the similarities (compare) and differences (contrast) between two subjects. You can organise it point by point (discuss each feature for both subjects in turn) or block (everything about subject A, then everything about subject B). Use comparison signals (similarly, likewise, both) and contrast signals (however, whereas, on the other hand, unlike) to keep the relationship clear.",
+    modelLabel:"Model paragraph — “Books and films”",
+    modelText:"Reading a novel and watching its film version offer the same story, yet the experience differs in important ways. Both can move us deeply and stay in the memory for years; in that sense they are alike. A novel, however, unfolds slowly and lets readers picture the characters in their own minds, whereas a film delivers images and sound in a fixed two hours. Unlike a book, which can be paused and reread at any pace, a film controls the timing for us. Similarly, both forms rely on a strong plot, but a film leans on actors and music while a novel leans on the writer's words. On the whole, neither is “better”; they simply reward the audience in different ways.",
+    notes:[
+      "Topic sentence introduces the two subjects and the point of the comparison.",
+      "Comparison signals: “Both”, “Similarly”, “are alike”.",
+      "Contrast signals: “however”, “whereas”, “Unlike”, “while”.",
+      "A balanced conclusion that does not force a winner."
+    ],
+    prompt:"Write a compare–contrast paragraph (about 130–180 words) on ONE pair: studying online vs studying in a classroom, or living in a city vs living in a village. Point out at least one similarity and two differences, and use clear comparison and contrast signals.",
+    checklist:[
+      "Topic sentence names both subjects and the purpose",
+      "At least one genuine similarity",
+      "At least two clear differences",
+      "Comparison signals (both, similarly, likewise)",
+      "Contrast signals (however, whereas, unlike, on the other hand)",
+      "A balanced concluding sentence"
+    ]
+  },
+  argue:{
+    range:[140,190],
+    intro:"An argumentative paragraph states a clear opinion (your claim) and defends it with reasons and evidence. It opens with a topic sentence that takes a position, supports it with logical reasons and examples, acknowledges an opposing view briefly, and answers it. Strong arguments stay focused on one claim and use measured language (clearly, in fact, although it is true that…) rather than exaggeration.",
+    modelLabel:"Model paragraph — “School should start later”",
+    modelText:"Secondary schools should begin the day later than they currently do. Research on adolescents shows that their natural sleep pattern shifts, making early starts genuinely difficult, so students often arrive too tired to learn. A later start would mean more rest, sharper concentration, and, in many studies, better results. Admittedly, some parents argue that early finishes are convenient for family schedules. However, this convenience is small compared with the cost of years of poor sleep and lower achievement. If the central purpose of school is learning, then the timetable should be built around when students can actually learn best. For that reason, a later start is not a luxury but a sensible reform.",
+    notes:[
+      "Topic sentence states a clear, debatable position.",
+      "Reasons are supported by evidence and consequences (“more rest, sharper concentration”).",
+      "An opposing view is acknowledged (“Admittedly… some parents argue…”).",
+      "The counter-argument is answered, then the claim is restated firmly."
+    ],
+    prompt:"Write an argumentative paragraph (about 140–190 words) taking a clear position on ONE: “Mobile phones should be banned in classrooms” or “University students should do part-time work.” Give two reasons with support, acknowledge one opposing view, answer it, and restate your position.",
+    checklist:[
+      "Topic sentence states one clear, debatable position",
+      "At least two reasons, each with support or an example",
+      "One opposing view is acknowledged fairly",
+      "The opposing view is answered, not ignored",
+      "Measured, precise language (no exaggeration)",
+      "A closing sentence that restates the position"
+    ]
+  },
+  process:{
+    range:[120,180],
+    intro:"A process analysis paragraph explains how to do something, or how something works, in clear ordered steps. The topic sentence names the process and why it matters; the body presents the steps in the correct sequence using order words (first, next, then, after that, finally); and the conclusion states the result. Be precise about each step and avoid skipping anything the reader would need.",
+    modelLabel:"Model paragraph — “How to give a clear presentation”",
+    modelText:"Giving a clear presentation is a skill that anyone can learn by following a few ordered steps. First, decide on a single main message, because an audience remembers one strong idea far better than ten weak ones. Next, plan a simple structure — an opening that states your point, a middle that supports it, and a short ending that repeats it. After that, prepare slides that show key words and images rather than full sentences. Then rehearse aloud at least twice, timing yourself and noting where you stumble. Finally, on the day, breathe slowly, make eye contact, and speak a little more slowly than feels natural. By working through these stages in order, even a nervous speaker can deliver a calm, convincing talk.",
+    notes:[
+      "Topic sentence names the process and its value.",
+      "Steps appear in strict order: “First”, “Next”, “After that”, “Then”, “Finally”.",
+      "Each step is specific and gives a brief reason.",
+      "The conclusion states the outcome (a calm, convincing talk)."
+    ],
+    prompt:"Write a process analysis paragraph (about 120–180 words) explaining how to do something you know well — for example, how to prepare for an exam, how to cook a simple dish, or how to open a bank account. Use clear order words and keep the steps in sequence.",
+    checklist:[
+      "Topic sentence names the process and why it matters",
+      "Steps are complete and in the correct order",
+      "Order words guide the reader (first, next, then, finally)",
+      "Each step is specific, not vague",
+      "No essential step is missing",
+      "A concluding sentence states the result"
+    ]
+  },
+  coverletter:{
+    range:[150,220],
+    intro:"A cover letter introduces you to an employer and explains why you are right for a specific job; your CV (curriculum vitae) lists your education, experience, and skills. The letter should be short — three or four paragraphs on one page — and tailored to the advertised role. Open by stating the job you are applying for, show in the middle how your experience matches the requirements, and close by asking for an interview. Keep the tone formal and confident, and never simply repeat the CV word for word.",
+    modelLabel:"Model — opening of a cover letter",
+    modelText:"Dear Ms Rahman,\n\nI am writing to apply for the position of Junior Marketing Assistant advertised on your company website. I am a final-year Business student with six months' experience managing social media for a student organisation, and I am keen to bring that experience to your team.\n\nDuring my internship, I planned a content schedule that increased our followers by forty per cent in three months. I work well under deadlines, enjoy collaborating with others, and pay close attention to detail — qualities that match the requirements in your advertisement.\n\nI would welcome the opportunity to discuss how I could contribute to your marketing team. Thank you for considering my application; I look forward to hearing from you.\n\nYours sincerely,\nAyesha Karim",
+    notes:[
+      "Opens by naming the exact job and where it was seen.",
+      "The middle paragraph gives concrete evidence (a measurable result), not vague claims.",
+      "“Dear Ms Rahman” pairs with “Yours sincerely” (named person); “Dear Sir or Madam” pairs with “Yours faithfully”.",
+      "It complements the CV; it does not copy it.",
+      "A one-page student CV usually has: contact details, a short personal profile, education, work or volunteer experience, and skills."
+    ],
+    prompt:"Write a cover letter (about 150–220 words) for a job or internship you would like. Name the role in the first line, use one middle paragraph to match your experience to the job with at least one specific example, and close by requesting an interview. Use the correct formal opening and closing.",
+    checklist:[
+      "States the exact job and where it was advertised",
+      "Matches your skills/experience to the role with a specific example",
+      "Formal tone throughout (no contractions, no slang)",
+      "Correct opening and matching closing (sincerely / faithfully)",
+      "One page, three or four short paragraphs",
+      "No spelling or grammar errors; name signed at the end"
+    ]
+  },
+  formalletter:{
+    range:[150,220],
+    intro:"A formal letter follows a fixed layout. Your address goes at the top, followed by the date, then the recipient's name and address. Use a formal greeting, a clear subject (“Re:”) line if helpful, short focused paragraphs, and a formal closing. The purpose should be obvious from the first sentence. Formal letters avoid contractions (do not, not don't) and casual language.",
+    modelLabel:"Model — a formal letter of complaint",
+    modelText:"24 Lake Road\nDhaka 1212\n\n15 March 2026\n\nThe Customer Service Manager\nBrightTech Electronics\nGulshan Avenue, Dhaka\n\nDear Sir or Madam,\n\nRe: Faulty laptop charger (Order No. 4471)\n\nI am writing to complain about a laptop charger I purchased from your store on 2 March 2026. Although the product was described as new, it stopped working within a week and now does not charge at all.\n\nI have attached a copy of the receipt. I should be grateful if you would replace the charger or refund the full amount within fourteen days.\n\nI look forward to your prompt reply.\n\nYours faithfully,\nImran Hossain",
+    notes:[
+      "Layout: sender's address and date, then the recipient's details, then the greeting.",
+      "A “Re:” line states the subject at a glance.",
+      "“Dear Sir or Madam” pairs with “Yours faithfully” (name unknown).",
+      "Tone is polite but firm; no contractions; a clear request with a deadline."
+    ],
+    prompt:"Write a formal letter (about 150–220 words) for ONE purpose: requesting a reference from a former teacher, or complaining about a product or service. Include the correct layout (addresses, date), a clear opening that states your purpose, one or two short paragraphs of detail, and a formal closing.",
+    checklist:[
+      "Correct layout: sender's address, date, recipient's details",
+      "Appropriate greeting and matching closing (faithfully / sincerely)",
+      "Purpose stated clearly in the first sentence",
+      "Short, focused paragraphs in a logical order",
+      "Formal language: no contractions or slang",
+      "A clear request or action, politely expressed"
+    ]
+  }
+};
+
+const QUIZ = {sva:SVA, tense:TENSE, fragments:FRAGMENTS, runons:RUNONS, modifiers:MODIFIERS, parallelism:PARALLELISM, awl1:AWL1, awl2:AWL2, phrasal:PHRASAL};
+
+/* WORDFORM and PAIRS (vocabulary) */
+const WORDFORM = [
+  {type:"fill",q:"Her ___ to the research project was remarkable.",base:"CONTRIBUTE",accept:["contribution"],why:"Noun form: contribution."},
+  {type:"fill",q:"His ___ towards the homeless surprised everyone.",base:"GENEROUS",accept:["generosity"],why:"Noun form: generosity."},
+  {type:"fill",q:"The proposed law proved deeply ___.",base:"CONTROVERSY",accept:["controversial"],why:"Adjective form: controversial."},
+  {type:"fill",q:"She answered every question with great ___.",base:"CONFIDENT",accept:["confidence"],why:"Noun form: confidence."},
+  {type:"fill",q:"After long talks, the two sides reached an ___.",base:"AGREE",accept:["agreement"],why:"Noun form: agreement."},
+  {type:"fill",q:"A good leader has to be ___ under pressure.",base:"DECIDE",accept:["decisive"],why:"Adjective form: decisive."},
+  {type:"fill",q:"His ___ of the data was careful and thorough.",base:"ANALYSE",accept:["analysis"],why:"Noun form: analysis."},
+  {type:"fill",q:"These exercises ___ the muscles of the lower back.",base:"STRONG",accept:["strengthen"],why:"Verb form: strengthen."},
+  {type:"fill",q:"A smaller, more ___ car uses far less fuel.",base:"ECONOMY",accept:["economical"],why:"Adjective (money-saving): economical."},
+  {type:"fill",q:"We received a quick ___ to our complaint.",base:"RESPOND",accept:["response"],why:"Noun form: response."}
+];
+const PAIRS = [
+  {type:"mcq",q:"The new rules will ___ everyone in the department.",options:["affect","effect"],answer:0,why:"“Affect” is the verb (to influence); “effect” is usually the noun (a result)."},
+  {type:"mcq",q:"___ going to announce the results tomorrow.",options:["Their","They're","There"],answer:1,why:"“They're” = they are."},
+  {type:"mcq",q:"The company increased ___ profits last year.",options:["its","it's"],answer:0,why:"Possessive “its” has no apostrophe; “it's” means “it is”."},
+  {type:"mcq",q:"She refused to compromise her ___.",options:["principals","principles"],answer:1,why:"“Principles” = moral rules; “principal” = head of a school / main."},
+  {type:"mcq",q:"Everyone arrived on time ___ John.",options:["accept","except"],answer:1,why:"“Except” = apart from; “accept” = to receive/agree."},
+  {type:"mcq",q:"Could you please ___ me on this matter?",options:["advice","advise"],answer:1,why:"“Advise” is the verb; “advice” is the (uncountable) noun."},
+  {type:"mcq",q:"Be careful not to ___ your keys again.",options:["loose","lose"],answer:1,why:"“Lose” (verb) = misplace; “loose” (adj) = not tight."},
+  {type:"mcq",q:"She is two years older ___ her brother.",options:["then","than"],answer:1,why:"“Than” for comparison; “then” for time/sequence."},
+  {type:"mcq",q:"A crisp white wine ___ the seafood beautifully.",options:["complements","compliments"],answer:0,why:"“Complement” = completes/goes well with; “compliment” = praise."},
+  {type:"mcq",q:"The car remained ___ at the red light.",options:["stationery","stationary"],answer:1,why:"“Stationary” = not moving; “stationery” = paper/pens."}
+];
+QUIZ.wordform = WORDFORM;
+QUIZ.pairs = PAIRS;
+
+/* ============================== HOME / NAV DATA ============================== */
+const GROUPS = [
+  {label:"Reading",items:[
+    {id:"reading",title:"Reading Comprehension",desc:"Passage + vocabulary and comprehension questions",ready:true}
+  ]},
+  {label:"Grammar",items:[
+    {id:"sva",title:"Subject–Verb Agreement",desc:"30 questions · immediate feedback",ready:true},
+    {id:"tense",title:"Tense",desc:"42 questions · immediate feedback",ready:true},
+    {id:"fragments",title:"Sentence Fragments",desc:"34 questions · identify & fix",ready:true},
+    {id:"runons",title:"Run-ons",desc:"20 questions · identify & fix",ready:true},
+    {id:"modifiers",title:"Modifiers",desc:"22 questions · choose the clear version",ready:true},
+    {id:"parallelism",title:"Parallelism",desc:"24 questions · choose the parallel version",ready:true}
+  ]},
+  {label:"Vocabulary",items:[
+    {id:"wordform",title:"Word Formation",desc:"10 questions · type the answer",ready:true},
+    {id:"pairs",title:"Confusing Word Pairs",desc:"10 questions · immediate feedback",ready:true},
+    {id:"awl1",title:"Academic Word List 1",desc:"10 academic words in context",ready:true},
+    {id:"awl2",title:"Academic Word List 2",desc:"10 academic words in context",ready:true},
+    {id:"phrasal",title:"Phrasal Verbs",desc:"10 questions · meaning in context",ready:true}
+  ]},
+  {label:"Paragraph Writing",items:[
+    {id:"howto",title:"How to Write a Paragraph",desc:"Foundations + model + practice",ready:true},
+    {id:"descriptive",title:"Descriptive Paragraph",desc:"Model + guided practice + checklist",ready:true},
+    {id:"narrative",title:"Narrative Paragraph",desc:"Model + guided practice + checklist",ready:true},
+    {id:"cause",title:"Cause–Effect Paragraph",desc:"Model + guided practice + checklist",ready:true},
+    {id:"compare",title:"Compare–Contrast Paragraph",desc:"Model + guided practice + checklist",ready:true},
+    {id:"argue",title:"Argumentative Paragraph",desc:"Model + guided practice + checklist",ready:true},
+    {id:"process",title:"Process Analysis Paragraph",desc:"Model + guided practice + checklist",ready:true}
+  ]},
+  {label:"Professional Writing",items:[
+    {id:"coverletter",title:"Cover Letter & CV",desc:"Model + CV guidance + practice",ready:true},
+    {id:"formalletter",title:"Formal Letter Format",desc:"Layout + model + practice",ready:true}
+  ]}
+];
+
+const TITLE = {};
+GROUPS.forEach(g=>g.items.forEach(i=>TITLE[i.id]=i.title));
+
+/* ============================== ENGINE ============================== */
+const app = document.getElementById("app");
+let q = null;
+let w = {id:null,text:"",ticks:{},showModel:true};
+
+/* ---- per-student progress (localStorage) ------------------------------------
+   Progress is stored per student ID so a student can log in again and again,
+   retry any topic, and always resume with their own completed/left status —
+   even if several students share one device. ---------------------------------- */
+function progressKey(){ const st=getStudent(); return "eng7101:progress:"+((st&&st.id)||(st&&st.name)||"anon"); }
+function loadProgress(){ try{ return JSON.parse(localStorage.getItem(progressKey())||"{}"); }catch(e){ return {}; } }
+function saveProgress(p){ try{ localStorage.setItem(progressKey(), JSON.stringify(p)); }catch(e){} }
+function recordScore(id, kind, s, t){
+  const p=loadProgress(); const e=p[id]||{attempts:0};
+  e.attempts=(e.attempts||0)+1; e.kind=kind; e.last={s,t};
+  if(!e.best || s>e.best.s) e.best={s,t};
+  e.lastTs=new Date().toISOString(); p[id]=e; saveProgress(p); return e;
+}
+function recordWriting(id, words, ticks, checklistLen){
+  const p=loadProgress(); const e=p[id]||{attempts:0};
+  e.attempts=(e.attempts||0)+1; e.kind="writing"; e.words=words; e.ticks=ticks; e.checklist=checklistLen;
+  e.detail=`${words} words · ${ticks}/${checklistLen} self-checks`;
+  e.lastTs=new Date().toISOString(); p[id]=e; saveProgress(p); return e;
+}
+function isScored(id){ return id==="reading" || !!QUIZ[id]; }
+/* every "ready" topic counts toward the completion total */
+function readyTopics(){ return GROUPS.reduce((a,g)=>a.concat(g.items.filter(i=>i.ready)),[]); }
+function completionStats(){
+  const items=readyTopics(); const p=loadProgress();
+  const done=items.filter(i=>p[i.id]).length;
+  return { done, total:items.length, pct: items.length?Math.round(done/items.length*100):0 };
+}
+
+function headerHTML(title){
+  return `<div class="head"><div class="head-in">
+    <button class="btn btn-ghost" style="padding:7px 13px" data-act="home">&larr; All topics</button>
+    <span class="serif" style="font-weight:700;font-size:16px">${esc(title)}</span>
+    <span style="flex:1"></span>
+    <img class="medallion xs" src="${MARK}" alt="" />
+  </div></div>`;
+}
+
+function renderHome(){
+  const progress = loadProgress();
+  const stat = completionStats();
+  let html = `<div class="wrap" style="max-width:1000px;padding-top:46px">
+    <div class="masthead">
+      <img class="medallion" src="${MARK}" alt="AW monogram — Abdul Wahid" />
+      <div>
+        <h1 class="title">ENG7101 Practice</h1>
+        <div class="byline">Written &amp; designed by <span class="nm">Abdul Wahid</span></div>
+      </div>
+    </div>
+    <div class="goldrule"></div>
+    ${whoamiHTML()}
+    <div class="progsum card">
+      <div class="progsum-row">
+        <div>
+          <div class="eyebrow">Your progress</div>
+          <div style="font-size:15.5px;font-weight:700;margin-top:3px">You've completed ${stat.done} of ${stat.total} topics</div>
+        </div>
+        <button class="btn btn-ghost" data-act="report" style="padding:8px 15px;white-space:nowrap">View my report</button>
+      </div>
+      <div class="pbar"><div class="pbar-fill" style="width:${stat.pct}%"></div></div>
+    </div>
+    <p style="color:var(--inkSoft);font-size:16.5px;max-width:600px;margin:20px 0 0">Extra practice for every part of the course, with fresh examples and instant feedback. You can retry any topic as often as you like — your best score is kept.</p>`;
+  GROUPS.forEach(g=>{
+    html += `<section style="margin-top:38px">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+        <span class="diamond">&#10022;</span>
+        <h2 class="sectlabel">${esc(g.label)}</h2>
+        <div style="flex:1;height:1px;background:var(--line)"></div></div><div class="grid">`;
+    g.items.forEach(it=>{
+      let right = "";
+      const e = progress[it.id];
+      if(!it.ready) right = '<span class="badge">Coming next</span>';
+      else if(e && e.last) right = `<span class="scorebadge" title="Last score · ${e.attempts} attempt(s)">${e.last.s}/${e.last.t}</span>`;
+      else if(e) right = `<span class="scorebadge" title="Completed · ${e.attempts} attempt(s)">&#10003; done</span>`;
+      html += `<div class="card tile ${it.ready?"":"soon"}" style="padding:16px 17px" ${it.ready?`role="button" tabindex="0" data-open="${it.id}"`:""}>
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+          <h3 style="font-size:15.5px;margin:0;font-weight:700">${esc(it.title)}</h3>
+          ${right}
+        </div>${it.desc?`<p style="margin:7px 0 0;font-size:13px;color:var(--inkSoft)">${esc(it.desc)}</p>`:""}</div>`;
+    });
+    html += `</div></section>`;
+  });
+  html += `<div class="foot">
+    <img class="medallion sm" src="${MARK}" alt="" style="margin-bottom:11px" />
+    <div class="copyline">&copy; 2026 Abdul Wahid &middot; All rights reserved</div>
+    <div class="copyline" style="margin-top:6px;opacity:.75">All practice content is original and written to B1+/B2 level.</div>
+  </div></div>`;
+  app.innerHTML = html;
+  app.querySelectorAll("[data-open]").forEach(el=>{
+    const id = el.getAttribute("data-open");
+    el.addEventListener("click",()=>openTopic(id));
+    el.addEventListener("keydown",e=>{ if(e.key==="Enter"||e.key===" "){e.preventDefault();openTopic(id);} });
+  });
+  const sw=app.querySelector('[data-act="switch"]');
+  if(sw) sw.addEventListener("click",()=>{ clearStudent(); renderIdGate(); });
+  const rp=app.querySelector('[data-act="report"]');
+  if(rp) rp.addEventListener("click",renderReport);
+  window.scrollTo(0,0);
+}
+
+function openTopic(id){
+  if(id==="reading"){ startQuiz("reading",READING.questions,"Reading Comprehension",passageHTML()); }
+  else if(WRITING[id]){ w={id:id,text:"",ticks:{},showModel:true}; renderWriting(); }
+  else if(QUIZ[id]){ startQuiz(id,QUIZ[id],TITLE[id],""); }
+}
+
+function passageHTML(){
+  let p = READING.paras.map(x=>`<p style="font-size:16px;line-height:1.7;margin:0 0 14px;color:#2c3954">${esc(x)}</p>`).join("");
+  return `<div class="card" style="padding:26px 26px 30px;margin-bottom:26px">
+      <div class="eyebrow">${esc(READING.meta)}</div>
+      <h2 class="serif" style="font-size:26px;margin:8px 0 16px">${esc(READING.title)}</h2>${p}</div>
+    <h3 class="serif" style="font-size:18px;margin:0 0 4px">Questions</h3>
+    <p style="font-size:13.5px;color:var(--muted);margin-top:0">Five vocabulary questions are graded automatically; the comprehension questions show a model answer to check yourself against.</p>`;
+}
+
+/* ---- QUIZ ENGINE ---- */
+function startQuiz(id,items,label,topHtml){
+  q = {id,items,label,top:topHtml||"",i:0,choice:null,checked:false,reveal:false,score:0,done:false};
+  renderQuiz();
+}
+function quizCorrect(){
+  const it=q.items[q.i];
+  if(it.type==="mcq") return q.choice===it.answer;
+  if(it.type==="fill") return q.choice!=null && it.accept.some(a=>norm(a)===norm(q.choice));
+  return false;
+}
+function renderQuiz(){
+  const total=q.items.length;
+  const autoTotal=q.items.filter(x=>x.type!=="open").length;
+  if(q.done){
+    if(autoTotal){
+      const kind = q.id==="reading" ? "reading" : "quiz";
+      const e = recordScore(q.id, kind, q.score, autoTotal);
+      syncResult(q.id, q.label, kind, q.score, autoTotal, `best ${e.best.s}/${e.best.t} · attempt ${e.attempts}`);
+    }
+    const pct=autoTotal?Math.round((q.score/autoTotal)*100):0;
+    const msg=pct>=80?"Excellent — you've got this.":pct>=50?"Good progress. Review the ones you missed and try again.":"Worth another pass — read the explanations carefully.";
+    app.innerHTML=headerHTML(q.label)+`<div class="wrap wrap-narrow" style="padding-top:48px">
+      <div class="card" style="padding:30px;text-align:center">
+        <div class="eyebrow">Practice complete</div>
+        <div class="serif" style="font-size:46px;font-weight:700;margin:8px 0 2px;color:var(--gold)">${q.score} / ${autoTotal}</div>
+        <p style="color:var(--inkSoft);margin-top:0">${msg}</p>
+        <button class="btn" style="margin-top:12px" data-act="restart">Try again</button></div></div>`;
+    wireQuiz(); return;
+  }
+  const it=q.items[q.i], checked=q.checked, correct=checked&&quizCorrect();
+  let qHtml="";
+  if(it.type==="mcq"){
+    qHtml=`<div style="display:grid;gap:9px">`+it.options.map((opt,idx)=>{
+      let bd="var(--line)",bg="var(--surface)";
+      if(checked){ if(idx===it.answer){bd="var(--correct)";bg="var(--correctBg)";} else if(idx===q.choice){bd="var(--wrong)";bg="var(--wrongBg)";} }
+      else if(idx===q.choice){bd="var(--gold)";bg="var(--goldSoft)";}
+      return `<button class="opt" ${checked?"disabled":""} data-opt="${idx}" style="border-color:${bd};background:${bg}">
+        <span style="font-weight:700;color:var(--muted);min-width:16px">${"ABCD"[idx]}</span><span>${esc(opt)}</span></button>`;
+    }).join("")+`</div>`;
+  } else if(it.type==="fill"){
+    const st=checked?`border-color:${correct?"var(--correct)":"var(--wrong)"};background:${correct?"var(--correctBg)":"var(--wrongBg)"}`:"";
+    qHtml=`<input class="input" id="fillInput" placeholder="Type the correct word" value="${esc(q.choice||"")}" ${checked?"disabled":""} style="${st}">`;
+  } else {
+    qHtml=`<textarea class="input" id="openInput" placeholder="Write your answer here, then compare it with the model.">${esc(q.choice||"")}</textarea>`;
+    qHtml+=q.reveal
+      ?`<div style="margin-top:14px;padding:14px;background:var(--accentSoft);border-radius:11px;border-left:3px solid var(--accent)">
+          <div class="eyebrow" style="color:var(--accent)">Model answer</div>
+          <p style="margin:6px 0 0;font-size:14.5px">${esc(it.model)}</p></div>`
+      :`<button class="link" style="margin-top:12px" data-act="reveal">Show model answer</button>`;
+  }
+  let fb="";
+  if(checked && it.type!=="open"){
+    fb=`<div style="margin-top:16px;padding:13px;border-radius:11px;background:${correct?"var(--correctBg)":"var(--wrongBg)"};border-left:3px solid ${correct?"var(--correct)":"var(--wrong)"}">
+      <div style="font-weight:700;color:${correct?"var(--correct)":"var(--wrong)"};font-size:13.5px">${correct?"Correct":"Not quite"}</div>
+      <p style="margin:5px 0 0;font-size:14px">${esc(it.why)}</p></div>`;
+  }
+  let nav=`<div style="display:flex;justify-content:flex-end;gap:10px;margin-top:18px">`;
+  if(it.type!=="open" && !checked){
+    const dis=(q.choice===null||q.choice==="")?"disabled":"";
+    nav+=`<button class="btn" id="checkBtn" ${dis} data-act="check">Check</button>`;
+  }
+  if(checked||it.type==="open"){ nav+=`<button class="btn" data-act="next">${q.i+1>=total?"Finish":"Next →"}</button>`; }
+  nav+=`</div>`;
+  app.innerHTML=headerHTML(q.label)+`<div class="wrap wrap-narrow" style="padding-top:30px">
+    ${q.top||""}
+    <div style="display:flex;justify-content:space-between;font-size:12.5px;color:var(--muted);margin-bottom:8px">
+      <span>Question ${q.i+1} of ${total}</span><span class="scorepill">Score ${q.score}/${autoTotal}</span></div>
+    <div style="height:5px;background:var(--line);border-radius:4px;margin-bottom:22px;overflow:hidden">
+      <div style="width:${(q.i/total)*100}%;height:100%;background:var(--gold);transition:width .2s"></div></div>
+    <div class="card" style="padding:22px 22px 24px">
+      ${it.base?`<div class="eyebrow" style="margin-bottom:8px">${esc(it.base)}</div>`:""}
+      <p class="serif" style="font-size:19px;line-height:1.45;margin:0 0 18px">${esc(it.q)}</p>
+      ${qHtml}${fb}</div>${nav}</div>`;
+  wireQuiz();
+}
+function wireQuiz(){
+  app.querySelectorAll("[data-act]").forEach(el=>{
+    const act=el.getAttribute("data-act");
+    el.addEventListener("click",()=>{
+      if(act==="home"){ renderHome(); }
+      else if(act==="restart"){ q.i=0;q.choice=null;q.checked=false;q.reveal=false;q.score=0;q.done=false;renderQuiz(); }
+      else if(act==="reveal"){ const t=document.getElementById("openInput"); if(t)q.choice=t.value; q.reveal=true; renderQuiz(); }
+      else if(act==="check"){ doCheck(); }
+      else if(act==="next"){ doNext(); }
+    });
+  });
+  app.querySelectorAll("[data-opt]").forEach(el=>{
+    el.addEventListener("click",()=>{ q.choice=parseInt(el.getAttribute("data-opt"),10); renderQuiz(); });
+  });
+  const fill=document.getElementById("fillInput");
+  if(fill){
+    fill.addEventListener("input",()=>{ q.choice=fill.value; const b=document.getElementById("checkBtn"); if(b)b.disabled=!fill.value.trim(); });
+    fill.addEventListener("keydown",e=>{ if(e.key==="Enter"&&fill.value.trim()){ q.choice=fill.value; doCheck(); } });
+    fill.focus();
+  }
+  const open=document.getElementById("openInput");
+  if(open) open.addEventListener("input",()=>{ q.choice=open.value; });
+}
+function doCheck(){
+  const it=q.items[q.i];
+  if(it.type==="fill"){ const f=document.getElementById("fillInput"); if(f)q.choice=f.value; }
+  if(it.type==="open") return;
+  q.checked=true; if(quizCorrect()) q.score++; renderQuiz();
+}
+function doNext(){
+  const it=q.items[q.i];
+  if(it.type==="open"){ const t=document.getElementById("openInput"); if(t)q.choice=t.value; }
+  if(q.i+1>=q.items.length){ q.done=true; renderQuiz(); return; }
+  q.i++; q.choice=null; q.checked=false; q.reveal=false; renderQuiz();
+}
+
+/* ---- WRITING STUDIO ---- */
+function renderWriting(){
+  const d=WRITING[w.id];
+  const min=d.range[0], max=d.range[1];
+  const words=w.text.trim()?w.text.trim().split(/\s+/).length:0;
+  const onTarget=words>=min&&words<=max;
+  app.innerHTML=headerHTML(TITLE[w.id])+`<div class="wrap" style="max-width:720px;padding-top:30px">
+    <div class="card" style="padding:22px 24px">
+      <div class="eyebrow">What it is</div>
+      <p style="font-size:15.5px;line-height:1.65;margin:8px 0 0;color:#2c3954">${esc(d.intro)}</p></div>
+    <div class="card" style="padding:20px 24px;margin-top:18px">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div class="eyebrow">${esc(d.modelLabel)}</div>
+        <button class="link" data-act="toggleModel">${w.showModel?"Hide":"Show"}</button></div>
+      ${w.showModel?`<p class="serif" style="font-size:16px;line-height:1.7;margin:12px 0 16px;white-space:pre-wrap">${esc(d.modelText)}</p>
+        <div style="background:var(--goldSoft);border-radius:11px;padding:12px 14px">
+          <div class="eyebrow" style="color:var(--gold)">How it works</div>
+          <ul style="margin:8px 0 0;padding-left:18px;font-size:13.5px;line-height:1.6">
+            ${d.notes.map(n=>`<li style="margin-bottom:4px">${esc(n)}</li>`).join("")}</ul></div>`:""}
+    </div>
+    <div class="card" style="padding:20px 24px;margin-top:18px">
+      <div class="eyebrow">Your turn</div>
+      <p style="font-size:15px;line-height:1.6;margin:8px 0 14px;color:#2c3954">${esc(d.prompt)}</p>
+      <textarea class="input" id="essay" placeholder="Write your answer here…">${esc(w.text)}</textarea>
+      <div id="wc" style="text-align:right;font-size:12.5px;margin-top:6px;color:${onTarget?"var(--correct)":"var(--muted)"}">${words} words · aim for ${min}–${max}</div>
+      <div style="margin-top:16px"><div class="eyebrow">Check your own work</div>
+        <div style="display:grid;gap:7px;margin-top:9px">
+          ${d.checklist.map((c,i)=>`<label style="display:flex;gap:10px;align-items:flex-start;font-size:14px;cursor:pointer">
+            <input type="checkbox" data-tick="${i}" ${w.ticks[i]?"checked":""} style="margin-top:3px;width:16px;height:16px;accent-color:var(--accent)">
+            <span style="color:${w.ticks[i]?"var(--muted)":"var(--ink)"};text-decoration:${w.ticks[i]?"line-through":"none"}">${esc(c)}</span>
+          </label>`).join("")}</div></div>
+    </div></div>`;
+  app.querySelector('[data-act="home"]').addEventListener("click",()=>{
+    const t=document.getElementById("essay"); if(t)w.text=t.value;
+    submitWriting(); renderHome();
+  });
+  app.querySelector('[data-act="toggleModel"]').addEventListener("click",()=>{
+    const t=document.getElementById("essay"); if(t)w.text=t.value; w.showModel=!w.showModel; renderWriting();
+  });
+  const essay=document.getElementById("essay");
+  essay.addEventListener("input",()=>{
+    w.text=essay.value;
+    const n=essay.value.trim()?essay.value.trim().split(/\s+/).length:0;
+    const ot=n>=min&&n<=max; const wc=document.getElementById("wc");
+    wc.textContent=`${n} words · aim for ${min}–${max}`; wc.style.color=ot?"var(--correct)":"var(--muted)";
+  });
+  app.querySelectorAll("[data-tick]").forEach(cb=>{
+    cb.addEventListener("change",()=>{
+      const t=document.getElementById("essay"); if(t)w.text=t.value;
+      const i=cb.getAttribute("data-tick"); w.ticks[i]=!w.ticks[i]; renderWriting();
+    });
+  });
+}
+
+function submitWriting(){
+  const d=WRITING[w.id]; if(!d) return;
+  const words=w.text.trim()?w.text.trim().split(/\s+/).length:0;
+  if(words<3) return;                                 // nothing meaningful written — don't report
+  const ticks=Object.keys(w.ticks).filter(k=>w.ticks[k]).length;
+  const e=recordWriting(w.id, words, ticks, d.checklist.length);
+  syncResult(w.id, TITLE[w.id], "writing", null, null, `${e.detail} · attempt ${e.attempts}`);
+}
+
+/* ---- CONSOLIDATED STUDENT REPORT ---- */
+function resendAll(){
+  const p=loadProgress(); let n=0;
+  Object.keys(p).forEach(id=>{
+    const e=p[id], title=TITLE[id]||id;
+    if(e.last) syncResult(id,title,e.kind||"quiz",e.last.s,e.last.t,`best ${e.best.s}/${e.best.t} · ${e.attempts} attempts`);
+    else       syncResult(id,title,e.kind||"writing",null,null,`${e.detail||"completed"} · ${e.attempts} attempts`);
+    n++;
+  });
+  const stat=completionStats();
+  syncResult("_summary","Overall completion","summary",stat.done,stat.total,`${stat.done}/${stat.total} topics`);
+  return n;
+}
+function renderReport(){
+  const st=getStudent()||{}, p=loadProgress(), stat=completionStats();
+  const rowsFor = items => items.map(it=>{
+    const e=p[it.id]; let status, cls;
+    if(!it.ready){ status="Coming soon"; cls="rs-soon"; }
+    else if(!e){ status="Not started"; cls="rs-none"; }
+    else if(e.last){
+      const att=`${e.attempts} attempt${e.attempts>1?"s":""}`;
+      const best=(e.best&&e.best.s!==e.last.s)?` (best ${e.best.s}/${e.best.t})`:"";
+      status=`${e.last.s}/${e.last.t}${best} · ${att}`; cls="rs-done";
+    } else {
+      status=`${e.detail||"Completed"} · ${e.attempts} attempt${e.attempts>1?"s":""}`; cls="rs-done";
+    }
+    return `<tr><td>${esc(it.title)}</td><td class="${cls}">${esc(status)}</td></tr>`;
+  }).join("");
+  const tables = GROUPS.map(g=>`<div class="rep-group">
+    <div class="rep-glabel">${esc(g.label)}</div>
+    <table class="rep-tbl"><tbody>${rowsFor(g.items)}</tbody></table></div>`).join("");
+  app.innerHTML = headerHTML("My Report") + `<div class="wrap" style="max-width:760px;padding-top:30px">
+    <div class="card rep-head" style="padding:24px 26px">
+      <div class="eyebrow">Progress report</div>
+      <h1 class="serif" style="font-size:26px;margin:6px 0 12px">${esc(st.name||"")}</h1>
+      <div class="rep-meta">
+        <span><strong>Student ID:</strong> ${esc(st.id||"—")}</span>
+        ${st.cls?`<span><strong>Class:</strong> ${esc(st.cls)}</span>`:""}
+        <span><strong>Date:</strong> ${esc(new Date().toLocaleDateString())}</span>
+      </div>
+      <div style="margin-top:16px">
+        <div style="font-size:15px;font-weight:700">Completed ${stat.done} of ${stat.total} topics (${stat.pct}%)</div>
+        <div class="pbar" style="margin-top:8px"><div class="pbar-fill" style="width:${stat.pct}%"></div></div>
+      </div>
+    </div>
+    ${tables}
+    <div class="rep-actions">
+      <button class="btn" data-act="print">Print / Save as PDF</button>
+      <button class="btn btn-ghost" data-act="resend">Re-send my results to teacher</button>
+      <button class="btn btn-ghost" data-act="home">Back to topics</button>
+    </div>
+    <p id="repMsg" style="font-size:13px;color:var(--muted);margin-top:10px"></p>
+  </div>`;
+  app.querySelectorAll('[data-act="home"]').forEach(b=>b.addEventListener("click",renderHome));
+  app.querySelector('[data-act="print"]').addEventListener("click",()=>window.print());
+  app.querySelector('[data-act="resend"]').addEventListener("click",()=>{
+    const n=resendAll(); const m=document.getElementById("repMsg");
+    if(m) m.textContent = SYNC_URL ? `Sent ${n} result(s) to your teacher.`
+      : "Saved on this device. (Teacher sync isn't set up yet — see TEACHER-SETUP.md.)";
+  });
+  window.scrollTo(0,0);
+}
+
+/* ---- PWA: install button + service worker ---- */
+let deferredPrompt=null;
+const installBtn=document.getElementById("installBtn");
+window.addEventListener("beforeinstallprompt",e=>{ e.preventDefault(); deferredPrompt=e; installBtn.style.display="block"; });
+installBtn.addEventListener("click",async()=>{ if(!deferredPrompt)return; deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt=null; installBtn.style.display="none"; });
+window.addEventListener("appinstalled",()=>{ installBtn.style.display="none"; });
+if("serviceWorker" in navigator && location.protocol==="https:"){ navigator.serviceWorker.register("sw.js").catch(()=>{}); }
+
+function boot(){
+  flushPending();                                     // resend anything that failed while offline
+  const st=getStudent();
+  if(st && st.name){ renderHome(); } else { renderIdGate(); }
+}
+boot();
+</script>
+</body>
+</html>
