@@ -8,6 +8,9 @@
 <meta name="description" content="ENG7101 Practice — an English practice app by Abdul Wahid." />
 <link rel="manifest" href="manifest.webmanifest" />
 <link rel="apple-touch-icon" href="icon-192.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" />
 <style>
   :root{
     --ink:#1E2636; --inkSoft:#55607a; --paper:#F4F0E7; --surface:#FFFDF9;
@@ -17,21 +20,23 @@
   }
   *{box-sizing:border-box}
   html,body{margin:0;padding:0}
-  body{font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  body{font-family:"Inter",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
     color:var(--ink);background:var(--paper);min-height:100vh;-webkit-font-smoothing:antialiased;line-height:1.55}
-  .serif{font-family:Georgia,"Times New Roman",serif}
+  .serif{font-family:"Cormorant Garamond",Georgia,"Times New Roman",serif;font-weight:500}
   .eyebrow{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);font-weight:700}
-  .card{background:var(--surface);border:1px solid var(--line);border-radius:14px}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:0 1px 2px rgba(30,22,10,.05)}
   .wrap{max-width:820px;margin:0 auto;padding:30px 22px 70px}
   .wrap-narrow{max-width:620px}
   .tile{cursor:pointer;transition:transform .12s ease,box-shadow .12s ease,border-color .12s ease}
-  .tile:hover{transform:translateY(-2px);box-shadow:0 10px 26px rgba(30,22,10,.10);border-color:var(--goldLine)}
+  .tile:hover{transform:translateY(-3px);box-shadow:0 16px 34px rgba(30,22,10,.13),0 2px 6px rgba(30,22,10,.06);border-color:var(--goldLine)}
   .tile:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
   .soon{opacity:.6;cursor:default}
   .soon:hover{transform:none;box-shadow:none;border-color:var(--line)}
   .btn{font:inherit;font-weight:600;border-radius:10px;border:1px solid var(--ink);
-    background:var(--ink);color:#fff;padding:11px 20px;cursor:pointer;transition:opacity .12s}
-  .btn:hover{opacity:.88}
+    background:var(--ink);color:#fff;padding:11px 20px;cursor:pointer;transition:opacity .12s,box-shadow .12s,transform .12s;
+    box-shadow:0 2px 8px rgba(15,12,6,.16)}
+  .btn:hover{opacity:.9;box-shadow:0 4px 14px rgba(15,12,6,.22)}
+  .btn:active{transform:translateY(1px)}
   .btn:disabled{opacity:.4;cursor:not-allowed}
   .btn-ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
   .btn-ghost:hover{border-color:var(--ink);opacity:1}
@@ -48,7 +53,7 @@
   .mark{background:linear-gradient(180deg,transparent 58%,var(--goldSoft) 58%);padding:0 1px}
   .link{background:none;border:none;color:var(--accent);font:inherit;font-weight:600;cursor:pointer;
     padding:0;text-decoration:underline;text-underline-offset:3px}
-  .head{border-bottom:1px solid var(--line);background:var(--surface);position:sticky;top:0;z-index:5}
+  .head{border-bottom:1px solid var(--line);background:var(--surface);position:sticky;top:0;z-index:5;box-shadow:0 1px 0 rgba(217,196,142,.35),0 6px 18px rgba(30,22,10,.04)}
   .head-in{max-width:820px;margin:0 auto;padding:13px 22px;display:flex;align-items:center;gap:14px}
   .grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(248px,1fr))}
   .badge{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);
@@ -62,12 +67,12 @@
     box-shadow:0 8px 22px rgba(15,12,6,.30);border:1px solid rgba(0,0,0,.22)}
   .medallion.sm{width:34px;height:34px;border-radius:9px;box-shadow:0 4px 12px rgba(15,12,6,.28)}
   .medallion.xs{width:26px;height:26px;border-radius:7px;box-shadow:0 3px 9px rgba(15,12,6,.25)}
-  .title{font-family:Georgia,"Times New Roman",serif;font-size:38px;line-height:1.04;margin:0;
-    font-weight:600;letter-spacing:.004em;color:var(--ink)}
+  .title{font-family:"Cormorant Garamond",Georgia,"Times New Roman",serif;font-size:46px;line-height:1.0;margin:0;
+    font-weight:600;letter-spacing:-.005em;color:var(--ink)}
   .byline{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-top:8px}
   .byline .nm{color:var(--ink);letter-spacing:.13em}
   .goldrule{height:1px;background:linear-gradient(90deg,var(--goldLine),rgba(217,196,142,0));margin:20px 0 0}
-  .sectlabel{font-family:Georgia,"Times New Roman",serif;font-size:19px;margin:0;letter-spacing:.01em;color:var(--ink)}
+  .sectlabel{font-family:"Cormorant Garamond",Georgia,"Times New Roman",serif;font-size:23px;font-weight:600;margin:0;letter-spacing:.005em;color:var(--ink)}
   .diamond{color:var(--goldLine);font-size:10px;letter-spacing:.1em}
   .foot{margin-top:58px;padding-top:24px;border-top:1px solid var(--line);text-align:center}
   .copyline{font-size:12px;letter-spacing:.05em;color:var(--muted)}
@@ -83,10 +88,10 @@
   .progsum{padding:16px 18px;margin-top:16px}
   .progsum-row{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
   .pbar{height:8px;background:var(--line);border-radius:5px;overflow:hidden;margin-top:12px}
-  .pbar-fill{height:100%;background:var(--accent);border-radius:5px;transition:width .3s}
+  .pbar-fill{height:100%;background:linear-gradient(90deg,#C6A24E,#9C7A2E);border-radius:5px;transition:width .3s}
   .rep-meta{display:flex;flex-wrap:wrap;gap:6px 20px;font-size:13.5px;color:var(--inkSoft)}
   .rep-group{margin-top:22px}
-  .rep-glabel{font-family:Georgia,"Times New Roman",serif;font-size:16px;font-weight:700;margin-bottom:8px;color:var(--ink)}
+  .rep-glabel{font-family:"Cormorant Garamond",Georgia,"Times New Roman",serif;font-size:19px;font-weight:600;margin-bottom:8px;color:var(--ink)}
   .rep-tbl{width:100%;border-collapse:collapse;font-size:14px}
   .rep-tbl td{padding:9px 12px;border:1px solid var(--line);vertical-align:top}
   .rep-tbl td:first-child{width:55%}
