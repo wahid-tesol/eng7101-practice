@@ -204,13 +204,14 @@ const MARK = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAIAAADTED8x
 
 /* ============================== READING ============================== */
 const READING = {
+  id:"reading", desc:"How the sleeping brain stores what you learn",
   title:"How Sleep Shapes Memory",
   meta:"Original passage · approx. 290 words · B2",
   paras:[
-    "For a long time, sleep was dismissed as a passive state — a nightly pause in which the brain simply switched off. Recent research has overturned this assumption. Far from being idle, the sleeping brain is remarkably busy, sorting through the events of the day and deciding which memories are worth keeping.",
-    "During the hours after we learn something new, the brain replays the experience in compressed bursts of activity. This rehearsal strengthens the connections between neurons, making the memory more durable and easier to retrieve later. Scientists call this process consolidation. Without it, much of what we learn would fade within a day.",
-    "Different stages of sleep appear to serve distinct functions. Deep, slow-wave sleep is thought to be crucial for storing facts and information — the kind of knowledge a student needs before an examination. Dreaming sleep, by contrast, seems to help the brain forge unexpected links between ideas, which may explain why a difficult problem sometimes looks solvable after a good night's rest.",
-    "The practical implications are significant. Students who sacrifice sleep in order to cram are often undermining the very process that would fix the material in their minds. A shorter period of study followed by adequate rest tends to produce better recall than a sleepless night of frantic revision.",
+    "For a long time, sleep was **dismissed** as a passive state — a nightly pause in which the brain simply switched off. Recent research has **overturned** this assumption. Far from being idle, the sleeping brain is remarkably busy, sorting through the events of the day and deciding which memories are worth keeping.",
+    "During the hours after we learn something new, the brain replays the experience in compressed bursts of activity. This rehearsal strengthens the connections between neurons, making the memory more **durable** and easier to retrieve later. Scientists call this process consolidation. Without it, much of what we learn would fade within a day.",
+    "Different stages of sleep appear to serve distinct functions. Deep, slow-wave sleep is thought to be **crucial** for storing facts and information — the kind of knowledge a student needs before an examination. Dreaming sleep, by contrast, seems to help the brain forge unexpected links between ideas, which may explain why a difficult problem sometimes looks solvable after a good night's rest.",
+    "The practical implications are significant. Students who sacrifice sleep in order to cram are often undermining the very process that would fix the material in their minds. A shorter period of study followed by adequate rest tends to produce better recall than a sleepless night of **frantic** revision.",
     "Crucially, the benefit cannot be postponed. Catching up at the weekend does not fully reverse the damage caused by a week of late nights. The brain needs consolidation soon after learning, not days afterwards. As the evidence accumulates, one message becomes increasingly clear: if you want to remember, you must first sleep."
   ],
   questions:[
@@ -226,6 +227,254 @@ const READING = {
     {type:"open",q:"Can weekend sleep undo a week of late nights? Why / why not?",model:"No. Consolidation has to happen soon after learning, so catching up later does not fully reverse the damage already done."}
   ]
 };
+
+const READING_CREATIVITY = {
+  id:"read_creativity", desc:"Can AI be truly creative — or only copying?",
+  title:"Can Machines Be Creative?",
+  meta:"Original passage · approx. 300 words · B1+/B2",
+  paras:[
+    "Not long ago, creativity was considered a uniquely human trait, something no machine could ever **replicate**. That belief is now being tested. Modern artificial-intelligence systems can compose music, paint portraits and write poetry that many people find genuinely appealing. When such works are shown to audiences without any explanation, viewers frequently cannot tell whether a human or a program produced them.",
+    "Yet a hard question remains: is the machine truly creating, or merely **imitating**? These systems learn by analysing millions of existing paintings and songs and detecting the patterns hidden within them. Critics argue that the results, however impressive, are essentially **derivative** — clever rearrangements of material the software has already seen, rather than genuinely **novel** ideas of its own.",
+    "Supporters take a different view. They point out that human artists also absorb the influence of those who came before them; no painter begins with an empty mind. If originality is really a matter of combining old elements in unexpected ways, then a machine that surprises us may deserve to be called creative. The line between the two, they suggest, is becoming increasingly **blurred**.",
+    "The debate is more than philosophical. Courts are already being asked who owns a picture generated by software, and whether such work can be protected by copyright at all. As these tools spread into design, advertising and film, universities are beginning to ask how students should use them honestly. Whatever we decide, one thing is clear: the comfortable border between human imagination and machine output is unlikely to stay where it is."
+  ],
+  questions:[
+    {type:"mcq",q:"'replicate' (paragraph 1) is closest in meaning to:",options:["copy exactly","replace","invent","understand"],answer:0,why:"To replicate is to reproduce or copy something exactly; note the trap 'replace', which only looks similar."},
+    {type:"mcq",q:"'imitating' (paragraph 2) most nearly means:",options:["copying","mocking","creating","translating"],answer:0,why:"Here 'imitate' means to copy. 'Mocking' is another sense of the word but is not the meaning used here."},
+    {type:"mcq",q:"Work described as 'derivative' (paragraph 2) is:",options:["based on existing sources","highly original","carefully hidden","technically perfect"],answer:0,why:"Derivative work copies or borrows from earlier work rather than being original."},
+    {type:"mcq",q:"Which is the closest ANTONYM of 'novel' (paragraph 2)?",options:["familiar","fresh","original","strange"],answer:0,why:"'Novel' means new; its opposite is familiar. 'Fresh' and 'original' are synonyms placed there as traps."},
+    {type:"mcq",q:"'blurred' (paragraph 3) here means:",options:["made unclear","firmly fixed","brightly lit","widely known"],answer:0,why:"A blurred line is indistinct or unclear; 'firmly fixed' is the opposite."}
+    ,{type:"open",q:"What can modern AI systems now produce that was once thought to be uniquely human?",model:"Creative works such as music, paintings and poetry that audiences often find genuinely appealing — sometimes indistinguishable from human work."},
+    {type:"open",q:"Why do critics claim that machine art is not truly creative?",model:"Because the systems only learn patterns from existing art and recombine them, so the output is derivative rather than a genuinely new idea."},
+    {type:"open",q:"How do supporters respond to the claim that machines only copy?",model:"They argue that human artists also learn from earlier artists, so combining old elements in surprising ways can count as creativity for a machine too."},
+    {type:"open",q:"In what way has the debate become a legal matter, not only a philosophical one?",model:"Courts must now decide who owns work generated by software and whether it can be copyrighted at all."},
+    {type:"open",q:"According to the writer, what is likely to happen to the boundary between human and machine creativity?",model:"It is unlikely to stay where it is; the line is becoming increasingly blurred as the technology spreads."}
+  ]
+};
+
+const READING_HABITS = {
+  id:"read_habits", desc:"The loop behind what we do without thinking",
+  title:"The Science of Habits",
+  meta:"Original passage · approx. 300 words · B1+/B2",
+  paras:[
+    "Much of what we do each day is not the result of careful decision-making. Psychologists estimate that a large share of our behaviour is **habitual** — performed almost automatically, with little conscious thought. Brushing our teeth, checking a phone the moment we wake, taking the same route to campus: these actions run so smoothly that we barely notice them.",
+    "Researchers describe a habit as a loop with three parts. First comes a **cue**, a trigger such as a time of day, a place or a particular mood. The cue sets off a routine, the behaviour itself. Finally there is a reward, the small sense of satisfaction that teaches the brain to **reinforce** the pattern. Each time the loop is completed, the connection grows stronger and harder to break.",
+    "This explains why bad habits are so **persistent**. Simply deciding to stop rarely works, because the cue and the craving remain in place. A more effective strategy, studies suggest, is to keep the same cue and reward but change the routine in between — going for a brief walk, for example, instead of reaching for a snack whenever stress strikes.",
+    "The findings offer a realistic kind of hope. Lasting change does not depend only on **willpower**, which tends to weaken exactly when we are tired or busy. By redesigning our surroundings and adjusting the cues around us, we can make good behaviours easier and bad ones less convenient. Habits, in other words, are not our destiny; with patience, they can be rebuilt."
+  ],
+  questions:[
+    {type:"mcq",q:"'habitual' (paragraph 1) is closest in meaning to:",options:["done regularly and automatically","done for the very first time","done with great effort","done in secret"],answer:0,why:"A habitual action is one repeated so often that it becomes automatic."},
+    {type:"mcq",q:"A 'cue' (paragraph 2) is best described as a:",options:["signal that triggers a behaviour","reward for good work","kind of routine","sudden decision"],answer:0,why:"In the habit loop the cue is the trigger that starts the routine."},
+    {type:"mcq",q:"'reinforce' (paragraph 2) most nearly means:",options:["strengthen","remove","interrupt","question"],answer:0,why:"To reinforce a pattern is to make it stronger."},
+    {type:"mcq",q:"Which is the closest ANTONYM of 'persistent' (paragraph 3)?",options:["short-lived","stubborn","constant","frequent"],answer:0,why:"Persistent means lasting or continuing; its opposite is short-lived. 'Stubborn' and 'constant' are near-synonyms used as traps."},
+    {type:"mcq",q:"'willpower' (paragraph 4) means the ability to:",options:["control your own impulses","remember facts easily","work well with others","feel strong emotions"],answer:0,why:"Willpower is self-control — the strength to resist an impulse."}
+    ,{type:"open",q:"According to the passage, how much of our daily behaviour is habitual, and how is it performed?",model:"A large share of it is habitual — carried out almost automatically, with little conscious thought."},
+    {type:"open",q:"What are the three parts of the habit loop, and how are they linked?",model:"A cue (a trigger) sets off a routine (the behaviour), which is followed by a reward that teaches the brain to repeat and strengthen the loop."},
+    {type:"open",q:"Why does simply deciding to quit a bad habit usually fail?",model:"Because the cue and the craving are still there; only the decision changes, so the trigger keeps setting off the old behaviour."},
+    {type:"open",q:"How do researchers suggest a bad habit can be changed more effectively?",model:"By keeping the same cue and reward but replacing the routine in between with a better behaviour."},
+    {type:"open",q:"Why does the writer claim that habits are 'not our destiny'?",model:"Because by changing our surroundings and cues we can rebuild our habits, so we are not permanently controlled by them."}
+  ]
+};
+
+const READING_MICROPLASTICS = {
+  id:"read_microplastics", desc:"The pollution too small to see",
+  title:"Microplastics: An Invisible Problem",
+  meta:"Original passage · approx. 300 words · B1+/B2",
+  paras:[
+    "Plastic waste is usually pictured as bottles washed up on a beach or bags caught in a tree. But some of the most worrying pollution is almost impossible to see. Over time, sunlight and waves cause larger pieces of plastic to **fragment** into tiny particles, less than five millimetres across, which scientists call microplastics.",
+    "These particles are now remarkably **pervasive**. Researchers have found them at the bottom of the deepest oceans, inside Arctic ice, in falling rain, and even in the air of busy cities. Because plastic breaks down extremely slowly, the particles **accumulate** in the environment year after year, and their total quantity keeps rising.",
+    "The effect on living things is only beginning to be understood. Fish and other sea creatures **ingest** microplastics, mistaking them for food, and the particles then pass along the food chain. Traces have already been detected in human blood and lungs. Whether these tiny fragments cause serious harm to health is still uncertain, but many researchers regard the trend as deeply concerning.",
+    "Solving the problem is difficult, precisely because the particles are so widely spread and so hard to collect. Most experts argue that the priority must be prevention: producing less unnecessary plastic in the first place, and pressing governments to **regulate** the materials most likely to break apart. Cleaning up what has already escaped, they warn, may prove almost impossible."
+  ],
+  questions:[
+    {type:"mcq",q:"'fragment' (verb, paragraph 1) means to:",options:["break into small pieces","dissolve completely","float on the surface","change colour"],answer:0,why:"To fragment is to break apart into fragments; 'dissolve' is a trap suggesting a different process."},
+    {type:"mcq",q:"'pervasive' (paragraph 2) is closest in meaning to:",options:["found almost everywhere","extremely rare","brightly coloured","recently discovered"],answer:0,why:"Something pervasive spreads through and is present everywhere; 'rare' is the opposite."},
+    {type:"mcq",q:"'accumulate' (paragraph 2) most nearly means:",options:["build up over time","disappear gradually","move quickly","become cleaner"],answer:0,why:"To accumulate is to gather and increase in quantity."},
+    {type:"mcq",q:"'ingest' (paragraph 3) here means to:",options:["take in through the mouth","breathe out","reject","examine"],answer:0,why:"To ingest is to swallow or take food (or particles) into the body."},
+    {type:"mcq",q:"Which is the closest ANTONYM of 'regulate' (paragraph 4)?",options:["leave uncontrolled","restrict","manage","control"],answer:0,why:"To regulate is to control by rules; its opposite is to leave uncontrolled. The other options are synonyms used as traps."}
+    ,{type:"open",q:"How are microplastics formed?",model:"Larger pieces of plastic are broken down by sunlight and waves into tiny particles smaller than five millimetres."},
+    {type:"open",q:"Why does the writer describe microplastics as 'pervasive'? Give examples.",model:"Because they have been found almost everywhere — in the deepest oceans, in Arctic ice, in rain and even in city air."},
+    {type:"open",q:"In what way do microplastics reach the human body?",model:"Sea creatures ingest them and they move up the food chain; traces have been found in human blood and lungs."},
+    {type:"open",q:"According to the passage, why is the effect on human health still uncertain?",model:"Because research is only beginning, so scientists do not yet know whether the particles cause serious harm."},
+    {type:"open",q:"Why do most experts believe prevention matters more than cleaning up?",model:"Because the particles are so widespread and hard to remove that cleaning them up may be almost impossible; producing less plastic is more realistic."}
+  ]
+};
+
+const READING_GIG = {
+  id:"read_gig", desc:"Apps, short tasks and the changing meaning of a job",
+  title:"The Gig Economy",
+  meta:"Original passage · approx. 310 words · B1+/B2",
+  paras:[
+    "A growing number of people no longer have a single, permanent employer. Instead they earn money through short, individual tasks — driving passengers, delivering meals, editing documents or designing websites — arranged through apps and websites. This way of working is often called the gig economy, and it is reshaping employment across the world.",
+    "Its appeal is easy to understand. Workers can choose their own hours and fit their jobs around study or family, an arrangement that traditional employment rarely allows. For companies, hiring people task by task is cheaper and more **flexible** than keeping a large permanent staff. Customers, meanwhile, enjoy services delivered quickly and **on demand**.",
+    "Yet the model has a darker side. Because gig workers are usually **classified** as independent contractors rather than employees, they are often denied basic protections such as sick pay, paid holidays and a guaranteed minimum wage. Earnings can change sharply from one week to the next, leaving many in a **precarious** financial position with very little security.",
+    "Governments are struggling to respond. Some courts have ruled that certain gig workers should receive the same **entitlements** as ordinary employees, while the companies insist that flexibility is exactly what their workers want. The outcome of this argument will shape not only a handful of apps, but the meaning of a 'job' for an entire generation."
+  ],
+  questions:[
+    {type:"mcq",q:"'flexible' (paragraph 2) is closest in meaning to:",options:["easily adjusted","permanently fixed","poorly paid","highly skilled"],answer:0,why:"Flexible arrangements can be changed easily; 'fixed' is the opposite."},
+    {type:"mcq",q:"To provide a service 'on demand' (paragraph 2) is to provide it:",options:["whenever it is requested","at one fixed time only","free of charge","in a few places only"],answer:0,why:"On demand means available immediately whenever the customer asks."},
+    {type:"mcq",q:"'classified' (paragraph 3) most nearly means:",options:["officially categorised","secretly hidden","highly praised","quickly dismissed"],answer:0,why:"Here 'classified' means placed in an official category. 'Secretly hidden' plays on another sense of the word and is a trap."},
+    {type:"mcq",q:"A 'precarious' (paragraph 3) situation is one that is:",options:["uncertain and insecure","safe and stable","highly profitable","strictly controlled"],answer:0,why:"Precarious means unstable and risky; 'safe and stable' is the opposite."},
+    {type:"mcq",q:"'entitlements' (paragraph 4) are best understood as:",options:["benefits one has a right to","taxes one must pay","skills one must learn","tasks one must complete"],answer:0,why:"An entitlement is something you are legally allowed to have, such as paid holiday."}
+    ,{type:"open",q:"How do people earn money in the gig economy?",model:"By completing short, individual tasks — such as driving, delivering food or designing websites — arranged through apps and websites, instead of working for one permanent employer."},
+    {type:"open",q:"Why does the gig economy appeal to companies?",model:"Because hiring workers task by task is cheaper and more flexible than employing a large permanent staff."},
+    {type:"open",q:"In what way are gig workers often worse off than regular employees?",model:"Being classified as independent contractors, they usually lack protections like sick pay, paid holidays and a guaranteed minimum wage."},
+    {type:"open",q:"Why is a gig worker's income described as insecure?",model:"Because earnings can change sharply from week to week, giving little financial stability."},
+    {type:"open",q:"According to the passage, why does this debate matter beyond a few apps?",model:"Because its outcome will redefine what counts as a 'job' and the rights attached to it for a whole generation."}
+  ]
+};
+
+const READING_BILINGUAL = {
+  id:"read_bilingual", desc:"What two languages do to the mind",
+  title:"Bilingualism and the Brain",
+  meta:"Original passage · approx. 300 words · B1+/B2",
+  paras:[
+    "For much of the twentieth century, parents were often warned that raising a child with two languages would cause confusion and slow their development. Modern research tells almost the opposite story. Far from being a burden, growing up **bilingual** appears to bring lasting advantages to the brain.",
+    "When a bilingual person speaks, both languages stay active in the mind at the same time. To choose the right word, the brain must constantly **suppress** the language that is not needed and **switch** smoothly to the one that is. Scientists believe this continual mental exercise strengthens the systems responsible for attention and self-control, rather as regular training strengthens a muscle.",
+    "These benefits are not limited to childhood. Studies suggest that people who use two languages throughout their lives may **enhance** their ability to concentrate and to ignore distractions. Most strikingly, some research indicates that lifelong bilingualism can delay the **decline** in memory linked to old age, postponing the symptoms of dementia by several years.",
+    "It is important, however, not to exaggerate. Being bilingual will not by itself make anyone a genius, and the exact size of the advantages is still debated. Even so, the old fear has been firmly overturned. A second language is no longer seen as a source of confusion, but as a form of mental enrichment that may last a lifetime."
+  ],
+  questions:[
+    {type:"mcq",q:"'bilingual' (paragraph 1) describes a person who:",options:["can use two languages","is learning to read","has moved abroad","speaks very quickly"],answer:0,why:"Bilingual literally means using two languages."},
+    {type:"mcq",q:"'suppress' (paragraph 2) most nearly means:",options:["hold back","express freely","translate","forget"],answer:0,why:"To suppress a language here is to hold it back so it does not interfere; 'express freely' is the opposite."},
+    {type:"mcq",q:"'switch' (paragraph 2) here means to:",options:["change from one to another","speak more loudly","make a mistake","turn something off"],answer:0,why:"To switch languages is to move from one to another. 'Turn off' is a trap based on 'switch off'."},
+    {type:"mcq",q:"'enhance' (paragraph 3) is closest in meaning to:",options:["improve","reduce","replace","delay"],answer:0,why:"To enhance is to improve or increase; 'reduce' is the opposite."},
+    {type:"mcq",q:"Which is the closest ANTONYM of 'decline' (paragraph 3)?",options:["improvement","fall","weakening","shortage"],answer:0,why:"Here 'decline' is a fall or weakening; its opposite is improvement. 'Fall' and 'weakening' are synonyms used as traps."}
+    ,{type:"open",q:"What used to be the common warning about raising children with two languages?",model:"That it would confuse the child and slow down their development."},
+    {type:"open",q:"According to the passage, what must a bilingual brain do in order to choose the right word?",model:"It must suppress the language that is not needed and switch smoothly to the one that is."},
+    {type:"open",q:"Why does the writer compare bilingualism to training a muscle?",model:"Because the constant mental effort of managing two languages strengthens attention and self-control, just as exercise strengthens a muscle."},
+    {type:"open",q:"In what way might lifelong bilingualism affect the ageing brain?",model:"It may delay the memory decline linked to old age and postpone the symptoms of dementia by several years."},
+    {type:"open",q:"Why does the writer warn readers 'not to exaggerate'?",model:"Because bilingualism alone will not make someone a genius, and the size of its benefits is still debated."}
+  ]
+};
+
+const READING_ATTENTION = {
+  id:"read_attention", desc:"Why free apps compete for your time",
+  title:"The Attention Economy",
+  meta:"Original passage · approx. 300 words · B1+/B2",
+  paras:[
+    "Most of the apps and websites we use every day are free. We pay nothing to scroll through videos, messages and news. Yet these companies earn enormous profits, and the explanation lies in a simple idea: in the modern world, human attention itself has become a valuable product that businesses buy and sell.",
+    "Because advertising income depends on how long we look at a screen, technology companies **compete** fiercely for our time. Their apps are carefully engineered to keep us watching. Bright colours, feeds that never reach a bottom, and constant **notifications** are all designed to pull us back the instant our attention starts to drift away.",
+    "Critics argue that these designs **exploit** well-known weaknesses in human psychology. The unpredictable reward of a fresh message or a new 'like' works in much the same way as a slot machine, encouraging **compulsive** checking. Many users admit that they pick up their phones dozens of times an hour for no clear reason, and feel uneasy when they cannot.",
+    "Awareness of these tricks is slowly spreading. Some designers now call for 'humane technology' that respects users' time instead of consuming it, and phones increasingly include tools that measure screen use. Ultimately, though, experts say the responsibility is shared: to **reclaim** our attention, we first have to understand how it is being captured."
+  ],
+  questions:[
+    {type:"mcq",q:"'compete' (paragraph 2) here means to:",options:["try to win something others also want","work together for a shared goal","pay money to customers","give up an advantage"],answer:0,why:"To compete is to struggle against rivals for the same thing — here, our attention."},
+    {type:"mcq",q:"'notifications' (paragraph 2) are best described as:",options:["alerts that call your attention","long news articles","private messages only","colours on the screen"],answer:0,why:"A notification is an alert designed to draw you back to an app."},
+    {type:"mcq",q:"'exploit' (paragraph 3) most nearly means:",options:["take unfair advantage of","explain clearly","strengthen","ignore"],answer:0,why:"To exploit a weakness is to use it for one's own benefit. 'Explain' is a look-alike trap."},
+    {type:"mcq",q:"'compulsive' (paragraph 3) describes behaviour that is:",options:["hard to control and repeated","done only once","carefully planned","completely relaxed"],answer:0,why:"Compulsive behaviour is repeated and difficult to resist."},
+    {type:"mcq",q:"'reclaim' (paragraph 4) is closest in meaning to:",options:["get back","give away","waste","sell"],answer:0,why:"To reclaim something is to take it back; 'give away' is the opposite."}
+    ,{type:"open",q:"According to the passage, what 'product' is really being bought and sold?",model:"Human attention — how long people look at a screen."},
+    {type:"open",q:"Why do technology companies compete so hard for our time?",model:"Because their advertising income depends on how long users keep looking at the screen."},
+    {type:"open",q:"In what way is checking a phone compared to using a slot machine?",model:"The unpredictable reward of a new message or 'like' encourages repeated, compulsive checking, just like a gambling machine."},
+    {type:"open",q:"How do critics say app designs affect human psychology?",model:"They say the designs exploit known weaknesses in the mind, using colours, endless feeds and notifications to hold attention."},
+    {type:"open",q:"Why does the writer say the responsibility for the problem is 'shared'?",model:"Because although companies design the traps, users must also understand how their attention is captured in order to reclaim it."}
+  ]
+};
+
+const READING_CRISPR = {
+  id:"read_crispr", desc:"Rewriting DNA — promise and controversy",
+  title:"Editing Life: The CRISPR Debate",
+  meta:"Original passage · approx. 320 words · B1+/B2",
+  paras:[
+    "For thousands of years, humans could only choose which plants and animals to breed and then hope for the best. Today, a technology called CRISPR allows scientists to edit the genetic code of living things directly and with remarkable **precision**. Sections of DNA can be cut out, corrected or replaced almost as easily as editing a document on a computer.",
+    "The medical promise is enormous. Researchers hope to **eliminate** inherited diseases such as sickle-cell anaemia by repairing the faulty genes that cause them. Early trials have already helped some patients, and the same tools may one day fight cancer or make crops more resistant to drought. For millions of people, such treatments could be life-changing.",
+    "But the technology is deeply **controversial**. The greatest concern involves changes made to embryos, because these alterations would be passed on to every future generation. A single mistake, critics warn, could therefore be **irreversible**, harming people who never agreed to take the risk. There are fears, too, that wealthy parents might one day pay to select desirable traits, widening the gap between rich and poor.",
+    "In 2018, a scientist in China shocked the world by announcing the birth of gene-edited babies, an act that was widely condemned as reckless. Since then, most countries have agreed that editing genes which can be **inherited** should not yet be permitted. The science is advancing rapidly; the hard task now is to agree where the limits should lie."
+  ],
+  questions:[
+    {type:"mcq",q:"'precision' (paragraph 1) is closest in meaning to:",options:["exactness","speed","cost","difficulty"],answer:0,why:"Precision is accuracy or exactness."},
+    {type:"mcq",q:"'eliminate' (paragraph 2) most nearly means:",options:["get rid of completely","reduce a little","study carefully","spread widely"],answer:0,why:"To eliminate a disease is to remove it entirely; 'reduce a little' is deliberately too weak."},
+    {type:"mcq",q:"Something 'controversial' (paragraph 3) is something that:",options:["causes strong disagreement","is widely accepted","is easy to understand","happens very rarely"],answer:0,why:"A controversial topic provokes opposing opinions; 'widely accepted' is the opposite."},
+    {type:"mcq",q:"'irreversible' (paragraph 3) means:",options:["impossible to undo","easy to repeat","clearly visible","strictly illegal"],answer:0,why:"An irreversible change cannot be undone."},
+    {type:"mcq",q:"'inherited' (paragraph 4) here describes genes that are:",options:["passed from parents to children","created in a laboratory","damaged by disease","chosen by doctors"],answer:0,why:"Inherited genes are those passed down from parents to their offspring."}
+    ,{type:"open",q:"How does CRISPR differ from the old method of improving plants and animals?",model:"Instead of only selecting which living things to breed, scientists can now edit the genetic code directly and precisely."},
+    {type:"open",q:"What medical benefits do researchers hope CRISPR will bring?",model:"They hope to cure inherited diseases like sickle-cell anaemia, and possibly to fight cancer and make crops more drought-resistant."},
+    {type:"open",q:"Why are changes made to embryos considered especially dangerous?",model:"Because such changes are passed on to all future generations, so a mistake could be irreversible and affect people who never consented."},
+    {type:"open",q:"According to the passage, why might CRISPR increase social inequality?",model:"Because wealthy parents might pay to select desirable traits for their children, widening the gap between rich and poor."},
+    {type:"open",q:"What happened in 2018, and how did the world react?",model:"A Chinese scientist announced the birth of gene-edited babies, and the act was widely condemned as reckless."}
+  ]
+};
+
+const READING_GREENCITIES = {
+  id:"read_greencities", desc:"Why parks are a matter of public health",
+  title:"Green Cities and Mental Health",
+  meta:"Original passage · approx. 310 words · B1+/B2",
+  paras:[
+    "More than half of the world's people now live in cities, and the proportion is still rising. Urban life offers jobs, education and culture, but it can also be stressful, crowded and noisy. In response, planners are giving new attention to an old idea: that contact with nature is good for the mind, and not merely pleasant to look at.",
+    "A growing body of research supports this belief. Studies show that time spent in parks and green spaces can lower stress hormones, improve mood and help people **restore** their ability to concentrate after mental effort. Even a short walk among trees, or a simple view of greenery from a window, appears to bring measurable benefits. Regular **exposure** to nature seems to act as a protective **buffer** against the pressures of city life.",
+    "The effects may be greatest for those who need them most. Green spaces are often scarcest in poorer neighbourhoods, where stress and ill health tend to be highest. Providing parks in such areas, researchers argue, is therefore not a luxury but a question of fairness and public health, helping disadvantaged communities to **thrive**.",
+    "As a result, cities around the world are trying to **incorporate** nature into their design. Rooftop gardens, tree-lined streets and disused railways turned into walkways are becoming common. The aim is not to return to the countryside, but to build cities in which people and plants can flourish side by side."
+  ],
+  questions:[
+    {type:"mcq",q:"'restore' (paragraph 2) here means to:",options:["bring back","use up","measure","damage"],answer:0,why:"To restore an ability is to bring it back; 'use up' is the opposite."},
+    {type:"mcq",q:"'exposure' (paragraph 2) most nearly means:",options:["contact with","protection from","fear of","memory of"],answer:0,why:"Exposure to nature means contact with it. 'Protection from' is the opposite and a trap."},
+    {type:"mcq",q:"A 'buffer' (paragraph 2) is something that:",options:["reduces the impact of harm","increases danger","cleans the air","costs a lot of money"],answer:0,why:"A buffer softens or reduces a harmful effect."},
+    {type:"mcq",q:"'thrive' (paragraph 3) most nearly means:",options:["grow and do well","barely survive","move away","complain often"],answer:0,why:"To thrive is to flourish; 'barely survive' is nearly the opposite and a trap."},
+    {type:"mcq",q:"'incorporate' (paragraph 4) here means to:",options:["include as part of","remove from","hide inside","sell off"],answer:0,why:"To incorporate nature into a design is to make it part of the design."}
+    ,{type:"open",q:"Why are city planners paying new attention to nature?",model:"Because urban life is stressful and crowded, and research shows that contact with nature benefits mental health."},
+    {type:"open",q:"According to the passage, what measurable effects does time in green space have?",model:"It can lower stress hormones, improve mood and help restore the ability to concentrate."},
+    {type:"open",q:"In what way is access to green space connected to fairness?",model:"Green spaces are scarcest in poorer areas where health is worst, so providing parks there is a matter of fairness, not luxury."},
+    {type:"open",q:"Why does the writer insist that parks are 'not a luxury'?",model:"Because they protect public health and especially help disadvantaged communities, so they are a necessity rather than a treat."},
+    {type:"open",q:"How are modern cities trying to bring nature into their design?",model:"Through rooftop gardens, tree-lined streets and old railways converted into green walkways."}
+  ]
+};
+
+const READING_DEEPFAKES = {
+  id:"read_deepfakes", desc:"When seeing is no longer believing",
+  title:"Deepfakes and Trust Online",
+  meta:"Original passage · approx. 310 words · B1+/B2",
+  paras:[
+    "Photographs and videos have long been treated as strong evidence that something really happened. That trust is now under threat. Using artificial intelligence, it has become possible to **fabricate** video and audio in which a real person appears to say or do things they never did. These false recordings are known as deepfakes.",
+    "Early fakes were clumsy and easy to spot, but the technology has improved with alarming speed. The most **convincing** examples can now fool ordinary viewers completely. Criminals have used fake voices to imitate company directors and order fraudulent payments, while fake videos have been made to **manipulate** public opinion during elections and to ruin people's reputations.",
+    "Fighting back is difficult. Researchers are building software to **detect** deepfakes automatically, but each advance in detection is soon matched by an advance in the fakes themselves. Experts compare the situation to a race with no finish line. In the meantime, ordinary users are urged to **verify** surprising clips before sharing them, and to ask where a recording first came from.",
+    "There is a further, subtler danger. As people grow aware that any video might be fake, they may start to distrust genuine evidence as well. A politician caught on camera could simply claim the footage was invented. In a world where seeing is no longer believing, protecting the truth may depend less on technology than on our own caution and judgement."
+  ],
+  questions:[
+    {type:"mcq",q:"'fabricate' (paragraph 1) most nearly means:",options:["create in order to deceive","record honestly","delete completely","share widely"],answer:0,why:"To fabricate is to make something false; 'record honestly' is the opposite and a trap."},
+    {type:"mcq",q:"Something 'convincing' (paragraph 2) is something that:",options:["seems real and believable","is obviously false","is very short","is highly technical"],answer:0,why:"A convincing fake looks real enough to be believed."},
+    {type:"mcq",q:"'manipulate' (paragraph 2) here means to:",options:["influence unfairly","inform honestly","entertain gently","translate accurately"],answer:0,why:"To manipulate public opinion is to influence it in a dishonest way."},
+    {type:"mcq",q:"'detect' (paragraph 3) most nearly means:",options:["discover the presence of","produce","hide","ignore"],answer:0,why:"To detect a deepfake is to discover that it is there; 'hide' is the opposite."},
+    {type:"mcq",q:"'verify' (paragraph 3) means to:",options:["check that something is true","believe it immediately","delete it","copy it"],answer:0,why:"To verify is to confirm that something is genuine or true."}
+    ,{type:"open",q:"Why have photographs and videos traditionally been trusted, and why is that changing?",model:"They were seen as strong proof that something really happened; now AI can fabricate realistic fake recordings, so that trust is breaking down."},
+    {type:"open",q:"How have criminals used deepfake technology?",model:"They have imitated company directors with fake voices to order fraudulent payments, and made fake videos to influence elections and damage reputations."},
+    {type:"open",q:"Why do experts compare fighting deepfakes to 'a race with no finish line'?",model:"Because every improvement in detection is quickly matched by an improvement in the fakes, so the struggle never truly ends."},
+    {type:"open",q:"According to the passage, what should ordinary users do before sharing a surprising clip?",model:"They should verify it and ask where the recording originally came from."},
+    {type:"open",q:"What is the 'subtler danger' the writer describes in the final paragraph?",model:"That people may start to distrust genuine evidence too, allowing wrongdoers to dismiss real footage as fake."}
+  ]
+};
+
+const READING_FOURDAY = {
+  id:"read_fourday", desc:"Same pay, one day less — does it work?",
+  title:"The Four-Day Work Week",
+  meta:"Original passage · approx. 320 words · B1+/B2",
+  paras:[
+    "The idea that a full working week must last five days is surprisingly recent, and it is now being questioned. Around the world, a growing number of companies are experimenting with a four-day week, in which employees work one day less but receive the same pay. Supporters believe it could be one of the biggest changes to working life in a century.",
+    "Several large **trials** have produced encouraging results. In studies carried out in Iceland and the United Kingdom, most companies reported that **productivity** stayed the same or even rose, despite the shorter hours. Employees said they felt less stressed and more satisfied, took fewer sick days, and found it easier to **maintain** a healthy balance between work and private life.",
+    "How can less time produce the same output? Advocates argue that a five-day week contains a great deal of wasted effort — long meetings, constant interruptions and hours of low concentration. Given one day less, teams tend to cut what is unnecessary and focus on what truly matters. In other words, the pressure of a shorter week pushes people to work more intelligently, not merely faster.",
+    "Not everyone is persuaded. **Skeptical** managers point out that the model may suit office work far better than hospitals, shops or factories, where someone must always be present. Others worry that the four remaining days could simply become exhausting. Even so, as more organisations run their own experiments, the assumption that five days is the natural length of a week no longer looks so certain, and many workplaces are preparing to **adapt**."
+  ],
+  questions:[
+    {type:"mcq",q:"'trials' (paragraph 2) here means:",options:["tests or experiments","court cases","painful problems","sports competitions"],answer:0,why:"In this context a trial is a controlled test. 'Court cases' and 'painful problems' are other senses used as traps."},
+    {type:"mcq",q:"'productivity' (paragraph 2) refers to:",options:["the amount of work produced","the number of employees","the length of meetings","the cost of wages"],answer:0,why:"Productivity measures how much useful work is produced."},
+    {type:"mcq",q:"'maintain' (paragraph 2) most nearly means:",options:["keep up","lose","begin","avoid"],answer:0,why:"To maintain a balance is to keep it going; 'lose' is the opposite."},
+    {type:"mcq",q:"A 'skeptical' (paragraph 4) manager is one who is:",options:["doubtful and unconvinced","completely confident","extremely angry","easily pleased"],answer:0,why:"Skeptical means doubtful; 'completely confident' is the opposite."},
+    {type:"mcq",q:"'adapt' (paragraph 4) here means to:",options:["adjust to a new situation","refuse to change","work much faster","close down"],answer:0,why:"To adapt is to adjust to new conditions; 'refuse to change' is the opposite."}
+    ,{type:"open",q:"What exactly is the four-day week described in the passage?",model:"An arrangement in which employees work one day less each week but still receive the same pay."},
+    {type:"open",q:"What did the trials in Iceland and the United Kingdom find?",model:"That productivity usually stayed the same or rose, while employees were less stressed, more satisfied and took fewer sick days."},
+    {type:"open",q:"How do advocates explain that fewer hours can produce the same output?",model:"They argue that a five-day week wastes time on long meetings and interruptions, so a shorter week forces people to cut waste and focus on what matters."},
+    {type:"open",q:"Why do some managers doubt that the model will work everywhere?",model:"Because jobs such as hospitals, shops and factories need someone present at all times, and the remaining days might become exhausting."},
+    {type:"open",q:"In what way has the idea of a 'natural' five-day week been challenged?",model:"Successful experiments suggest five days is not fixed or natural, so many workplaces are now preparing to change."}
+  ]
+};
+
+const READINGS = [
+  READING, READING_CREATIVITY, READING_HABITS, READING_MICROPLASTICS, READING_GIG,
+  READING_BILINGUAL, READING_ATTENTION, READING_CRISPR, READING_GREENCITIES,
+  READING_DEEPFAKES, READING_FOURDAY
+];
+const READINGS_BY_ID = {};
+READINGS.forEach(r => { READINGS_BY_ID[r.id] = r; });
 
 /* ============================== GRAMMAR ============================== */
 const SVA = [{"type": "mcq", "q": "A box of chocolates ___ on the table.", "options": ["is", "are"], "answer": 0, "why": "The subject is ‘box’ (singular); ‘of chocolates’ is a prepositional phrase."}, {"type": "mcq", "q": "The quality of the answers ___ improved this term.", "options": ["have", "has"], "answer": 1, "why": "The subject is ‘quality’ (singular), not ‘answers’."}, {"type": "mcq", "q": "Either the teacher or the principal ___ going to speak.", "options": ["is", "are"], "answer": 0, "why": "Two singular subjects joined by ‘either…or’ take a singular verb."}, {"type": "mcq", "q": "Neither the manager nor the secretary ___ available today.", "options": ["are", "is"], "answer": 1, "why": "Two singular subjects with ‘neither…nor’ → singular verb."}, {"type": "mcq", "q": "Neither the players nor the coach ___ satisfied with the result.", "options": ["is", "are"], "answer": 0, "why": "With neither…nor, the verb agrees with the nearer subject (‘coach’ → is)."}, {"type": "mcq", "q": "Either the manager or the assistants ___ to blame for the error.", "options": ["is", "are"], "answer": 1, "why": "The nearer subject (‘assistants’) is plural → are."}, {"type": "mcq", "q": "Rice and curry ___ my favourite meal.", "options": ["is", "are"], "answer": 0, "why": "‘Rice and curry’ works as a single dish (a compound idea) → singular."}, {"type": "mcq", "q": "The teacher and the students ___ waiting outside.", "options": ["is", "are"], "answer": 1, "why": "Two separate subjects joined by ‘and’ → plural verb."}, {"type": "mcq", "q": "The captain, as well as his teammates, ___ delighted with the win.", "options": ["was", "were"], "answer": 0, "why": "‘as well as…’ is not part of the subject; ‘captain’ is singular."}, {"type": "mcq", "q": "The teacher (and her assistants) ___ always welcome here.", "options": ["are", "is"], "answer": 1, "why": "Words in parentheses aren’t part of the subject; ‘teacher’ is singular."}, {"type": "mcq", "q": "There ___ several problems with this plan.", "options": ["are", "is"], "answer": 0, "why": "The real subject (‘problems’) is plural → are."}, {"type": "mcq", "q": "Beyond the hills ___ a small fishing village.", "options": ["lie", "lies"], "answer": 1, "why": "The true subject (‘a village’) follows the verb and is singular."}, {"type": "mcq", "q": "Ten thousand taka ___ a lot to pay for a phone.", "options": ["is", "are"], "answer": 0, "why": "A sum of money considered as one amount → singular."}, {"type": "mcq", "q": "Two years ___ a long time to wait for a reply.", "options": ["are", "is"], "answer": 1, "why": "A period of time seen as a single unit → singular."}, {"type": "mcq", "q": "Half of the cake ___ already gone.", "options": ["is", "are"], "answer": 0, "why": "With ‘half of’, the verb follows the noun after ‘of’ (‘cake’ → singular)."}, {"type": "mcq", "q": "Most of the students ___ already left the hall.", "options": ["has", "have"], "answer": 1, "why": "With ‘most of’, the verb follows ‘students’ (plural) → have."}, {"type": "mcq", "q": "If I ___ you, I would apologise at once.", "options": ["were", "was"], "answer": 0, "why": "In unreal or hypothetical statements use the subjunctive ‘were’."}, {"type": "mcq", "q": "She wishes she ___ a little taller.", "options": ["was", "were"], "answer": 1, "why": "After ‘wish’ for something contrary to fact → ‘were’."}, {"type": "mcq", "q": "Everybody in the two classes ___ been informed.", "options": ["has", "have"], "answer": 0, "why": "‘Everybody’ is singular → has."}, {"type": "mcq", "q": "Neither of the answers ___ correct.", "options": ["are", "is"], "answer": 1, "why": "‘Neither (of)’ is singular → is."}, {"type": "mcq", "q": "The committee ___ its final decision tomorrow.", "options": ["announces", "announce"], "answer": 0, "why": "Acting as one unit (note ‘its’) → singular verb."}, {"type": "mcq", "q": "The staff ___ among themselves about the new rota.", "options": ["is arguing", "are arguing"], "answer": 1, "why": "‘among themselves’ shows the members acting individually → plural verb."}, {"type": "mcq", "q": "The news from the coast ___ better than we expected.", "options": ["is", "are"], "answer": 0, "why": "‘News’ is uncountable and singular despite the ‑s."}, {"type": "mcq", "q": "Mathematics ___ her strongest subject by far.", "options": ["are", "is"], "answer": 1, "why": "Subject names like mathematics and physics are singular."}, {"type": "mcq", "q": "A number of complaints ___ been received this week.", "options": ["have", "has"], "answer": 0, "why": "‘A number of’ means ‘several’ → plural verb."}, {"type": "mcq", "q": "The number of applicants ___ risen sharply this year.", "options": ["have", "has"], "answer": 1, "why": "‘The number of’ refers to one figure → singular verb."}, {"type": "mcq", "q": "Reading long novels ___ her favourite way to relax.", "options": ["is", "are"], "answer": 0, "why": "A gerund (‑ing) subject is singular."}, {"type": "mcq", "q": "To admit your mistakes ___ a sign of maturity.", "options": ["are", "is"], "answer": 1, "why": "An infinitive phrase used as the subject takes a singular verb."}, {"type": "mcq", "q": "Every student and teacher ___ received a copy of the notice.", "options": ["has", "have"], "answer": 0, "why": "‘Every… and…’ is treated as singular."}, {"type": "mcq", "q": "Each of the rooms ___ its own bathroom.", "options": ["have", "has"], "answer": 1, "why": "‘Each (of)’ is singular → has."}];
@@ -506,9 +755,7 @@ QUIZ.pairs = PAIRS;
 
 /* ============================== HOME / NAV DATA ============================== */
 const GROUPS = [
-  {label:"Reading",items:[
-    {id:"reading",title:"Reading Comprehension",desc:"Passage + vocabulary and comprehension questions",ready:true}
-  ]},
+  {label:"Reading",items:READINGS.map(r=>({id:r.id,title:r.title,desc:r.desc,ready:true}))},
   {label:"Grammar",items:[
     {id:"sva",title:"Subject–Verb Agreement",desc:"30 questions · immediate feedback",ready:true},
     {id:"tense",title:"Tense",desc:"42 questions · immediate feedback",ready:true},
@@ -566,7 +813,7 @@ function recordWriting(id, words, ticks, checklistLen){
   e.detail=`${words} words · ${ticks}/${checklistLen} self-checks`;
   e.lastTs=new Date().toISOString(); p[id]=e; saveProgress(p); return e;
 }
-function isScored(id){ return id==="reading" || !!QUIZ[id]; }
+function isScored(id){ return !!READINGS_BY_ID[id] || !!QUIZ[id]; }
 /* every "ready" topic counts toward the completion total */
 function readyTopics(){ return GROUPS.reduce((a,g)=>a.concat(g.items.filter(i=>i.ready)),[]); }
 function completionStats(){
@@ -647,23 +894,34 @@ function renderHome(){
 }
 
 function openTopic(id){
-  if(id==="reading"){ startQuiz("reading",READING.questions,"Reading Comprehension",passageHTML()); }
+  if(READINGS_BY_ID[id]){ const r=READINGS_BY_ID[id]; startQuiz(id,r.questions,r.title,passageHTML(r)); }
   else if(WRITING[id]){ w={id:id,text:"",ticks:{},showModel:true}; renderWriting(); }
   else if(QUIZ[id]){ startQuiz(id,QUIZ[id],TITLE[id],""); }
 }
 
-function passageHTML(){
-  let p = READING.paras.map(x=>`<p style="font-size:16px;line-height:1.7;margin:0 0 14px;color:#2c3954">${esc(x)}</p>`).join("");
+/* bold target words written as **word** in a passage; everything else is escaped */
+function fmtPara(x){ return esc(x).replace(/\*\*([^*]+)\*\*/g,'<b>$1</b>'); }
+function passageHTML(r){
+  let p = r.paras.map(x=>`<p style="font-size:16px;line-height:1.7;margin:0 0 14px;color:#2c3954">${fmtPara(x)}</p>`).join("");
   return `<div class="card" style="padding:26px 26px 30px;margin-bottom:26px">
-      <div class="eyebrow">${esc(READING.meta)}</div>
-      <h2 class="serif" style="font-size:26px;margin:8px 0 16px">${esc(READING.title)}</h2>${p}</div>
+      <div class="eyebrow">${esc(r.meta)}</div>
+      <h2 class="serif" style="font-size:26px;margin:8px 0 16px">${esc(r.title)}</h2>${p}</div>
     <h3 class="serif" style="font-size:18px;margin:0 0 4px">Questions</h3>
     <p style="font-size:13.5px;color:var(--muted);margin-top:0">Five vocabulary questions are graded automatically; the comprehension questions show a model answer to check yourself against.</p>`;
 }
 
 /* ---- QUIZ ENGINE ---- */
+/* Randomise MCQ option order so the correct answer is not always in the same
+   position. Returns a fresh item; the source data is never mutated. */
+function shuffleItem(it){
+  if(it.type!=="mcq" || !Array.isArray(it.options)) return it;
+  const order = it.options.map((_,i)=>i);
+  for(let i=order.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); const t=order[i]; order[i]=order[j]; order[j]=t; }
+  return {...it, options: order.map(i=>it.options[i]), answer: order.indexOf(it.answer)};
+}
 function startQuiz(id,items,label,topHtml){
-  q = {id,items,label,top:topHtml||"",i:0,choice:null,checked:false,reveal:false,score:0,done:false};
+  const mixed = items.map(shuffleItem);
+  q = {id,items:mixed,label,top:topHtml||"",i:0,choice:null,checked:false,reveal:false,score:0,done:false};
   renderQuiz();
 }
 function quizCorrect(){
