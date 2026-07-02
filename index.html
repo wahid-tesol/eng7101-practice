@@ -729,24 +729,112 @@ const QUIZ = {sva:SVA, tense:TENSE, fragments:FRAGMENTS, runons:RUNONS, modifier
    Each deck runs three stages: Meet (flashcards) -> Train (active recall) ->
    Review. A per-student spaced-repetition memory (Leitner boxes) resurfaces
    weak words first and retires mastered ones. */
-const VOCAB_DECKS = [
-  { id:"wl_a1", title:"Word Lab · Deck 1 (A-words)", desc:"12 academic words · flashcards, recall & spaced review",
-    words:[
-      {w:"ambiguous",pos:"adjective",def:"having more than one possible meaning",ex:"With an ambiguous plot, no one could follow the film."},
-      {w:"ambivalence",pos:"noun",def:"the state of having mixed feelings about something",ex:"She felt real ambivalence about leaving her old job."},
-      {w:"analogous",pos:"adjective",def:"similar or comparable in some way",ex:"The human eye is often said to be analogous to a camera."},
-      {w:"anomalous",pos:"adjective",def:"different from what is normal or expected",ex:"The scientists could not explain the anomalous result."},
-      {w:"antipathy",pos:"noun",def:"a strong feeling of dislike",ex:"He has a deep antipathy towards dishonest politicians."},
-      {w:"appropriate",pos:"adjective",def:"suitable for a particular situation",ex:"Jeans are not appropriate for a formal interview."},
-      {w:"autonomous",pos:"adjective",def:"independent; able to act on its own",ex:"The university gives each department autonomous control of its budget."},
-      {w:"aesthetic",pos:"adjective",def:"relating to beauty or its appreciation",ex:"The building was praised for its aesthetic appeal."},
-      {w:"aggregate",pos:"verb",def:"to gather or combine into a single total",ex:"Analysts aggregate data from many sources into one report."},
-      {w:"amalgamate",pos:"verb",def:"to combine to form one organisation",ex:"The plan is to amalgamate the two departments into one."},
-      {w:"audacious",pos:"adjective",def:"bold and daring; willing to take risks",ex:"Her audacious plan to cross the desert alone surprised everyone."},
-      {w:"approbation",pos:"noun",def:"formal approval or praise",ex:"The proposal won the approbation of the whole committee."}
-    ]
-  }
+const AWL1_WORDS = [
+  {w:"aberrant",def:"different from what is normal or accepted",ex:"The scan showed an aberrant pattern that puzzled the doctors."},
+  {w:"aesthetic",def:"relating to beauty or the way something looks",ex:"The gallery was designed with a strong aesthetic sense."},
+  {w:"aggregate",def:"to gather separate items into a single total",ex:"Researchers aggregate the results of many small studies into one figure."},
+  {w:"amalgamate",def:"to combine two or more things into one",ex:"The two unions plan to amalgamate into a single body."},
+  {w:"ambiguous",def:"having more than one possible meaning; unclear",ex:"His ambiguous reply left us unsure whether he agreed."},
+  {w:"ambivalence",def:"the state of having mixed feelings about something",ex:"She felt a quiet ambivalence about moving abroad."},
+  {w:"analogous",def:"similar in a way that allows a comparison",ex:"A computer's memory is analogous to a filing cabinet."},
+  {w:"anomalous",def:"different from what is normal or expected",ex:"The sensor recorded an anomalous rise in temperature."},
+  {w:"antipathy",def:"a strong feeling of dislike",ex:"There is deep antipathy between the two rival groups."},
+  {w:"apprise",def:"to formally tell someone about something",ex:"Please apprise me of any change to the plan."},
+  {w:"approbation",def:"official approval or praise",ex:"The design won the approbation of the whole panel."},
+  {w:"appropriate",def:"suitable for a particular situation",ex:"Shorts are not appropriate for a formal ceremony."},
+  {w:"artless",def:"natural and honest, without cleverness or trickery",ex:"Her artless honesty made everyone trust her at once."},
+  {w:"audacious",def:"bold and daring; willing to take risks",ex:"They had an audacious plan to build the bridge in a year."},
+  {w:"autonomous",def:"independent; able to act on its own",ex:"The region was given autonomous control of its schools."},
+  {w:"aver",def:"to state firmly that something is true",ex:"The witness continued to aver that she was at home."},
+  {w:"banal",def:"boring because it is ordinary and unoriginal",ex:"The song's lyrics were banal and quickly forgotten."},
+  {w:"beneficent",def:"doing good; kind and generous",ex:"The clinic relied on a beneficent local donor."},
+  {w:"bombastic",def:"using long, grand words with little real meaning",ex:"His bombastic speech impressed no one who listened closely."},
+  {w:"boorish",def:"rude and bad-mannered",ex:"His boorish comments spoiled the dinner for everyone."},
+  {w:"burnish",def:"to polish until shiny; to improve a reputation",ex:"She hoped the award would burnish her reputation."},
+  {w:"cacophonous",def:"full of harsh, unpleasant noise",ex:"The cacophonous street market made conversation difficult."},
+  {w:"capricious",def:"changing suddenly and without a clear reason",ex:"The capricious weather ruined our careful plans."},
+  {w:"castigation",def:"severe criticism or scolding",ex:"The report's castigation of the company made headlines."},
+  {w:"catalyst",def:"something that causes an important change",ex:"The strike became the catalyst for wider reform."},
+  {w:"causality",def:"the relationship between a cause and its effect",ex:"The study shows a link but does not prove causality."},
+  {w:"chicanery",def:"the use of clever but dishonest methods",ex:"The deal collapsed once his chicanery was exposed."},
+  {w:"coagulate",def:"to change from a liquid into a thick or solid state",ex:"Blood will coagulate to seal a small cut."},
+  {w:"coda",def:"a final section that completes a piece of music or writing",ex:"The novel ends with a short coda set years later."},
+  {w:"commensurate",def:"matching in size, amount, or degree",ex:"The pay should be commensurate with the person's experience."},
+  {w:"conciliatory",def:"intended to make someone less angry",ex:"She sent a conciliatory message to end the quarrel."},
+  {w:"confound",def:"to confuse, or to prove someone wrong",ex:"The team's success continued to confound the experts."},
+  {w:"contention",def:"disagreement, or a strongly held opinion",ex:"The real cause of the fire is still a matter of contention."},
+  {w:"contentious",def:"likely to cause disagreement",ex:"Taxation is a contentious topic before any election."},
+  {w:"conundrum",def:"a difficult problem or puzzling question",ex:"Balancing growth and safety is a real conundrum."},
+  {w:"conventional",def:"following accepted, traditional ways",ex:"She chose a conventional design rather than a risky one."},
+  {w:"convoluted",def:"extremely complicated and hard to follow",ex:"The rules were so convoluted that nobody understood them."},
+  {w:"craven",def:"completely lacking courage; cowardly",ex:"His craven silence during the argument disappointed us."},
+  {w:"decorum",def:"polite, correct behaviour",ex:"The judge demanded decorum from everyone present."},
+  {w:"deference",def:"polite respect for someone's wishes or status",ex:"Out of deference to her teacher, she stayed quiet."},
+  {w:"delineate",def:"to describe or mark out something clearly",ex:"The report tries to delineate the causes of the crisis."},
+  {w:"denigrate",def:"to criticise unfairly and belittle",ex:"It is unfair to denigrate work you have not read."},
+  {w:"derivative",def:"copied from something else; not original",ex:"Critics found the film derivative and dull."},
+  {w:"dichotomy",def:"a sharp division between two opposite things",ex:"There is a clear dichotomy between his words and his actions."},
+  {w:"diffidence",def:"shyness and lack of confidence",ex:"Her diffidence vanished once she began to speak."},
+  {w:"diffuse",def:"to spread over a wide area",ex:"New ideas can diffuse quickly through social media."},
+  {w:"digression",def:"a temporary move away from the main subject",ex:"After a long digression, she returned to her main point."},
+  {w:"discerning",def:"showing good judgement and taste",ex:"Discerning readers soon noticed the errors."},
+  {w:"discordant",def:"not in agreement; harsh-sounding",ex:"A discordant note in the report was the sudden drop in sales."},
+  {w:"discredit",def:"to make someone or something seem unreliable",ex:"The rival tried to discredit her research."},
+  {w:"discrepancy",def:"a difference between things that should match",ex:"There was a discrepancy between the receipt and the bill."},
+  {w:"discrete",def:"separate and distinct",ex:"The course is divided into five discrete units."},
+  {w:"disinterested",def:"fair and not influenced by personal gain",ex:"We need a disinterested judge to settle this."},
+  {w:"disjointed",def:"badly connected; lacking smooth flow",ex:"His disjointed essay jumped from one idea to another."},
+  {w:"dismiss",def:"to decide something is not worth considering",ex:"It would be unwise to dismiss her warning."},
+  {w:"disparage",def:"to speak about someone with a lack of respect",ex:"A good coach will never disparage a beginner."},
+  {w:"dissemble",def:"to hide your true feelings or intentions",ex:"He tried to dissemble, but his face gave him away."},
+  {w:"disseminate",def:"to spread information widely",ex:"Universities disseminate research through open journals."},
+  {w:"dissolution",def:"the ending or breaking up of something",ex:"The dissolution of the partnership shocked their clients."},
+  {w:"dissonance",def:"a harsh mix of sounds; a lack of agreement",ex:"There was a clear dissonance between the two reports."},
+  {w:"dogmatic",def:"insisting on your opinions as if they cannot be wrong",ex:"He is too dogmatic to consider other views."},
+  {w:"dupe",def:"to trick or deceive someone",ex:"Fake charities try to dupe kind-hearted people."},
+  {w:"eclectic",def:"made up of many different styles or sources",ex:"Her music has an eclectic mix of jazz and folk."},
+  {w:"efficacy",def:"the power to produce the result you want",ex:"Doctors are testing the efficacy of the new drug."},
+  {w:"elegy",def:"a sad poem or song, usually for someone who has died",ex:"The poet wrote an elegy for his lost friend."},
+  {w:"elicit",def:"to draw out a response or information",ex:"A good teacher's questions elicit real thought."},
+  {w:"embellish",def:"to add details to make something more attractive, sometimes untrue",ex:"He tends to embellish a story to get a laugh."},
+  {w:"empirical",def:"based on observation or experiment, not theory",ex:"There is strong empirical evidence for the claim."},
+  {w:"endemic",def:"regularly found in a particular place or group",ex:"The disease is endemic to certain tropical regions."},
+  {w:"enervate",def:"to make someone weak and tired",ex:"The long, humid afternoons seemed to enervate everyone."},
+  {w:"erudite",def:"having or showing deep knowledge",ex:"Her erudite talk drew on history, science and art."},
+  {w:"eulogy",def:"a speech of high praise, often for someone who has died",ex:"He gave a moving eulogy at the funeral."},
+  {w:"euphemism",def:"a mild word used in place of a harsh one",ex:"'Let go' is a common euphemism for being fired."},
+  {w:"exacerbate",def:"to make a problem worse",ex:"Ignoring the leak will only exacerbate the damage."},
+  {w:"exigency",def:"an urgent need or demand",ex:"The team adapted quickly to the exigency of the moment."},
+  {w:"facilitate",def:"to make an action or process easier",ex:"A clear agenda helps facilitate a short meeting."},
+  {w:"fallacious",def:"based on a mistake; false",ex:"The argument rests on a fallacious assumption."},
+  {w:"felicitous",def:"well chosen and pleasing; very suitable",ex:"She made a felicitous remark that relaxed the room."},
+  {w:"flag",def:"to become weak or lose energy",ex:"Energy levels often flag in the early afternoon."},
+  {w:"fledgling",def:"new and inexperienced; just starting out",ex:"The fledgling company had only three staff at first."},
+  {w:"flout",def:"to break a rule openly and without respect",ex:"Some drivers openly flout the parking rules."},
+  {w:"forestall",def:"to prevent something by acting first",ex:"The shop cut prices to forestall a loss of customers."},
+  {w:"frugality",def:"the quality of being careful with money",ex:"Years of frugality helped them buy a home."},
+  {w:"garrulous",def:"talking too much, especially about small things",ex:"Our garrulous neighbour kept us at the door for an hour."},
+  {w:"gregarious",def:"enjoying the company of others; sociable",ex:"Her gregarious nature made her popular everywhere."},
+  {w:"gullible",def:"too ready to believe things and easily tricked",ex:"Gullible buyers are the main target of the scam."},
+  {w:"homogeneous",def:"made up of parts that are all the same",ex:"The town's population is fairly homogeneous."},
+  {w:"hyperbole",def:"obvious exaggeration used for effect",ex:"Calling the meal 'the best ever' was pure hyperbole."},
+  {w:"idolatry",def:"excessive admiration or worship",ex:"The fans' idolatry of the singer worried her parents."},
+  {w:"immutable",def:"never changing; permanent",ex:"They treat the founder's rules as immutable."},
+  {w:"impair",def:"to weaken or damage something",ex:"Too little sleep can seriously impair concentration."},
+  {w:"impassive",def:"showing no emotion",ex:"Her face stayed impassive as the result was read out."},
+  {w:"impede",def:"to slow down or block progress",ex:"Fallen trees impede traffic on the mountain road."},
+  {w:"implicit",def:"suggested but not directly stated",ex:"There was an implicit warning in his short reply."},
+  {w:"inadvertently",def:"without meaning to; by accident",ex:"He inadvertently deleted the file while tidying up."}
 ];
+function chunkDecks(prefix,label,words,size){
+  var decks=[];
+  for(var i=0;i<words.length;i+=size){
+    var chunk=words.slice(i,i+size), n=Math.floor(i/size)+1;
+    decks.push({ id:prefix+"_"+n, title:label+" · Deck "+n, desc:chunk.length+" academic words · flashcards, recall & review", words:chunk });
+  }
+  return decks;
+}
+const VOCAB_DECKS = chunkDecks("wl1","Academic List 1", AWL1_WORDS, 12);
 const VOCAB_BY_ID = {};
 VOCAB_DECKS.forEach(function(d){ VOCAB_BY_ID[d.id]=d; });
 
@@ -788,7 +876,7 @@ function renderFlash(){
     '<div class="card" id="vlCard" role="button" tabindex="0" style="padding:34px 24px;text-align:center;min-height:150px;cursor:pointer;display:flex;flex-direction:column;justify-content:center">'+
       (vl.flipped
         ? '<div><div style="font-size:18px;line-height:1.5">'+esc(c.def)+'</div><div style="font-size:14px;color:var(--inkSoft);font-style:italic;margin-top:12px;line-height:1.5">“'+esc(c.ex)+'”</div></div>'
-        : '<div><div class="serif" style="font-size:30px;font-weight:600">'+esc(c.w)+'</div><div style="font-size:13px;color:var(--muted);margin-top:8px">'+esc(c.pos)+' · tap to reveal meaning</div></div>')+
+        : '<div><div class="serif" style="font-size:30px;font-weight:600">'+esc(c.w)+'</div><div style="font-size:13px;color:var(--muted);margin-top:8px">'+(c.pos?esc(c.pos)+' · ':'')+'tap to reveal meaning</div></div>')+
     '</div>'+
     '<div style="display:flex;gap:10px;margin-top:16px;justify-content:center;flex-wrap:wrap">'+
       '<button class="btn btn-ghost" data-vl="flip">'+(vl.flipped?"Show word":"Flip card")+'</button>'+
@@ -813,9 +901,16 @@ function makeVQ(word,type){
   var pool=vl.deck.words;
   if(type==="gap"){
     var esc2=word.w.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
-    var re=new RegExp("\\b"+esc2+"\\b","i");
-    var text=word.ex.replace(re,"______");
-    return {type:"fill",word:word,prompt:"Type the word that fits:",stem:text,accept:[word.w]};
+    var reExact=new RegExp("\\b"+esc2+"\\b","i");
+    if(reExact.test(word.ex)){
+      return {type:"fill",word:word,prompt:"Type the word that fits:",stem:word.ex.replace(reExact,"______"),accept:[word.w]};
+    }
+    var reInfl=new RegExp("\\b"+esc2+"(s|es|ed|d|ing|ally|ly|ies)?\\b","i");
+    var m=word.ex.match(reInfl);
+    if(m){
+      return {type:"fill",word:word,prompt:"Type the word that fits:",stem:word.ex.replace(reInfl,"______"),accept:[m[0],word.w]};
+    }
+    type="d2w";
   }
   var others=shuffleArr(pool.filter(function(x){ return x.w!==word.w; })).slice(0,3);
   if(type==="d2w"){
@@ -954,7 +1049,7 @@ QUIZ.pairs = PAIRS;
 /* ============================== HOME / NAV DATA ============================== */
 const GROUPS = [
   {label:"Reading",items:READINGS.map(r=>({id:r.id,title:r.title,desc:r.desc,ready:true}))},
-  {label:"Vocabulary — Word Lab",items:VOCAB_DECKS.map(d=>({id:d.id,title:d.title,desc:d.desc,ready:true}))},
+  {label:"Word Lab — Academic List 1",items:VOCAB_DECKS.filter(d=>d.id.indexOf("wl1_")===0).map(d=>({id:d.id,title:d.title,desc:d.desc,ready:true}))},
   {label:"Grammar",items:[
     {id:"sva",title:"Subject–Verb Agreement",desc:"30 questions · immediate feedback",ready:true},
     {id:"tense",title:"Tense",desc:"42 questions · immediate feedback",ready:true},
