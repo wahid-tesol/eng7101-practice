@@ -945,7 +945,7 @@ function renderTrain(){
        '<p style="margin:5px 0 0;font-size:14px"><strong>'+esc(it.word.w)+'</strong> — '+esc(it.word.def)+'</p></div>';
   }
   var nav='<div style="display:flex;justify-content:flex-end;gap:10px;margin-top:18px">';
-  if(!checked){ var dis=(vl.choice===null||vl.choice==="")?"disabled":""; nav+='<button class="btn" data-vl="check" '+dis+'>Check</button>'; }
+  if(!checked){ var dis=(vl.choice===null||vl.choice==="")?"disabled":""; nav+='<button class="btn" id="vlCheckBtn" data-vl="check" '+dis+'>Check</button>'; }
   else { nav+='<button class="btn" data-vl="vnext">'+((vl.qi+1>=total)?"See results →":"Next →")+'</button>'; }
   nav+='</div>';
   app.innerHTML=headerHTML(vl.deck.title)+'<div class="wrap wrap-narrow" style="padding-top:26px">'+
@@ -1012,7 +1012,7 @@ function wireVocab(){
     el.addEventListener("click",function(){ vl.choice=parseInt(el.getAttribute("data-vlopt"),10); renderVocab(); });
   });
   var f=document.getElementById("vlFill");
-  if(f){ f.addEventListener("input",function(){ vl.choice=f.value; }); f.addEventListener("keydown",function(e){ if(e.key==="Enter"&&f.value.trim()){ vl.choice=f.value; vlCheck(); } }); f.focus(); }
+  if(f){ f.addEventListener("input",function(){ vl.choice=f.value; var b=document.getElementById("vlCheckBtn"); if(b) b.disabled=!f.value.trim(); }); f.addEventListener("keydown",function(e){ if(e.key==="Enter"&&f.value.trim()){ vl.choice=f.value; vlCheck(); } }); f.focus(); }
   var card=document.getElementById("vlCard");
   if(card){ card.addEventListener("click",function(){ vl.flipped=!vl.flipped; renderVocab(); });
             card.addEventListener("keydown",function(e){ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); vl.flipped=!vl.flipped; renderVocab(); } }); }
