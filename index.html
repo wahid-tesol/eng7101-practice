@@ -725,6 +725,204 @@ const WRITING = {
 
 const QUIZ = {sva:SVA, tense:TENSE, fragments:FRAGMENTS, runons:RUNONS, modifiers:MODIFIERS, parallelism:PARALLELISM, awl1:AWL1, awl2:AWL2, phrasal:PHRASAL};
 
+/* ===================== VOCABULARY — WORD LAB (pilot) =====================
+   Each deck runs three stages: Meet (flashcards) -> Train (active recall) ->
+   Review. A per-student spaced-repetition memory (Leitner boxes) resurfaces
+   weak words first and retires mastered ones. */
+const VOCAB_DECKS = [
+  { id:"wl_a1", title:"Word Lab · Deck 1 (A-words)", desc:"12 academic words · flashcards, recall & spaced review",
+    words:[
+      {w:"ambiguous",pos:"adjective",def:"having more than one possible meaning",ex:"With an ambiguous plot, no one could follow the film."},
+      {w:"ambivalence",pos:"noun",def:"the state of having mixed feelings about something",ex:"She felt real ambivalence about leaving her old job."},
+      {w:"analogous",pos:"adjective",def:"similar or comparable in some way",ex:"The human eye is often said to be analogous to a camera."},
+      {w:"anomalous",pos:"adjective",def:"different from what is normal or expected",ex:"The scientists could not explain the anomalous result."},
+      {w:"antipathy",pos:"noun",def:"a strong feeling of dislike",ex:"He has a deep antipathy towards dishonest politicians."},
+      {w:"appropriate",pos:"adjective",def:"suitable for a particular situation",ex:"Jeans are not appropriate for a formal interview."},
+      {w:"autonomous",pos:"adjective",def:"independent; able to act on its own",ex:"The university gives each department autonomous control of its budget."},
+      {w:"aesthetic",pos:"adjective",def:"relating to beauty or its appreciation",ex:"The building was praised for its aesthetic appeal."},
+      {w:"aggregate",pos:"verb",def:"to gather or combine into a single total",ex:"Analysts aggregate data from many sources into one report."},
+      {w:"amalgamate",pos:"verb",def:"to combine to form one organisation",ex:"The plan is to amalgamate the two departments into one."},
+      {w:"audacious",pos:"adjective",def:"bold and daring; willing to take risks",ex:"Her audacious plan to cross the desert alone surprised everyone."},
+      {w:"approbation",pos:"noun",def:"formal approval or praise",ex:"The proposal won the approbation of the whole committee."}
+    ]
+  }
+];
+const VOCAB_BY_ID = {};
+VOCAB_DECKS.forEach(function(d){ VOCAB_BY_ID[d.id]=d; });
+
+function shuffleArr(a){ a=a.slice(); for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+
+const VOCAB_SRS_PREFIX = "eng7101:vocab:";
+function vocabSrsKey(){ var st=getStudent(); return VOCAB_SRS_PREFIX+((st&&st.id)||(st&&st.name)||"anon"); }
+function loadSRS(){ try{ return JSON.parse(localStorage.getItem(vocabSrsKey())||"{}"); }catch(e){ return {}; } }
+function saveSRS(m){ try{ localStorage.setItem(vocabSrsKey(), JSON.stringify(m)); }catch(e){} }
+
+let vl = null;
+function startDeck(id){
+  var d=VOCAB_BY_ID[id]; if(!d) return;
+  var srs=loadSRS();
+  var words=d.words.map(function(word,idx){
+    var key=d.id+":"+idx; var b=(srs[key]&&srs[key].box)||0;
+    return {w:word.w,pos:word.pos,def:word.def,ex:word.ex,key:key,box:b};
+  });
+  vl={deck:d,words:words,stage:"flash",i:0,flipped:false,correct:0,qList:[],qi:0,choice:null,checked:false};
+  renderVocab();
+}
+function vlStepsHTML(active){
+  var steps=[["flash","1 · Meet"],["train","2 · Train"],["done","3 · Review"]];
+  return '<div style="display:flex;gap:8px;margin-bottom:16px">'+steps.map(function(s){
+    var on=s[0]===active;
+    return '<span style="flex:1;text-align:center;font-size:12px;font-weight:700;padding:7px 4px;border-radius:8px;border:1px solid '+(on?"var(--gold)":"var(--line)")+';color:'+(on?"var(--gold)":"var(--muted)")+';background:'+(on?"var(--goldSoft)":"transparent")+'">'+s[1]+'</span>';
+  }).join("")+'</div>';
+}
+function renderVocab(){
+  if(vl.stage==="flash") return renderFlash();
+  if(vl.stage==="train") return renderTrain();
+  return renderDone();
+}
+function renderFlash(){
+  var c=vl.words[vl.i], last=(vl.i+1>=vl.words.length);
+  app.innerHTML=headerHTML(vl.deck.title)+'<div class="wrap wrap-narrow" style="padding-top:26px">'+
+    vlStepsHTML("flash")+
+    '<div style="display:flex;justify-content:space-between;font-size:12.5px;color:var(--muted);margin-bottom:8px"><span>Flashcards · card '+(vl.i+1)+' of '+vl.words.length+'</span><span>Learn it, then rate yourself</span></div>'+
+    '<div class="card" id="vlCard" role="button" tabindex="0" style="padding:34px 24px;text-align:center;min-height:150px;cursor:pointer;display:flex;flex-direction:column;justify-content:center">'+
+      (vl.flipped
+        ? '<div><div style="font-size:18px;line-height:1.5">'+esc(c.def)+'</div><div style="font-size:14px;color:var(--inkSoft);font-style:italic;margin-top:12px;line-height:1.5">“'+esc(c.ex)+'”</div></div>'
+        : '<div><div class="serif" style="font-size:30px;font-weight:600">'+esc(c.w)+'</div><div style="font-size:13px;color:var(--muted);margin-top:8px">'+esc(c.pos)+' · tap to reveal meaning</div></div>')+
+    '</div>'+
+    '<div style="display:flex;gap:10px;margin-top:16px;justify-content:center;flex-wrap:wrap">'+
+      '<button class="btn btn-ghost" data-vl="flip">'+(vl.flipped?"Show word":"Flip card")+'</button>'+
+      '<button class="btn btn-ghost" data-vl="learn">Still learning</button>'+
+      '<button class="btn" data-vl="know">'+(last?"Start practice →":"Know it →")+'</button>'+
+    '</div></div>';
+  wireVocab();
+}
+function vlAdvanceFlash(learn){
+  if(learn) vl.words[vl.i].box=0;
+  vl.flipped=false;
+  if(vl.i+1>=vl.words.length){ vl.stage="train"; buildTrain(); renderVocab(); return; }
+  vl.i++; renderVocab();
+}
+function buildTrain(){
+  var words=vl.words.slice().sort(function(a,b){ return a.box-b.box; });
+  var types=["d2w","w2d","gap"];
+  vl.qList=words.map(function(word,n){ return makeVQ(word, types[n%types.length]); });
+  vl.qi=0; vl.choice=null; vl.checked=false; vl.correct=0;
+}
+function makeVQ(word,type){
+  var pool=vl.deck.words;
+  if(type==="gap"){
+    var esc2=word.w.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
+    var re=new RegExp("\\b"+esc2+"\\b","i");
+    var text=word.ex.replace(re,"______");
+    return {type:"fill",word:word,prompt:"Type the word that fits:",stem:text,accept:[word.w]};
+  }
+  var others=shuffleArr(pool.filter(function(x){ return x.w!==word.w; })).slice(0,3);
+  if(type==="d2w"){
+    var opts=shuffleArr([word.w].concat(others.map(function(x){ return x.w; })));
+    return {type:"mcq",word:word,prompt:"Which word means this?",stem:word.def,options:opts,answer:opts.indexOf(word.w)};
+  }
+  var opts2=shuffleArr([word.def].concat(others.map(function(x){ return x.def; })));
+  return {type:"mcq",word:word,prompt:"What does this word mean?",stem:word.w,options:opts2,answer:opts2.indexOf(word.def)};
+}
+function vlFillCorrect(it){ return it.accept.some(function(a){ return norm(a)===norm(vl.choice||""); }); }
+function renderTrain(){
+  if(!vl.qList.length) buildTrain();
+  var it=vl.qList[vl.qi], total=vl.qList.length, checked=vl.checked;
+  var body="";
+  if(it.type==="mcq"){
+    body='<div style="display:grid;gap:9px">'+it.options.map(function(opt,idx){
+      var bd="var(--line)",bg="var(--surface)";
+      if(checked){ if(idx===it.answer){bd="var(--correct)";bg="var(--correctBg)";} else if(idx===vl.choice){bd="var(--wrong)";bg="var(--wrongBg)";} }
+      else if(idx===vl.choice){bd="var(--gold)";bg="var(--goldSoft)";}
+      return '<button class="opt" '+(checked?"disabled":"")+' data-vlopt="'+idx+'" style="border-color:'+bd+';background:'+bg+'"><span>'+esc(opt)+'</span></button>';
+    }).join("")+'</div>';
+  } else {
+    var okf=checked&&vlFillCorrect(it);
+    var st=checked?("border-color:"+(okf?"var(--correct)":"var(--wrong)")+";background:"+(okf?"var(--correctBg)":"var(--wrongBg)")):"";
+    body='<input class="input" id="vlFill" placeholder="Type the word" value="'+esc(vl.choice||"")+'" '+(checked?"disabled":"")+' style="'+st+'">';
+  }
+  var fb="";
+  if(checked){
+    var ok=(it.type==="mcq")?(vl.choice===it.answer):vlFillCorrect(it);
+    fb='<div style="margin-top:16px;padding:13px;border-radius:11px;background:'+(ok?"var(--correctBg)":"var(--wrongBg)")+';border-left:3px solid '+(ok?"var(--correct)":"var(--wrong)")+'">'+
+       '<div style="font-weight:700;color:'+(ok?"var(--correct)":"var(--wrong)")+';font-size:13.5px">'+(ok?"Correct":"Not quite")+'</div>'+
+       '<p style="margin:5px 0 0;font-size:14px"><strong>'+esc(it.word.w)+'</strong> — '+esc(it.word.def)+'</p></div>';
+  }
+  var nav='<div style="display:flex;justify-content:flex-end;gap:10px;margin-top:18px">';
+  if(!checked){ var dis=(vl.choice===null||vl.choice==="")?"disabled":""; nav+='<button class="btn" data-vl="check" '+dis+'>Check</button>'; }
+  else { nav+='<button class="btn" data-vl="vnext">'+((vl.qi+1>=total)?"See results →":"Next →")+'</button>'; }
+  nav+='</div>';
+  app.innerHTML=headerHTML(vl.deck.title)+'<div class="wrap wrap-narrow" style="padding-top:26px">'+
+    vlStepsHTML("train")+
+    '<div style="display:flex;justify-content:space-between;font-size:12.5px;color:var(--muted);margin-bottom:8px"><span>Practice · question '+(vl.qi+1)+' of '+total+'</span><span class="scorepill">Score '+vl.correct+'/'+total+'</span></div>'+
+    '<div style="height:5px;background:var(--line);border-radius:4px;margin-bottom:22px;overflow:hidden"><div style="width:'+(vl.qi/total*100)+'%;height:100%;background:var(--gold)"></div></div>'+
+    '<div class="card" style="padding:22px">'+
+      '<div class="eyebrow" style="margin-bottom:8px">'+esc(it.prompt)+'</div>'+
+      '<p class="serif" style="font-size:20px;line-height:1.4;margin:0 0 18px">'+esc(it.stem)+'</p>'+
+      body+fb+'</div>'+nav+'</div>';
+  wireVocab();
+}
+function vlCheck(){
+  var it=vl.qList[vl.qi];
+  if(it.type==="fill"){ var f=document.getElementById("vlFill"); if(f) vl.choice=f.value; }
+  if(vl.choice===null||vl.choice==="") return;
+  vl.checked=true;
+  var ok=(it.type==="mcq")?(vl.choice===it.answer):vlFillCorrect(it);
+  if(ok) vl.correct++;
+  var srs=loadSRS(); var cur=srs[it.word.key]||{box:0,seen:0,correct:0};
+  cur.seen=(cur.seen||0)+1;
+  if(ok){ cur.correct=(cur.correct||0)+1; cur.box=Math.min((cur.box||0)+1,5); } else { cur.box=0; }
+  srs[it.word.key]=cur; saveSRS(srs);
+  renderVocab();
+}
+function vlNext(){
+  if(vl.qi+1>=vl.qList.length){ vl.stage="done"; renderVocab(); return; }
+  vl.qi++; vl.choice=null; vl.checked=false; renderVocab();
+}
+function renderDone(){
+  var total=vl.qList.length, srs=loadSRS();
+  var missed=vl.words.filter(function(w){ var s=srs[w.key]; return !s || s.box===0; });
+  recordScore(vl.deck.id,"vocab",vl.correct,total);
+  syncResult(vl.deck.id,vl.deck.title,"vocab",vl.correct,total,"recall "+vl.correct+"/"+total);
+  var pct=total?Math.round(vl.correct/total*100):0;
+  var msg=pct>=80?"Excellent recall.":pct>=50?"Good — review the words below, then go again.":"Keep going — a second pass will help a lot.";
+  app.innerHTML=headerHTML(vl.deck.title)+'<div class="wrap wrap-narrow" style="padding-top:40px">'+
+    vlStepsHTML("done")+
+    '<div class="card" style="padding:28px;text-align:center">'+
+      '<div class="eyebrow">Deck complete</div>'+
+      '<div class="serif" style="font-size:44px;font-weight:700;margin:6px 0 2px;color:var(--gold)">'+vl.correct+' / '+total+'</div>'+
+      '<p style="color:var(--inkSoft);margin-top:0">'+msg+'</p>'+
+      (missed.length
+        ? '<div style="text-align:left;margin-top:14px;background:var(--goldSoft);border:1px solid var(--goldLine);border-radius:11px;padding:14px"><div class="eyebrow" style="color:var(--gold)">Words to review ('+missed.length+')</div><div style="margin-top:8px;font-size:14px;line-height:1.8">'+missed.map(function(w){ return '<strong>'+esc(w.w)+'</strong> — '+esc(w.def); }).join("<br>")+'</div></div>'
+        : '<p style="color:var(--correct);font-weight:700;margin-top:10px">Every word recalled — well done!</p>')+
+      '<div style="display:flex;gap:10px;margin-top:18px;justify-content:center;flex-wrap:wrap"><button class="btn" data-vl="again">Study again</button><button class="btn btn-ghost" data-vl="home">Back to topics</button></div>'+
+    '</div></div>';
+  wireVocab();
+}
+function wireVocab(){
+  var hb=app.querySelector('[data-act="home"]'); if(hb) hb.addEventListener("click",renderHome);
+  app.querySelectorAll("[data-vl]").forEach(function(el){
+    el.addEventListener("click",function(){
+      var a=el.getAttribute("data-vl");
+      if(a==="home") return renderHome();
+      if(a==="flip"){ vl.flipped=!vl.flipped; return renderVocab(); }
+      if(a==="know"||a==="learn"){ return vlAdvanceFlash(a==="learn"); }
+      if(a==="check") return vlCheck();
+      if(a==="vnext") return vlNext();
+      if(a==="again") return startDeck(vl.deck.id);
+    });
+  });
+  app.querySelectorAll("[data-vlopt]").forEach(function(el){
+    el.addEventListener("click",function(){ vl.choice=parseInt(el.getAttribute("data-vlopt"),10); renderVocab(); });
+  });
+  var f=document.getElementById("vlFill");
+  if(f){ f.addEventListener("input",function(){ vl.choice=f.value; }); f.addEventListener("keydown",function(e){ if(e.key==="Enter"&&f.value.trim()){ vl.choice=f.value; vlCheck(); } }); f.focus(); }
+  var card=document.getElementById("vlCard");
+  if(card){ card.addEventListener("click",function(){ vl.flipped=!vl.flipped; renderVocab(); });
+            card.addEventListener("keydown",function(e){ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); vl.flipped=!vl.flipped; renderVocab(); } }); }
+}
+
 /* WORDFORM and PAIRS (vocabulary) */
 const WORDFORM = [
   {type:"fill",q:"Her ___ to the research project was remarkable.",base:"CONTRIBUTE",accept:["contribution"],why:"Noun form: contribution."},
@@ -756,6 +954,7 @@ QUIZ.pairs = PAIRS;
 /* ============================== HOME / NAV DATA ============================== */
 const GROUPS = [
   {label:"Reading",items:READINGS.map(r=>({id:r.id,title:r.title,desc:r.desc,ready:true}))},
+  {label:"Vocabulary — Word Lab",items:VOCAB_DECKS.map(d=>({id:d.id,title:d.title,desc:d.desc,ready:true}))},
   {label:"Grammar",items:[
     {id:"sva",title:"Subject–Verb Agreement",desc:"30 questions · immediate feedback",ready:true},
     {id:"tense",title:"Tense",desc:"42 questions · immediate feedback",ready:true},
@@ -895,6 +1094,7 @@ function renderHome(){
 
 function openTopic(id){
   if(READINGS_BY_ID[id]){ const r=READINGS_BY_ID[id]; startQuiz(id,r.questions,r.title,passageHTML(r)); }
+  else if(VOCAB_BY_ID[id]){ startDeck(id); }
   else if(WRITING[id]){ w={id:id,text:"",ticks:{},showModel:true}; renderWriting(); }
   else if(QUIZ[id]){ startQuiz(id,QUIZ[id],TITLE[id],""); }
 }
