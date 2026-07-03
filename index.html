@@ -730,7 +730,7 @@ const WRITING = {
   }
 };
 
-const QUIZ = {sva:SVA, tense:TENSE, fragments:FRAGMENTS, runons:RUNONS, modifiers:MODIFIERS, parallelism:PARALLELISM, awl1:AWL1, awl2:AWL2, phrasal:PHRASAL};
+const QUIZ = {sva:SVA, tense:TENSE, fragments:FRAGMENTS, runons:RUNONS, modifiers:MODIFIERS, parallelism:PARALLELISM, phrasal:PHRASAL};
 
 /* ===================== VOCABULARY — WORD LAB (pilot) =====================
    Each deck runs three stages: Meet (flashcards) -> Train (active recall) ->
@@ -1231,8 +1231,6 @@ const GROUPS = [
   {umbrella:"Vocabulary",label:"Word skills & usage",items:[
     {id:"wordform",title:"Word Formation",desc:"10 questions · type the answer",ready:true},
     {id:"pairs",title:"Confusing Word Pairs",desc:"10 questions · immediate feedback",ready:true},
-    {id:"awl1",title:"Academic Words in Context 1",desc:"10 common academic words · gap-fill",ready:true},
-    {id:"awl2",title:"Academic Words in Context 2",desc:"10 common academic words · gap-fill",ready:true},
     {id:"phrasal",title:"Phrasal Verbs",desc:"10 questions · meaning in context",ready:true}
   ]},
   {umbrella:"Vocabulary",label:"Word Lab · Academic List 1",items:VOCAB_DECKS.filter(d=>d.id.indexOf("wl1_")===0).map(d=>({id:d.id,title:d.title,desc:d.desc,ready:true}))},
