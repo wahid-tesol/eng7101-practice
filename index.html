@@ -74,6 +74,8 @@
   .goldrule{height:1px;background:linear-gradient(90deg,var(--goldLine),rgba(217,196,142,0));margin:20px 0 0}
   .sectlabel{font-family:"Cormorant Garamond",Georgia,"Times New Roman",serif;font-size:23px;font-weight:600;margin:0;letter-spacing:.005em;color:var(--ink)}
   .diamond{color:var(--goldLine);font-size:10px;letter-spacing:.1em}
+  .subsect{display:flex;align-items:center;gap:9px}
+  .subsectlabel{font-family:"Cormorant Garamond",Georgia,"Times New Roman",serif;font-size:18px;font-weight:600;margin:0;color:var(--ink)}
   .foot{margin-top:58px;padding-top:24px;border-top:1px solid var(--line);text-align:center}
   .copyline{font-size:12px;letter-spacing:.05em;color:var(--muted)}
   .install{position:fixed;right:18px;bottom:18px;z-index:20;display:none}
@@ -1218,8 +1220,6 @@ QUIZ.pairs = PAIRS;
 /* ============================== HOME / NAV DATA ============================== */
 const GROUPS = [
   {label:"Reading",items:READINGS.map(r=>({id:r.id,title:r.title,desc:r.desc,ready:true}))},
-  {label:"Word Lab — Academic List 1",items:VOCAB_DECKS.filter(d=>d.id.indexOf("wl1_")===0).map(d=>({id:d.id,title:d.title,desc:d.desc,ready:true}))},
-  {label:"Word Lab — Academic List 2",items:VOCAB_DECKS.filter(d=>d.id.indexOf("wl2_")===0).map(d=>({id:d.id,title:d.title,desc:d.desc,ready:true}))},
   {label:"Grammar",items:[
     {id:"sva",title:"Subject–Verb Agreement",desc:"30 questions · immediate feedback",ready:true},
     {id:"tense",title:"Tense",desc:"42 questions · immediate feedback",ready:true},
@@ -1228,13 +1228,15 @@ const GROUPS = [
     {id:"modifiers",title:"Modifiers",desc:"22 questions · choose the clear version",ready:true},
     {id:"parallelism",title:"Parallelism",desc:"24 questions · choose the parallel version",ready:true}
   ]},
-  {label:"Vocabulary",items:[
+  {umbrella:"Vocabulary",label:"Word skills & usage",items:[
     {id:"wordform",title:"Word Formation",desc:"10 questions · type the answer",ready:true},
     {id:"pairs",title:"Confusing Word Pairs",desc:"10 questions · immediate feedback",ready:true},
-    {id:"awl1",title:"Academic Word List 1",desc:"10 academic words in context",ready:true},
-    {id:"awl2",title:"Academic Word List 2",desc:"10 academic words in context",ready:true},
+    {id:"awl1",title:"Academic Words in Context 1",desc:"10 common academic words · gap-fill",ready:true},
+    {id:"awl2",title:"Academic Words in Context 2",desc:"10 common academic words · gap-fill",ready:true},
     {id:"phrasal",title:"Phrasal Verbs",desc:"10 questions · meaning in context",ready:true}
   ]},
+  {umbrella:"Vocabulary",label:"Word Lab · Academic List 1",items:VOCAB_DECKS.filter(d=>d.id.indexOf("wl1_")===0).map(d=>({id:d.id,title:d.title,desc:d.desc,ready:true}))},
+  {umbrella:"Vocabulary",label:"Word Lab · Academic List 2",items:VOCAB_DECKS.filter(d=>d.id.indexOf("wl2_")===0).map(d=>({id:d.id,title:d.title,desc:d.desc,ready:true}))},
   {label:"Paragraph Writing",items:[
     {id:"howto",title:"How to Write a Paragraph",desc:"Foundations + model + practice",ready:true},
     {id:"descriptive",title:"Descriptive Paragraph",desc:"Model + guided practice + checklist",ready:true},
@@ -1319,26 +1321,41 @@ function renderHome(){
       <div class="pbar"><div class="pbar-fill" style="width:${stat.pct}%"></div></div>
     </div>
     <p style="color:var(--inkSoft);font-size:16.5px;max-width:600px;margin:20px 0 0">Extra practice for every part of the course, with fresh examples and instant feedback. You can retry any topic as often as you like — your best score is kept.</p>`;
+  let lastUmb=null;
   GROUPS.forEach(g=>{
-    html += `<section style="margin-top:38px">
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
-        <span class="diamond">&#10022;</span>
-        <h2 class="sectlabel">${esc(g.label)}</h2>
-        <div style="flex:1;height:1px;background:var(--line)"></div></div><div class="grid">`;
-    g.items.forEach(it=>{
+    const items = g.items.map(it=>{
       let right = "";
       const e = progress[it.id];
       if(!it.ready) right = '<span class="badge">Coming next</span>';
       else if(e && e.last) right = `<span class="scorebadge" title="Last score · ${e.attempts} attempt(s)">${e.last.s}/${e.last.t}</span>`;
       else if(e) right = `<span class="scorebadge" title="Completed · ${e.attempts} attempt(s)">&#10003; done</span>`;
-      html += `<div class="card tile ${it.ready?"":"soon"}" style="padding:16px 17px" ${it.ready?`role="button" tabindex="0" data-open="${it.id}"`:""}>
+      return `<div class="card tile ${it.ready?"":"soon"}" style="padding:16px 17px" ${it.ready?`role="button" tabindex="0" data-open="${it.id}"`:""}>
         <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
           <h3 style="font-size:15.5px;margin:0;font-weight:700">${esc(it.title)}</h3>
           ${right}
         </div>${it.desc?`<p style="margin:7px 0 0;font-size:13px;color:var(--inkSoft)">${esc(it.desc)}</p>`:""}</div>`;
-    });
-    html += `</div></section>`;
+    }).join("");
+    if(g.umbrella){
+      const firstSub = g.umbrella!==lastUmb;
+      if(firstSub){
+        html += `<section style="margin-top:44px">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:4px">
+            <span class="diamond">&#10022;</span>
+            <h2 class="sectlabel">${esc(g.umbrella)}</h2>
+            <div style="flex:1;height:1px;background:var(--line)"></div></div>`;
+      }
+      html += `<div class="subsect" style="margin-top:${firstSub?16:30}px;margin-bottom:12px"><span style="color:var(--goldLine);font-size:9px">&#9670;</span><h3 class="subsectlabel">${esc(g.label)}</h3></div><div class="grid">${items}</div>`;
+      lastUmb=g.umbrella;
+    } else {
+      if(lastUmb){ html += `</section>`; lastUmb=null; }
+      html += `<section style="margin-top:38px">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+          <span class="diamond">&#10022;</span>
+          <h2 class="sectlabel">${esc(g.label)}</h2>
+          <div style="flex:1;height:1px;background:var(--line)"></div></div><div class="grid">${items}</div></section>`;
+    }
   });
+  if(lastUmb){ html += `</section>`; }
   html += `<div class="foot">
     <img class="medallion sm" src="${MARK}" alt="" style="margin-bottom:11px" />
     <div class="copyline">&copy; 2026 Abdul Wahid &middot; All rights reserved</div>
