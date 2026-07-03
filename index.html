@@ -961,7 +961,9 @@ function startDeck(id){
     var key=d.id+":"+idx; var b=(srs[key]&&srs[key].box)||0;
     return {w:word.w,pos:word.pos,def:word.def,ex:word.ex,key:key,box:b};
   });
-  vl={deck:d,words:words,stage:"flash",i:0,flipped:false,correct:0,qList:[],qi:0,choice:null,checked:false};
+  vl={deck:d,words:words,stage:"flash",
+      queue:words.map(function(_,i){return i;}),reshow:{},drill:{},known:{},
+      flipped:false,correct:0,qList:[],qi:0,choice:null,checked:false};
   renderVocab();
 }
 function vlStepsHTML(active){
@@ -977,10 +979,12 @@ function renderVocab(){
   return renderDone();
 }
 function renderFlash(){
-  var c=vl.words[vl.i], last=(vl.i+1>=vl.words.length);
+  if(!vl.queue.length){ return finishMeet(); }
+  var ci=vl.queue[0], c=vl.words[ci];
+  var knownCount=Object.keys(vl.known).length, drillCount=Object.keys(vl.drill).length;
   app.innerHTML=headerHTML(vl.deck.title)+'<div class="wrap wrap-narrow" style="padding-top:26px">'+
     vlStepsHTML("flash")+
-    '<div style="display:flex;justify-content:space-between;font-size:12.5px;color:var(--muted);margin-bottom:8px"><span>Flashcards · card '+(vl.i+1)+' of '+vl.words.length+'</span><span>Learn it, then rate yourself</span></div>'+
+    '<div style="display:flex;justify-content:space-between;font-size:12.5px;color:var(--muted);margin-bottom:8px"><span>Flashcards · '+vl.queue.length+' to go</span><span>Known '+knownCount+' &middot; Still learning '+drillCount+'</span></div>'+
     '<div class="card" id="vlCard" role="button" tabindex="0" style="padding:34px 24px;text-align:center;min-height:150px;cursor:pointer;display:flex;flex-direction:column;justify-content:center">'+
       (vl.flipped
         ? '<div><div style="font-size:18px;line-height:1.5">'+esc(c.def)+'</div><div style="font-size:14px;color:var(--inkSoft);font-style:italic;margin-top:12px;line-height:1.5">“'+esc(c.ex)+'”</div></div>'
@@ -988,19 +992,38 @@ function renderFlash(){
     '</div>'+
     '<div style="display:flex;gap:10px;margin-top:16px;justify-content:center;flex-wrap:wrap">'+
       '<button class="btn btn-ghost" data-vl="flip">'+(vl.flipped?"Show word":"Flip card")+'</button>'+
-      '<button class="btn btn-ghost" data-vl="learn">Still learning</button>'+
-      '<button class="btn" data-vl="know">'+(last?"Start practice →":"Know it →")+'</button>'+
-    '</div></div>';
+      '<button class="btn btn-ghost" data-vl="learn">Still learning &#8635;</button>'+
+      '<button class="btn" data-vl="know">Know it &#10003;</button>'+
+    '</div>'+
+    '<div style="text-align:center;font-size:11.5px;color:var(--muted);margin-top:11px;line-height:1.55">&#8635; <b>Still learning</b> — brings the word back and adds it to practice &nbsp;·&nbsp; &#10003; <b>Know it</b> — skips it in practice</div>'+
+    '</div>';
   wireVocab();
 }
 function vlAdvanceFlash(learn){
-  if(learn) vl.words[vl.i].box=0;
+  var ci=vl.queue[0], word=vl.words[ci];
   vl.flipped=false;
-  if(vl.i+1>=vl.words.length){ vl.stage="train"; buildTrain(); renderVocab(); return; }
-  vl.i++; renderVocab();
+  var srs=loadSRS(); var cur=srs[word.key]||{box:word.box||0,seen:0,correct:0};
+  vl.queue.shift();
+  if(learn){
+    vl.drill[ci]=true; delete vl.known[ci];
+    cur.box=0; word.box=0;
+    vl.reshow[ci]=(vl.reshow[ci]||0)+1;
+    if(vl.reshow[ci]<=2){ vl.queue.push(ci); }   // a still-learning word returns up to twice more
+  } else {
+    delete vl.drill[ci]; vl.known[ci]=true;
+    cur.box=Math.min((cur.box||0)+1,5); word.box=cur.box;
+  }
+  srs[word.key]=cur; saveSRS(srs);
+  if(!vl.queue.length){ return finishMeet(); }
+  renderVocab();
+}
+function finishMeet(){
+  if(!Object.keys(vl.drill).length){ vl.stage="done"; renderVocab(); return; }
+  vl.stage="train"; buildTrain(); renderVocab();
 }
 function buildTrain(){
-  var words=vl.words.slice().sort(function(a,b){ return a.box-b.box; });
+  var idxs=Object.keys(vl.drill).map(Number);
+  var words=idxs.map(function(i){ return vl.words[i]; }).sort(function(a,b){ return a.box-b.box; });
   var types=["d2w","w2d","gap"];
   vl.qList=words.map(function(word,n){ return makeVQ(word, types[n%types.length]); });
   vl.qi=0; vl.choice=null; vl.checked=false; vl.correct=0;
@@ -1084,18 +1107,20 @@ function vlNext(){
   vl.qi++; vl.choice=null; vl.checked=false; renderVocab();
 }
 function renderDone(){
-  var total=vl.qList.length, srs=loadSRS();
+  var srs=loadSRS(), totalDeck=vl.words.length, drilled=vl.qList.length;
+  var mastered=vl.words.filter(function(w){ var s=srs[w.key]; return s && s.box>=1; }).length;
   var missed=vl.words.filter(function(w){ var s=srs[w.key]; return !s || s.box===0; });
-  recordScore(vl.deck.id,"vocab",vl.correct,total);
-  syncResult(vl.deck.id,vl.deck.title,"vocab",vl.correct,total,"recall "+vl.correct+"/"+total);
-  var pct=total?Math.round(vl.correct/total*100):0;
-  var msg=pct>=80?"Excellent recall.":pct>=50?"Good — review the words below, then go again.":"Keep going — a second pass will help a lot.";
+  recordScore(vl.deck.id,"vocab",mastered,totalDeck);
+  syncResult(vl.deck.id,vl.deck.title,"vocab",mastered,totalDeck,"mastered "+mastered+"/"+totalDeck+(drilled?(" · drilled "+vl.correct+"/"+drilled):" · knew all"));
+  var pct=totalDeck?Math.round(mastered/totalDeck*100):0;
+  var msg=pct>=80?"Excellent — most of this deck is locked in.":pct>=50?"Good progress. Review the words below, then go again.":"Keep going — another pass will help a lot.";
   app.innerHTML=headerHTML(vl.deck.title)+'<div class="wrap wrap-narrow" style="padding-top:40px">'+
     vlStepsHTML("done")+
     '<div class="card" style="padding:28px;text-align:center">'+
       '<div class="eyebrow">Deck complete</div>'+
-      '<div class="serif" style="font-size:44px;font-weight:700;margin:6px 0 2px;color:var(--gold)">'+vl.correct+' / '+total+'</div>'+
-      '<p style="color:var(--inkSoft);margin-top:0">'+msg+'</p>'+
+      '<div class="serif" style="font-size:44px;font-weight:700;margin:6px 0 2px;color:var(--gold)">'+mastered+' / '+totalDeck+'</div>'+
+      '<div style="font-size:12.5px;color:var(--muted);margin:0 0 2px">words mastered'+(drilled?(' · you practised '+drilled+' and recalled '+vl.correct):'')+'</div>'+
+      '<p style="color:var(--inkSoft);margin-top:6px">'+msg+'</p>'+
       (missed.length
         ? '<div style="text-align:left;margin-top:14px;background:var(--goldSoft);border:1px solid var(--goldLine);border-radius:11px;padding:14px"><div class="eyebrow" style="color:var(--gold)">Words to review ('+missed.length+')</div><div style="margin-top:8px;font-size:14px;line-height:1.8">'+missed.map(function(w){ return '<strong>'+esc(w.w)+'</strong> — '+esc(w.def); }).join("<br>")+'</div></div>'
         : '<p style="color:var(--correct);font-weight:700;margin-top:10px">Every word recalled — well done!</p>')+
