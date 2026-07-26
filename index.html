@@ -475,10 +475,107 @@ const READING_FOURDAY = {
   ]
 };
 
+const READING_PLACEBO = {
+  id:"read_placebo", desc:"How belief alone can ease real symptoms",
+  title:"The Placebo Effect",
+  meta:"Original passage · approx. 300 words · B1+/B2",
+  paras:[
+    "If a patient is given a sugar pill but believes it is a powerful medicine, their symptoms often improve. This surprising response is known as the placebo effect. The pill itself is **inert** — it contains no active ingredient — yet the belief that it will help can produce real, measurable changes in the body.",
+    "Researchers once treated the placebo effect as mere imagination, but modern studies show something more **profound**. Brain scans reveal that simply expecting relief can trigger the release of the body's own painkillers. The mind's **anticipation** of healing sets off a genuine biological process, and the effect is strongest for symptoms such as pain, anxiety and tiredness.",
+    "This creates a difficult **ethical** question for doctors. Deceiving a patient with a fake treatment is dishonest, yet the placebo can genuinely reduce suffering. Strangely, some trials show that patients improve even when they are openly told the pill is a placebo, which suggests that the ritual of taking medicine matters almost as much as the medicine itself.",
+    "The placebo effect also complicates medical research. Because a patient's report of pain is **subjective**, scientists must test every new drug against a placebo to be sure that the drug, and not belief alone, is responsible for any improvement. Far from being a simple trick, the placebo reveals how deeply the mind can shape the health of the body."
+  ],
+  questions:[
+    {type:"mcq",q:"'inert' (paragraph 1) is closest in meaning to:",options:["having no active effect","extremely powerful","brightly coloured","very expensive"],answer:0,why:"An inert substance does nothing chemically; 'powerful' is the opposite and a trap."},
+    {type:"mcq",q:"'profound' (paragraph 2) most nearly means:",options:["deep and significant","shallow and minor","quick and sudden","strange and rare"],answer:0,why:"Profound means far-reaching or deep; 'shallow and minor' is the opposite."},
+    {type:"mcq",q:"'anticipation' (paragraph 2) here means:",options:["expectation of something to come","memory of the past","fear of doctors","refusal to believe"],answer:0,why:"To anticipate is to expect; anticipation is the expectation of what is coming."},
+    {type:"mcq",q:"An 'ethical' (paragraph 3) question is one about:",options:["what is morally right or wrong","what is medically effective","what is financially cheap","what is scientifically new"],answer:0,why:"Ethics concerns right and wrong conduct."},
+    {type:"mcq",q:"Something 'subjective' (paragraph 4) is:",options:["based on personal feeling","proven by measurement","completely false","shared by everyone"],answer:0,why:"Subjective means based on personal experience; 'proven by measurement' describes its opposite, objective."}
+    ,{type:"open",q:"What is the placebo effect?",model:"It is when a patient given a fake or inactive treatment improves simply because they believe it will work."},
+    {type:"open",q:"How did scientists' view of the placebo effect change with modern research?",model:"They once dismissed it as imagination, but brain scans showed that expecting relief triggers the body's own painkillers — a genuine biological process."},
+    {type:"open",q:"Why does the placebo effect create an ethical problem for doctors?",model:"Because giving a fake treatment deceives the patient, yet it can also genuinely reduce their suffering, so honesty and helping the patient seem to conflict."},
+    {type:"open",q:"According to the passage, what surprising finding involves patients who KNOW they are taking a placebo?",model:"Some still improve even when openly told the pill is a placebo, suggesting the ritual of taking medicine matters almost as much as the medicine."},
+    {type:"open",q:"Why must every new drug be tested against a placebo?",model:"Because a patient's report of pain is subjective, so a placebo comparison is needed to prove the drug itself, not belief, caused any improvement."}
+  ]
+};
+
+const READING_MICROBIOME = {
+  id:"read_microbiome", desc:"The hidden world of bacteria inside you",
+  title:"The Gut Microbiome",
+  meta:"Original passage · approx. 300 words · B1+/B2",
+  paras:[
+    "The human body is home to trillions of bacteria, most of them living in the gut. Far from being harmful, these tiny organisms are essential to our health. Together they form what scientists call the gut microbiome, a hidden community that begins to **colonise** the body from the moment we are born.",
+    "A healthy microbiome is a **diverse** one, containing many different species. These bacteria help us digest food that the body could not break down alone, and they **synthesise** certain vitamins we cannot make for ourselves. Increasingly, researchers believe the microbiome also shapes the immune system and even communicates with the brain.",
+    "Modern life, however, can **disrupt** this delicate balance. Diets high in sugar and low in fibre, together with the overuse of antibiotics, can reduce the variety of bacteria in the gut. Studies have linked an unbalanced microbiome to problems ranging from obesity and allergies to anxiety and low mood.",
+    "The field is still young, and much remains uncertain. Even so, the **emerging** science points to some simple advice: eating plenty of vegetables, fruit and fibre helps feed a rich community of gut bacteria. What was once seen as a simple digestive tube is now understood to be one of the most active and influential systems in the body."
+  ],
+  questions:[
+    {type:"mcq",q:"'colonise' (paragraph 1) here means to:",options:["settle and spread throughout","attack and destroy","clean completely","leave empty"],answer:0,why:"To colonise is to move in and spread through a place."},
+    {type:"mcq",q:"'diverse' (paragraph 2) is closest in meaning to:",options:["varied, with many types","small and simple","weak and unhealthy","recently formed"],answer:0,why:"Diverse means made up of many different kinds."},
+    {type:"mcq",q:"'synthesise' (paragraph 2) most nearly means:",options:["produce or make","destroy","absorb","copy"],answer:0,why:"To synthesise is to build or make something, such as a vitamin."},
+    {type:"mcq",q:"'disrupt' (paragraph 3) means to:",options:["disturb and unbalance","strengthen","measure","clean"],answer:0,why:"To disrupt is to upset the normal balance; 'strengthen' is the opposite."},
+    {type:"mcq",q:"'emerging' (paragraph 4) describes science that is:",options:["new and still developing","old and settled","completely proven","no longer studied"],answer:0,why:"Emerging means newly appearing and still growing; 'old and settled' is the opposite."}
+    ,{type:"open",q:"What is the gut microbiome, and where is most of it found?",model:"It is the community of trillions of bacteria living in the body, most of them in the gut."},
+    {type:"open",q:"According to the passage, what useful jobs do gut bacteria do for us?",model:"They help digest food the body cannot break down alone, make certain vitamins, and may shape the immune system and communicate with the brain."},
+    {type:"open",q:"In what ways can modern life disrupt the microbiome?",model:"Through diets high in sugar and low in fibre and through the overuse of antibiotics, which reduce the variety of gut bacteria."},
+    {type:"open",q:"What health problems have been linked to an unbalanced microbiome?",model:"Problems ranging from obesity and allergies to anxiety and low mood."},
+    {type:"open",q:"What simple advice does the emerging science suggest?",model:"Eat plenty of vegetables, fruit and fibre to feed a rich, varied community of gut bacteria."}
+  ]
+};
+
+const READING_LONELINESS = {
+  id:"read_loneliness", desc:"Why connection is falling in a connected age",
+  title:"The Loneliness Epidemic",
+  meta:"Original passage · approx. 310 words · B1+/B2",
+  paras:[
+    "We live in the most connected age in history. With a phone in every pocket, we can reach almost anyone at any time. And yet surveys across many countries report that more people feel lonely than ever before. Health experts have begun to describe this quiet problem as a loneliness epidemic.",
+    "The situation contains a strange **paradox**: we are surrounded by contact, but often lack real connection. Scrolling through other people's lives online can leave us feeling more alone, not less. Longer working hours, living far from family, and the loss of local community spaces have all deepened the **isolation** that many people feel.",
+    "The consequences are not only emotional. Research suggests that **chronic** loneliness can be as harmful to physical health as smoking or obesity, raising the risk of heart disease and a weakened immune system. Part of the problem is a lingering **stigma**: many people feel ashamed to admit that they are lonely, and so suffer in silence.",
+    "There are, however, reasons for hope. Simple actions — joining a club, volunteering, or regularly meeting a friend in person — can **foster** the genuine connections that human beings need. Some governments now treat loneliness as a public-health priority. The first step, experts agree, is to talk about it openly, so that no one feels they must face it alone."
+  ],
+  questions:[
+    {type:"mcq",q:"A 'paradox' (paragraph 2) is:",options:["a situation that seems to contradict itself","a clear and simple solution","a common daily habit","a strong emotion"],answer:0,why:"A paradox is something that appears to contradict itself — here, being connected yet lonely."},
+    {type:"mcq",q:"'isolation' (paragraph 2) most nearly means:",options:["being cut off from others","close friendship","hard work","poor health"],answer:0,why:"Isolation is separation from other people; 'friendship' is the opposite."},
+    {type:"mcq",q:"'chronic' (paragraph 3) here means:",options:["lasting for a long time","sudden and brief","mild and harmless","easily cured"],answer:0,why:"Chronic means long-lasting or continual; 'sudden and brief' is the opposite."},
+    {type:"mcq",q:"'stigma' (paragraph 3) refers to:",options:["a sense of shame or disapproval","a medical treatment","a type of illness","a feeling of pride"],answer:0,why:"A stigma is a mark of shame attached to something."},
+    {type:"mcq",q:"'foster' (paragraph 4) is closest in meaning to:",options:["encourage and help to grow","prevent","ignore","replace"],answer:0,why:"To foster something is to help it develop; 'prevent' is the opposite."}
+    ,{type:"open",q:"Why does the writer call loneliness a 'paradox' in a connected age?",model:"Because although we can contact almost anyone at any time, many people still lack real connection and feel lonelier than ever."},
+    {type:"open",q:"According to the passage, what factors have deepened people's sense of isolation?",model:"Time spent comparing lives online, longer working hours, living far from family, and the loss of local community spaces."},
+    {type:"open",q:"In what way can chronic loneliness affect physical health?",model:"It can be as harmful as smoking or obesity, raising the risk of heart disease and weakening the immune system."},
+    {type:"open",q:"Why do many lonely people 'suffer in silence'?",model:"Because of a lingering stigma — they feel ashamed to admit that they are lonely."},
+    {type:"open",q:"What actions does the passage suggest can help reduce loneliness?",model:"Joining a club, volunteering, meeting a friend in person, treating loneliness as a public-health issue, and talking about it openly."}
+  ]
+};
+
+const READING_FASTFASHION = {
+  id:"read_fastfashion", desc:"The hidden price of cheap, throwaway clothes",
+  title:"Fast Fashion",
+  meta:"Original passage · approx. 310 words · B1+/B2",
+  paras:[
+    "Not long ago, most people bought a few new items of clothing each season. Today, online shops release new styles almost every week, often at astonishingly low prices. This model, known as fast fashion, encourages us to treat clothes as almost **disposable** — worn a handful of times, then thrown away.",
+    "For companies, the business is highly **lucrative**. Producing garments quickly and cheaply, and persuading customers to keep buying more, brings enormous profits. But those low prices hide a real cost. To keep them down, some factories exploit their workers, paying very low wages for long hours in unsafe conditions.",
+    "The environmental price is just as heavy. The industry uses vast amounts of water and energy and produces a huge quantity of waste. Clothes made from cheap **synthetic** fabrics are rarely long-lasting; once **discarded**, they can sit in landfill for decades without breaking down. Every stage, from growing cotton to shipping, adds to the industry's carbon footprint.",
+    "Change is slowly beginning. Some shoppers are buying fewer, better-made clothes, or choosing second-hand. Campaigners are demanding greater **transparency**, so that buyers can see how and where their clothes are made. The challenge is to enjoy fashion without treating either people or the planet as something cheap and throwaway."
+  ],
+  questions:[
+    {type:"mcq",q:"'disposable' (paragraph 1) describes something meant to be:",options:["thrown away after little use","kept for a lifetime","sold at a high price","worn only formally"],answer:0,why:"Disposable things are designed to be used briefly and discarded; 'kept for a lifetime' is the opposite."},
+    {type:"mcq",q:"'lucrative' (paragraph 2) most nearly means:",options:["producing a lot of profit","losing money","very difficult","strictly illegal"],answer:0,why:"A lucrative business earns large profits."},
+    {type:"mcq",q:"'synthetic' (paragraph 3) here means:",options:["made from artificial materials","grown naturally","extremely expensive","brightly coloured"],answer:0,why:"Synthetic fabrics are man-made rather than natural."},
+    {type:"mcq",q:"'discarded' (paragraph 3) means:",options:["thrown away","carefully kept","newly bought","repaired"],answer:0,why:"To discard is to get rid of; 'carefully kept' is the opposite."},
+    {type:"mcq",q:"'transparency' (paragraph 4) here means:",options:["openness about how things are done","secrecy","high quality","low price"],answer:0,why:"Transparency is being open, so people can see how something is done; 'secrecy' is the opposite."}
+    ,{type:"open",q:"What does the term 'fast fashion' describe?",model:"A model in which shops release cheap new clothing styles very frequently, encouraging people to treat clothes as almost disposable."},
+    {type:"open",q:"Why is fast fashion so profitable for companies?",model:"Because they produce garments quickly and cheaply and persuade customers to keep buying more, which brings enormous profits."},
+    {type:"open",q:"According to the passage, what is the human cost hidden behind low prices?",model:"Some factories exploit workers, paying very low wages for long hours in unsafe conditions."},
+    {type:"open",q:"In what ways does fast fashion harm the environment?",model:"It uses vast amounts of water and energy, creates huge waste, and cheap synthetic clothes sit in landfill for decades, adding to the carbon footprint."},
+    {type:"open",q:"What changes does the passage say are beginning to happen?",model:"Some shoppers buy fewer, better-made or second-hand clothes, and campaigners demand greater transparency about how clothes are made."}
+  ]
+};
+
 const READINGS = [
   READING, READING_CREATIVITY, READING_HABITS, READING_MICROPLASTICS, READING_GIG,
   READING_BILINGUAL, READING_ATTENTION, READING_CRISPR, READING_GREENCITIES,
-  READING_DEEPFAKES, READING_FOURDAY
+  READING_DEEPFAKES, READING_FOURDAY,
+  READING_PLACEBO, READING_MICROBIOME, READING_LONELINESS, READING_FASTFASHION
 ];
 const READINGS_BY_ID = {};
 READINGS.forEach(r => { READINGS_BY_ID[r.id] = r; });
