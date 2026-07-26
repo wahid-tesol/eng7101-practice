@@ -1124,11 +1124,13 @@ function renderReviewDone(){
       '<div style="font-size:12.5px;color:var(--muted)">recalled just now</div>'+
       '<div style="display:flex;gap:9px;justify-content:center;margin:16px 0 2px;flex-wrap:wrap">'+
         '<span class="scorepill">&#128293; '+streak+'-day streak</span>'+
+        '<span class="scorepill">Level '+levelInfo().level+'</span>'+
         '<span class="scorepill">Today '+tc+'/'+goal+(goalMet?' &#10003;':'')+'</span>'+
         '<span class="scorepill">'+stillDue+' still due</span></div>'+
       '<p style="color:var(--inkSoft);margin-top:10px">'+(goalMet?"Daily goal reached — nicely done.":(stillDue?"Good work — there are still words due, keep going.":"Good work — you're all caught up for now."))+'</p>'+
       '<div style="display:flex;gap:10px;margin-top:16px;justify-content:center;flex-wrap:wrap">'+
         (stillDue?'<button class="btn" data-vl="reviewmore">Review more</button>':'')+
+        '<button class="btn btn-ghost" data-vl="stats">My progress</button>'+
         '<button class="btn btn-ghost" data-vl="home">Back to topics</button></div>'+
     '</div></div>';
   wireVocab();
@@ -1143,8 +1145,56 @@ function reviewBannerHTML(){
       '<div style="font-size:15.5px;font-weight:600;margin-top:3px">&#128293; '+streak+'-day streak &middot; '+due+' word'+(due===1?'':'s')+' due &middot; today '+tc+'/'+goal+'</div>'+
       '<div class="pbar" style="margin-top:9px;max-width:320px"><div class="pbar-fill" style="width:'+pctGoal+'%"></div></div>'+
     '</div>'+
-    '<button class="btn" role="button" tabindex="0" data-open="_review" style="white-space:nowrap">'+(due?('Review '+due+' &rarr;'):'Practice &rarr;')+'</button>'+
+    '<div style="display:flex;gap:8px;flex-wrap:wrap">'+
+      '<button class="btn btn-ghost" role="button" tabindex="0" data-open="_vocabstats">Progress</button>'+
+      '<button class="btn" role="button" tabindex="0" data-open="_review" style="white-space:nowrap">'+(due?('Review '+due+' &rarr;'):'Practice &rarr;')+'</button>'+
+    '</div>'+
   '</div>';
+}
+function levelInfo(){ var xp=(loadStats().xp||0), per=150; return {xp:xp, level:Math.floor(xp/per)+1, into:xp%per, per:per, pct:Math.round((xp%per)/per*100)}; }
+function listMastery(list){
+  var srs=loadSRS(), words=ALL_WORDS.filter(function(x){ return x.list===list; }), mastered=0, started=0;
+  var cells=words.map(function(x){
+    var s=srs[x.key], box=(s?(s.box||0):0), seen=(s?(s.seen||0):0), state;
+    if(box>=5) state="mastered"; else if(box>=3) state="strong"; else if(seen>0) state="learning"; else state="new";
+    if(box>=3) mastered++; if(seen>0) started++;
+    return {w:x.w, state:state};
+  });
+  return {total:words.length, mastered:mastered, started:started, cells:cells};
+}
+function ringSVG(pct,size){
+  var r=(size-10)/2, c=2*Math.PI*r, off=c*(1-pct/100);
+  return '<svg width="'+size+'" height="'+size+'" viewBox="0 0 '+size+' '+size+'" aria-hidden="true">'+
+    '<circle cx="'+(size/2)+'" cy="'+(size/2)+'" r="'+r+'" fill="none" stroke="var(--line)" stroke-width="8"/>'+
+    '<circle cx="'+(size/2)+'" cy="'+(size/2)+'" r="'+r+'" fill="none" stroke="#9C7A2E" stroke-width="8" stroke-linecap="round" stroke-dasharray="'+c+'" stroke-dashoffset="'+off+'" transform="rotate(-90 '+(size/2)+' '+(size/2)+')"/>'+
+    '<text x="50%" y="50%" text-anchor="middle" dy="0.35em" style="font-family:\'Cormorant Garamond\',Georgia,serif;font-weight:600;font-size:'+Math.round(size*0.28)+'px;fill:var(--ink)">'+pct+'%</text></svg>';
+}
+function heatmapHTML(cells){
+  var color={"new":"var(--line)","learning":"var(--goldSoft)","strong":"var(--goldLine)","mastered":"var(--accent)"};
+  return '<div style="display:flex;flex-wrap:wrap;gap:4px">'+cells.map(function(c){ return '<span title="'+esc(c.w)+'" style="width:14px;height:14px;border-radius:3px;background:'+color[c.state]+';display:inline-block"></span>'; }).join("")+'</div>';
+}
+function legendDot(color,label){ return '<span style="display:inline-flex;align-items:center;gap:6px"><span style="width:12px;height:12px;border-radius:3px;background:'+color+';display:inline-block"></span>'+esc(label)+'</span>'; }
+function listCardHTML(title,m){
+  var pct=m.total?Math.round(m.mastered/m.total*100):0;
+  return '<div class="card" style="padding:20px">'+
+    '<div style="display:flex;align-items:center;gap:14px">'+ringSVG(pct,86)+
+      '<div><div class="subsectlabel">'+esc(title)+'</div>'+
+        '<div style="font-size:13px;color:var(--inkSoft);margin-top:4px">'+m.mastered+' of '+m.total+' mastered</div>'+
+        '<div style="font-size:12.5px;color:var(--muted)">'+m.started+' words started</div></div></div>'+
+    '<div style="margin-top:14px">'+heatmapHTML(m.cells)+'</div></div>';
+}
+function renderVocabStats(){
+  var li=levelInfo(), m1=listMastery("wl1"), m2=listMastery("wl2");
+  app.innerHTML=headerHTML("My Vocabulary")+'<div class="wrap" style="max-width:760px;padding-top:30px">'+
+    '<div class="card" style="padding:22px 24px">'+
+      '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">'+
+        '<div><div class="eyebrow" style="color:var(--gold)">Your level</div><div class="serif" style="font-size:34px;font-weight:600;margin-top:2px">Level '+li.level+'</div></div>'+
+        '<div style="text-align:right"><div style="font-size:13px;color:var(--muted)">'+li.xp+' XP total</div><div style="font-size:12px;color:var(--muted)">'+li.into+' / '+li.per+' to level '+(li.level+1)+'</div></div></div>'+
+      '<div class="pbar" style="margin-top:12px"><div class="pbar-fill" style="width:'+li.pct+'%"></div></div></div>'+
+    '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;margin-top:16px">'+listCardHTML("Academic List 1",m1)+listCardHTML("Academic List 2",m2)+'</div>'+
+    '<div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:16px;font-size:12.5px;color:var(--inkSoft)">'+legendDot("var(--line)","Not started")+legendDot("var(--goldSoft)","Learning")+legendDot("var(--goldLine)","Strong")+legendDot("var(--accent)","Mastered")+'</div>'+
+    '<div style="margin-top:20px"><button class="btn btn-ghost" data-vl="home">Back to topics</button></div></div>';
+  wireVocab();
 }
 function startDeck(id){
   var d=VOCAB_BY_ID[id]; if(!d) return;
@@ -1387,6 +1437,7 @@ function wireVocab(){
       if(a==="vredo") return vlRedo();
       if(a==="again") return startDeck(vl.deck.id);
       if(a==="reviewmore") return startReview();
+      if(a==="stats") return renderVocabStats();
       if(a==="dhint"){ vl.qList[vl.qi].showHint=true; return renderVocab(); }
     });
   });
@@ -1590,6 +1641,7 @@ function renderHome(){
 function openTopic(id){
   if(READINGS_BY_ID[id]){ const r=READINGS_BY_ID[id]; startQuiz(id,r.questions,r.title,passageHTML(r)); }
   else if(id==="_review"){ startReview(); }
+  else if(id==="_vocabstats"){ renderVocabStats(); }
   else if(VOCAB_BY_ID[id]){ startDeck(id); }
   else if(WRITING[id]){ w={id:id,text:"",ticks:{},showModel:true}; renderWriting(); }
   else if(QUIZ[id]){ startQuiz(id,QUIZ[id],TITLE[id],""); }
