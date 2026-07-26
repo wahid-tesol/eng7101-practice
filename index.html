@@ -76,6 +76,10 @@
   .diamond{color:var(--goldLine);font-size:10px;letter-spacing:.1em}
   .subsect{display:flex;align-items:center;gap:9px}
   .subsectlabel{font-family:"Cormorant Garamond",Georgia,"Times New Roman",serif;font-size:18px;font-weight:600;margin:0;color:var(--ink)}
+  .spk{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;border:1px solid var(--line);background:var(--surface);cursor:pointer;font-size:14px;vertical-align:middle;padding:0;color:var(--ink);transition:border-color .12s,background .12s}
+  .spk:hover{border-color:var(--gold);background:var(--goldSoft)}
+  .spk-big{font:inherit;font-weight:600;border-radius:11px;border:1px solid var(--gold);background:var(--goldSoft);color:var(--gold);padding:13px 22px;cursor:pointer;font-size:15px;transition:background .12s,color .12s}
+  .spk-big:hover{background:var(--gold);color:#fff}
   .foot{margin-top:58px;padding-top:24px;border-top:1px solid var(--line);text-align:center}
   .copyline{font-size:12px;letter-spacing:.05em;color:var(--muted)}
   .install{position:fixed;right:18px;bottom:18px;z-index:20;display:none}
@@ -1046,6 +1050,8 @@ const VOCAB_BY_ID = {};
 VOCAB_DECKS.forEach(function(d){ VOCAB_BY_ID[d.id]=d; });
 
 function shuffleArr(a){ a=a.slice(); for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+function sayWord(w){ try{ if(window.speechSynthesis){ speechSynthesis.cancel(); var u=new SpeechSynthesisUtterance(String(w)); u.lang="en-GB"; u.rate=0.92; speechSynthesis.speak(u); } }catch(e){} }
+function spkBtn(w){ return '<button class="spk" data-say="'+esc(w)+'" title="Hear the word" aria-label="Hear pronunciation">&#128266;</button>'; }
 
 const VOCAB_SRS_PREFIX = "eng7101:vocab:";
 function vocabSrsKey(){ var st=getStudent(); return VOCAB_SRS_PREFIX+((st&&st.id)||(st&&st.name)||"anon"); }
@@ -1174,7 +1180,7 @@ function renderFlash(){
     '<div class="card" id="vlCard" role="button" tabindex="0" style="padding:34px 24px;text-align:center;min-height:150px;cursor:pointer;display:flex;flex-direction:column;justify-content:center">'+
       (vl.flipped
         ? '<div><div style="font-size:18px;line-height:1.5">'+esc(c.def)+'</div><div style="font-size:14px;color:var(--inkSoft);font-style:italic;margin-top:12px;line-height:1.5">“'+esc(c.ex)+'”</div></div>'
-        : '<div><div class="serif" style="font-size:30px;font-weight:600">'+esc(c.w)+'</div><div style="font-size:13px;color:var(--muted);margin-top:8px">'+(c.pos?esc(c.pos)+' · ':'')+'tap to reveal meaning</div></div>')+
+        : '<div><div class="serif" style="font-size:30px;font-weight:600">'+esc(c.w)+' '+spkBtn(c.w)+'</div><div style="font-size:13px;color:var(--muted);margin-top:8px">'+(c.pos?esc(c.pos)+' · ':'')+'tap to reveal meaning</div></div>')+
     '</div>'+
     '<div style="display:flex;gap:10px;margin-top:16px;justify-content:space-between;align-items:center;flex-wrap:wrap">'+
       '<div>'+(vl.snap.length?'<button class="btn btn-ghost" data-vl="fback">&larr; Previous</button>':'')+'</div>'+
@@ -1215,12 +1221,18 @@ function buildTrain(){
   var idxs=Object.keys(vl.drill).map(Number);
   if(!idxs.length){ idxs=vl.words.map(function(_,i){ return i; }); }   // nothing flagged -> practise the whole deck
   var words=idxs.map(function(i){ return vl.words[i]; }).sort(function(a,b){ return a.box-b.box; });
-  var types=["d2w","w2d","gap"];
+  var types=["typed","dictation","w2d","gap","d2w"];
   vl.qList=words.map(function(word,n){ var q=makeVQ(word, types[n%types.length]); q.chosen=null; q.checked=false; q.correct=false; return q; });
   vl.qi=0;
 }
 function makeVQ(word,type){
   var pool=vl.deck.words;
+  if(type==="typed"){
+    return {type:"fill",word:word,prompt:"Type the word for this meaning:",stem:word.def,accept:[word.w]};
+  }
+  if(type==="dictation"){
+    return {type:"fill",word:word,dictation:true,prompt:"Listen and type the word you hear",stem:"",clue:word.def,accept:[word.w]};
+  }
   if(type==="gap"){
     var esc2=word.w.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
     var reExact=new RegExp("\\b"+esc2+"\\b","i");
@@ -1240,7 +1252,7 @@ function makeVQ(word,type){
     return {type:"mcq",word:word,prompt:"Which word means this?",stem:word.def,options:opts,answer:opts.indexOf(word.w)};
   }
   var opts2=shuffleArr([word.def].concat(others.map(function(x){ return x.def; })));
-  return {type:"mcq",word:word,prompt:"What does this word mean?",stem:word.w,options:opts2,answer:opts2.indexOf(word.def)};
+  return {type:"mcq",word:word,prompt:"What does this word mean?",stem:word.w,options:opts2,answer:opts2.indexOf(word.def),showWord:true};
 }
 function vlFillCorrect(it,val){ return it.accept.some(function(a){ return norm(a)===norm(val||""); }); }
 function trainScore(){ return vl.qList.filter(function(q){ return q.checked&&q.correct; }).length; }
@@ -1265,7 +1277,7 @@ function renderTrain(){
     var ok=it.correct;
     fb='<div style="margin-top:16px;padding:13px;border-radius:11px;background:'+(ok?"var(--correctBg)":"var(--wrongBg)")+';border-left:3px solid '+(ok?"var(--correct)":"var(--wrong)")+'">'+
        '<div style="font-weight:700;color:'+(ok?"var(--correct)":"var(--wrong)")+';font-size:13.5px">'+(ok?"Correct":"Not quite")+'</div>'+
-       '<p style="margin:5px 0 0;font-size:14px"><strong>'+esc(it.word.w)+'</strong> — '+esc(it.word.def)+'</p></div>';
+       '<p style="margin:5px 0 0;font-size:14px"><strong>'+esc(it.word.w)+'</strong> '+spkBtn(it.word.w)+' — '+esc(it.word.def)+'</p></div>';
   }
   var right="";
   if(checked){ right+='<button class="btn btn-ghost" data-vl="vredo">Redo</button><button class="btn" data-vl="vnext">'+((vl.qi+1>=total)?"See results →":"Next →")+'</button>'; }
@@ -1273,14 +1285,24 @@ function renderTrain(){
   var nav='<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:18px;flex-wrap:wrap">'+
     '<div>'+((vl.qi>0)?'<button class="btn btn-ghost" data-vl="vprev">&larr; Previous</button>':'')+'</div>'+
     '<div style="display:flex;gap:10px;flex-wrap:wrap">'+right+'</div></div>';
+  var head;
+  if(it.dictation){
+    head='<div style="text-align:center;margin:2px 0 18px">'+
+      '<button class="spk-big" data-say="'+esc(it.word.w)+'">&#128266; Play word</button>'+
+      '<div style="font-size:12px;color:var(--muted);margin-top:10px">Cannot hear it? <button class="link" data-vl="dhint">show the meaning</button></div>'+
+      (it.showHint?('<p style="margin:10px 0 0;font-size:15px;color:var(--inkSoft)">'+esc(it.clue)+'</p>'):'')+
+    '</div>';
+  } else {
+    head='<p class="serif" style="font-size:20px;line-height:1.4;margin:0 0 18px">'+esc(it.stem)+(it.showWord?(' '+spkBtn(it.word.w)):'')+'</p>';
+  }
   app.innerHTML=headerHTML(vl.deck.title)+'<div class="wrap wrap-narrow" style="padding-top:26px">'+
     (vl.review?"":vlStepsHTML("train"))+
     '<div style="display:flex;justify-content:space-between;font-size:12.5px;color:var(--muted);margin-bottom:8px"><span>'+(vl.review?"Review":"Practice")+' · question '+(vl.qi+1)+' of '+total+'</span><span class="scorepill">Score '+trainScore()+'/'+total+'</span></div>'+
     '<div style="height:5px;background:var(--line);border-radius:4px;margin-bottom:22px;overflow:hidden"><div style="width:'+((vl.qi+1)/total*100)+'%;height:100%;background:var(--gold)"></div></div>'+
     '<div class="card" style="padding:22px">'+
       '<div class="eyebrow" style="margin-bottom:8px">'+esc(it.prompt)+'</div>'+
-      '<p class="serif" style="font-size:20px;line-height:1.4;margin:0 0 18px">'+esc(it.stem)+'</p>'+
-      body+fb+'</div>'+nav+'</div>';
+      head+body+fb+'</div>'+nav+'</div>';
+  if(it.dictation && !it._played){ it._played=true; sayWord(it.word.w); }
   wireVocab();
 }
 function vlCheck(){
@@ -1365,7 +1387,11 @@ function wireVocab(){
       if(a==="vredo") return vlRedo();
       if(a==="again") return startDeck(vl.deck.id);
       if(a==="reviewmore") return startReview();
+      if(a==="dhint"){ vl.qList[vl.qi].showHint=true; return renderVocab(); }
     });
+  });
+  app.querySelectorAll("[data-say]").forEach(function(el){
+    el.addEventListener("click",function(e){ e.stopPropagation(); sayWord(el.getAttribute("data-say")); });
   });
   app.querySelectorAll("[data-vlopt]").forEach(function(el){
     el.addEventListener("click",function(){ vl.qList[vl.qi].chosen=parseInt(el.getAttribute("data-vlopt"),10); renderVocab(); });
