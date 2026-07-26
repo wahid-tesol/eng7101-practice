@@ -1052,7 +1052,94 @@ function vocabSrsKey(){ var st=getStudent(); return VOCAB_SRS_PREFIX+((st&&st.id
 function loadSRS(){ try{ return JSON.parse(localStorage.getItem(vocabSrsKey())||"{}"); }catch(e){ return {}; } }
 function saveSRS(m){ try{ localStorage.setItem(vocabSrsKey(), JSON.stringify(m)); }catch(e){} }
 
+/* ---- spaced-repetition scheduling + daily habit stats ---- */
+const SRS_INTERVAL=[0,1,2,4,7,15];   // days until a word is due again, indexed by box (0..5)
+function today(){ return Math.floor(Date.now()/86400000); }
+const ALL_WORDS=[];
+VOCAB_DECKS.forEach(function(d){
+  var list=d.id.indexOf("wl1_")===0?"wl1":(d.id.indexOf("wl2_")===0?"wl2":"other");
+  d.words.forEach(function(w,idx){ ALL_WORDS.push({key:d.id+":"+idx,w:w.w,def:w.def,ex:w.ex,list:list,deckId:d.id}); });
+});
+function dueWords(){
+  var srs=loadSRS(), t=today(), out=[];
+  ALL_WORDS.forEach(function(x){ var s=srs[x.key]; if(s && (s.seen||0)>0){ var due=(s.due===undefined?0:s.due); if(due<=t) out.push(x); } });
+  return out;
+}
+function learnedCount(){ var srs=loadSRS(); return Object.keys(srs).filter(function(k){ return (srs[k].seen||0)>0; }).length; }
+
+const STATS_PREFIX="eng7101:stats:";
+function statsKey(){ var st=getStudent(); return STATS_PREFIX+((st&&st.id)||(st&&st.name)||"anon"); }
+function loadStats(){ try{ return JSON.parse(localStorage.getItem(statsKey())||"{}"); }catch(e){ return {}; } }
+function saveStats(m){ try{ localStorage.setItem(statsKey(), JSON.stringify(m)); }catch(e){} }
+function currentStreak(){ var st=loadStats(), t=today(); return (st.lastDay===t||st.lastDay===t-1)?(st.streak||0):0; }
+function todayCountVal(){ var st=loadStats(), t=today(); return (st.todayDay===t)?(st.todayCount||0):0; }
+function dailyGoalVal(){ var st=loadStats(); return st.dailyGoal||15; }
+function markPractisedToday(correct){
+  var st=loadStats(), t=today();
+  if(st.todayDay!==t){ st.todayDay=t; st.todayCount=0; }
+  st.todayCount=(st.todayCount||0)+1;
+  if(st.lastDay!==t){ st.streak=(st.lastDay===t-1)?((st.streak||0)+1):1; st.lastDay=t; }
+  st.xp=(st.xp||0)+(correct?10:3);
+  saveStats(st);
+}
+
 let vl = null;
+function startReview(){
+  var due=dueWords();
+  if(!due.length){ return renderReviewEmpty(); }
+  var srs=loadSRS();
+  due=shuffleArr(due).sort(function(a,b){ return ((srs[a.key]&&srs[a.key].box)||0)-((srs[b.key]&&srs[b.key].box)||0); });
+  var pick=due.slice(0,20);
+  var words=pick.map(function(x){ return {w:x.w,def:x.def,ex:x.ex,key:x.key,box:(srs[x.key]?srs[x.key].box:0)}; });
+  vl={deck:{id:"_review",title:"Daily Review",words:ALL_WORDS},words:words,stage:"train",
+      queue:[],reshow:{},drill:{},known:{},snap:[],flipped:false,qList:[],qi:0,review:true};
+  words.forEach(function(_,i){ vl.drill[i]=true; });
+  buildTrain();
+  renderVocab();
+}
+function renderReviewEmpty(){
+  app.innerHTML=headerHTML("Daily Review")+'<div class="wrap wrap-narrow" style="padding-top:48px">'+
+    '<div class="card" style="padding:30px;text-align:center">'+
+      '<div class="eyebrow">Daily review</div>'+
+      '<div class="serif" style="font-size:30px;margin:8px 0 6px">All caught up</div>'+
+      '<p style="color:var(--inkSoft);margin-top:0">No words are due for review right now. Learn a new deck below, or come back tomorrow to keep your streak going.</p>'+
+      '<div style="display:flex;gap:10px;margin-top:16px;justify-content:center"><button class="btn" data-vl="home">Back to topics</button></div>'+
+    '</div></div>';
+  wireVocab();
+}
+function renderReviewDone(){
+  var correct=trainScore(), total=vl.qList.length;
+  var streak=currentStreak(), tc=todayCountVal(), goal=dailyGoalVal(), goalMet=tc>=goal;
+  var stillDue=dueWords().length;
+  app.innerHTML=headerHTML("Daily Review")+'<div class="wrap wrap-narrow" style="padding-top:44px">'+
+    '<div class="card" style="padding:28px;text-align:center">'+
+      '<div class="eyebrow">Review complete</div>'+
+      '<div class="serif" style="font-size:44px;font-weight:700;margin:6px 0 2px;color:var(--gold)">'+correct+' / '+total+'</div>'+
+      '<div style="font-size:12.5px;color:var(--muted)">recalled just now</div>'+
+      '<div style="display:flex;gap:9px;justify-content:center;margin:16px 0 2px;flex-wrap:wrap">'+
+        '<span class="scorepill">&#128293; '+streak+'-day streak</span>'+
+        '<span class="scorepill">Today '+tc+'/'+goal+(goalMet?' &#10003;':'')+'</span>'+
+        '<span class="scorepill">'+stillDue+' still due</span></div>'+
+      '<p style="color:var(--inkSoft);margin-top:10px">'+(goalMet?"Daily goal reached — nicely done.":(stillDue?"Good work — there are still words due, keep going.":"Good work — you're all caught up for now."))+'</p>'+
+      '<div style="display:flex;gap:10px;margin-top:16px;justify-content:center;flex-wrap:wrap">'+
+        (stillDue?'<button class="btn" data-vl="reviewmore">Review more</button>':'')+
+        '<button class="btn btn-ghost" data-vl="home">Back to topics</button></div>'+
+    '</div></div>';
+  wireVocab();
+}
+function reviewBannerHTML(){
+  if(!learnedCount()) return "";
+  var due=dueWords().length, streak=currentStreak(), tc=todayCountVal(), goal=dailyGoalVal();
+  var pctGoal=Math.min(100,Math.round(tc/goal*100));
+  return '<div class="card" style="padding:16px 18px;margin-top:16px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap">'+
+    '<div style="min-width:220px;flex:1">'+
+      '<div class="eyebrow" style="color:var(--gold)">Daily review</div>'+
+      '<div style="font-size:15.5px;font-weight:600;margin-top:3px">&#128293; '+streak+'-day streak &middot; '+due+' word'+(due===1?'':'s')+' due &middot; today '+tc+'/'+goal+'</div>'+
+      '<div class="pbar" style="margin-top:9px;max-width:320px"><div class="pbar-fill" style="width:'+pctGoal+'%"></div></div>'+
+    '</div>'+
+    '<button class="btn" role="button" tabindex="0" data-open="_review" style="white-space:nowrap">'+(due?('Review '+due+' &rarr;'):'Practice &rarr;')+'</button>'+
+  '</div>';
+}
 function startDeck(id){
   var d=VOCAB_BY_ID[id]; if(!d) return;
   var srs=loadSRS();
@@ -1187,8 +1274,8 @@ function renderTrain(){
     '<div>'+((vl.qi>0)?'<button class="btn btn-ghost" data-vl="vprev">&larr; Previous</button>':'')+'</div>'+
     '<div style="display:flex;gap:10px;flex-wrap:wrap">'+right+'</div></div>';
   app.innerHTML=headerHTML(vl.deck.title)+'<div class="wrap wrap-narrow" style="padding-top:26px">'+
-    vlStepsHTML("train")+
-    '<div style="display:flex;justify-content:space-between;font-size:12.5px;color:var(--muted);margin-bottom:8px"><span>Practice · question '+(vl.qi+1)+' of '+total+'</span><span class="scorepill">Score '+trainScore()+'/'+total+'</span></div>'+
+    (vl.review?"":vlStepsHTML("train"))+
+    '<div style="display:flex;justify-content:space-between;font-size:12.5px;color:var(--muted);margin-bottom:8px"><span>'+(vl.review?"Review":"Practice")+' · question '+(vl.qi+1)+' of '+total+'</span><span class="scorepill">Score '+trainScore()+'/'+total+'</span></div>'+
     '<div style="height:5px;background:var(--line);border-radius:4px;margin-bottom:22px;overflow:hidden"><div style="width:'+((vl.qi+1)/total*100)+'%;height:100%;background:var(--gold)"></div></div>'+
     '<div class="card" style="padding:22px">'+
       '<div class="eyebrow" style="margin-bottom:8px">'+esc(it.prompt)+'</div>'+
@@ -1205,7 +1292,9 @@ function vlCheck(){
   var srs=loadSRS(); var cur=srs[it.word.key]||{box:0,seen:0,correct:0};
   cur.seen=(cur.seen||0)+1;
   if(it.correct){ cur.correct=(cur.correct||0)+1; cur.box=Math.min((cur.box||0)+1,5); } else { cur.box=0; }
+  cur.due=today()+SRS_INTERVAL[cur.box];
   srs[it.word.key]=cur; saveSRS(srs);
+  if(!it.counted){ markPractisedToday(it.correct); it.counted=true; }
   renderVocab();
 }
 function vlNext(){
@@ -1233,6 +1322,7 @@ function vlGoStage(stage){
   vl.stage="done"; renderVocab();
 }
 function renderDone(){
+  if(vl.review) return renderReviewDone();
   var srs=loadSRS(), totalDeck=vl.words.length, drilled=vl.qList.length, recalled=trainScore();
   var mastered=vl.words.filter(function(w){ var s=srs[w.key]; return s && s.box>=1; }).length;
   var missed=vl.words.filter(function(w){ var s=srs[w.key]; return !s || s.box===0; });
@@ -1274,6 +1364,7 @@ function wireVocab(){
       if(a==="vprev") return vlPrev();
       if(a==="vredo") return vlRedo();
       if(a==="again") return startDeck(vl.deck.id);
+      if(a==="reviewmore") return startReview();
     });
   });
   app.querySelectorAll("[data-vlopt]").forEach(function(el){
@@ -1438,6 +1529,7 @@ function renderHome(){
             <span class="diamond">&#10022;</span>
             <h2 class="sectlabel">${esc(g.umbrella)}</h2>
             <div style="flex:1;height:1px;background:var(--line)"></div></div>`;
+        if(g.umbrella==="Vocabulary") html += reviewBannerHTML();
       }
       html += `<div class="subsect" style="margin-top:${firstSub?16:30}px;margin-bottom:12px"><span style="color:var(--goldLine);font-size:9px">&#9670;</span><h3 class="subsectlabel">${esc(g.label)}</h3></div><div class="grid">${items}</div>`;
       lastUmb=g.umbrella;
@@ -1471,6 +1563,7 @@ function renderHome(){
 
 function openTopic(id){
   if(READINGS_BY_ID[id]){ const r=READINGS_BY_ID[id]; startQuiz(id,r.questions,r.title,passageHTML(r)); }
+  else if(id==="_review"){ startReview(); }
   else if(VOCAB_BY_ID[id]){ startDeck(id); }
   else if(WRITING[id]){ w={id:id,text:"",ticks:{},showModel:true}; renderWriting(); }
   else if(QUIZ[id]){ startQuiz(id,QUIZ[id],TITLE[id],""); }
