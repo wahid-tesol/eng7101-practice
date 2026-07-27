@@ -1508,7 +1508,9 @@ function renderTrain(){
        '<p style="margin:5px 0 0;font-size:14px"><strong>'+esc(it.word.w)+'</strong> '+spkBtn(it.word.w)+' — '+esc(it.word.def)+'</p></div>';
   }
   var right="";
-  if(checked){ right+='<button class="btn btn-ghost" data-vl="vredo">Redo</button><button class="btn" data-vl="vnext">'+((vl.qi+1>=total)?"See results →":"Next →")+'</button>'; }
+  var lastQ=(vl.qi+1>=total);
+  var nextLabel=lastQ?((vl.cloze&&!vl.clozeDone)?"Next: passage →":"See results →"):"Next →";
+  if(checked){ right+=(it.correct?"":'<button class="btn btn-ghost" data-vl="vredo">Redo</button>')+'<button class="btn" data-vl="vnext">'+nextLabel+'</button>'; }
   else { var dis=(chosen===null||chosen==="")?"disabled":""; right+='<button class="btn" id="vlCheckBtn" data-vl="check" '+dis+'>Check</button>'; }
   var nav='<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:18px;flex-wrap:wrap">'+
     '<div>'+((vl.qi>0)?'<button class="btn btn-ghost" data-vl="vprev">&larr; Previous</button>':'')+'</div>'+
@@ -1628,18 +1630,38 @@ function vlGoStage(stage){
 }
 function startReviewLoop(){
   var srs=loadSRS();
-  var missed=vl.words.filter(function(w){ var s=srs[w.key]; return !s || s.box===0; });
-  if(!missed.length){ missed=vl.words.slice(); }
+  var missed=(vl.reviewList&&vl.reviewList.length)?vl.reviewList.slice():vl.words.slice();
   var d=vl.deck;
   var words=missed.map(function(w){ return {w:w.w,pos:w.pos,def:w.def,ex:w.ex,key:w.key,box:(srs[w.key]?srs[w.key].box:0)}; });
   vl={deck:d,words:words,stage:"flash",i:0,flipped:false,picked:{},qList:[],qi:0,reviewLoop:true};
   renderVocab();
 }
+// This session's outcome — drives the Review screen. A word is mastered only if it was
+// attempted this session (a training question, the passage gap, or "picked up" in Meet) and
+// every attempt was correct. Any wrong attempt, or a word never attempted, sends it to review.
+function sessionReview(){
+  var qByKey={};
+  vl.qList.forEach(function(q){ (qByKey[q.word.key]=qByKey[q.word.key]||[]).push(q); });
+  var czByKey={};
+  if(vl.cloze){ vl.cloze.items.forEach(function(it,i){ czByKey[it.key]={checked:vl.cloze.checked,ok:(vl.cloze.checked&&vl.cloze.placed[i]===it.word)}; }); }
+  var mastered=[], review=[];
+  vl.words.forEach(function(w,idx){
+    if(vl.picked[idx]){ mastered.push(w); return; }              // marked "picked up" in Meet = known
+    var qs=(qByKey[w.key]||[]).filter(function(q){ return q.checked; });
+    var cz=czByKey[w.key], czAtt=!!(cz&&cz.checked);
+    var anyAttempt=qs.length>0 || czAtt;
+    var anyWrong=qs.some(function(q){ return !q.correct; }) || (czAtt && !cz.ok);
+    if(anyAttempt && !anyWrong){ mastered.push(w); } else { review.push(w); }
+  });
+  return {mastered:mastered, review:review};
+}
 function renderDone(){
   if(vl.review) return renderReviewDone();
-  var srs=loadSRS(), totalDeck=vl.words.length, drilled=vl.qList.length, recalled=trainScore();
-  var mastered=vl.words.filter(function(w){ var s=srs[w.key]; return s && s.box>=1; }).length;
-  var missed=vl.words.filter(function(w){ var s=srs[w.key]; return !s || s.box===0; });
+  var totalDeck=vl.words.length, drilled=vl.qList.length, recalled=trainScore();
+  var sr=sessionReview();
+  var mastered=sr.mastered.length;
+  var missed=sr.review;
+  vl.reviewList=missed;
   var activity=Object.keys(vl.picked).length>0 || vl.qList.some(function(q){ return q.checked; });
   if(activity && !vl.reviewLoop){
     recordScore(vl.deck.id,"vocab",mastered,totalDeck);
