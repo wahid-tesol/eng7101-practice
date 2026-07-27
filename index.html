@@ -110,7 +110,16 @@
   .wchip:active{cursor:grabbing}
   .foot{margin-top:58px;padding-top:24px;border-top:1px solid var(--line);text-align:center}
   .copyline{font-size:12px;letter-spacing:.05em;color:var(--muted)}
-  .install{position:fixed;right:18px;bottom:18px;z-index:20;display:none}
+  .install{position:fixed;right:16px;bottom:16px;z-index:20;display:none;border-radius:26px;box-shadow:0 4px 14px rgba(0,0,0,.16);padding:11px 17px;font-size:14px}
+  .ovl{position:fixed;inset:0;background:rgba(28,24,14,.48);z-index:60;display:none;align-items:flex-end;justify-content:center}
+  .ovl.show{display:flex}
+  .sheet{background:var(--surface);width:100%;max-width:470px;border-radius:20px 20px 0 0;padding:22px 22px 26px;box-shadow:0 -10px 34px rgba(0,0,0,.22);animation:sheetUp .22s ease;max-height:88vh;overflow:auto}
+  @media(min-width:540px){ .ovl{align-items:center} .sheet{border-radius:20px} }
+  @keyframes sheetUp{ from{transform:translateY(28px);opacity:.5} to{transform:none;opacity:1} }
+  .istep{display:flex;gap:12px;align-items:flex-start;margin:14px 0}
+  .istep .n{flex:0 0 27px;height:27px;border-radius:50%;background:var(--gold);color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center;font-size:14px}
+  .istep .t{font-size:15px;line-height:1.5;padding-top:2px}
+  .ishare{display:inline-flex;vertical-align:-5px;margin:0 2px}
   ul{margin:0}
   .idgate{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
   .idcard{max-width:430px;width:100%;padding:30px 28px;text-align:center}
@@ -133,13 +142,14 @@
   .rs-none{color:var(--muted)}
   .rs-soon{color:var(--muted);font-style:italic}
   .rep-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:24px}
-  @media print{ .head,.install,.rep-actions,.whoami{display:none!important} body{background:#fff} .card{border-color:#ccc} }
+  @media print{ .head,.install,.ovl,.rep-actions,.whoami{display:none!important} body{background:#fff} .card{border-color:#ccc} }
   @media (prefers-reduced-motion: reduce){.tile,.btn,.opt{transition:none}}
 </style>
 </head>
 <body>
 <div id="app"></div>
-<button id="installBtn" class="btn install">Install app</button>
+<button id="installBtn" class="btn install">📲 Install this app</button>
+<div class="ovl" id="installOvl"><div class="sheet" id="installSheet"></div></div>
 
 <script>
 /* ============================================================================
@@ -2181,12 +2191,58 @@ function renderReport(){
   window.scrollTo(0,0);
 }
 
-/* ---- PWA: install button + service worker ---- */
+/* ---- PWA: install helper + service worker ---- */
 let deferredPrompt=null;
 const installBtn=document.getElementById("installBtn");
-window.addEventListener("beforeinstallprompt",e=>{ e.preventDefault(); deferredPrompt=e; installBtn.style.display="block"; });
-installBtn.addEventListener("click",async()=>{ if(!deferredPrompt)return; deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt=null; installBtn.style.display="none"; });
-window.addEventListener("appinstalled",()=>{ installBtn.style.display="none"; });
+const installOvl=document.getElementById("installOvl");
+const installSheet=document.getElementById("installSheet");
+function isStandalone(){ return window.matchMedia("(display-mode: standalone)").matches || navigator.standalone===true; }
+function platform(){
+  var ua=navigator.userAgent||"";
+  var ios=/iphone|ipad|ipod/i.test(ua) || (/macintosh/i.test(ua) && "ontouchend" in document); // iPadOS reports as Mac
+  var android=/android/i.test(ua);
+  return { ios:ios, android:android, safari:/safari/i.test(ua) && !/crios|fxios|edgios/i.test(ua) };
+}
+var SHARE_SVG='<svg class="ishare" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1E6F5C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4"/><path d="m8 8 4-4 4 4"/><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7"/></svg>';
+function updateInstallBtn(){ installBtn.style.display = isStandalone() ? "none" : "block"; }
+function step(n,html){ return '<div class="istep"><div class="n">'+n+'</div><div class="t">'+html+'</div></div>'; }
+function openInstallHelp(){
+  var p=platform(), body, foot='';
+  if(deferredPrompt){
+    body='<p style="color:var(--inkSoft);margin:2px 0 4px">Add ENG7101 Practice to your device so it opens with one tap, like a normal app — and works offline.</p>';
+    foot='<button class="btn" id="doInstall" style="width:100%;margin-top:12px">Install now</button>';
+  } else if(p.ios){
+    body='<p style="color:var(--inkSoft);margin:2px 0 10px">Add it to your Home Screen — you\'ll get an app icon just like the App Store.</p>'+
+      (p.safari?'':'<p style="color:var(--wrong);font-size:13px;margin:0 0 8px"><b>Open this page in Safari first</b> — Add to Home Screen only works in Safari on iPhone/iPad.</p>')+
+      step(1,'Tap the <b>Share</b> button '+SHARE_SVG+' at the bottom of the screen.')+
+      step(2,'Scroll down and tap <b>Add to Home Screen</b>.')+
+      step(3,'Tap <b>Add</b> in the top-right corner.');
+  } else if(p.android){
+    body='<p style="color:var(--inkSoft);margin:2px 0 10px">Add it to your Home screen — you\'ll get an app icon just like Play Store apps.</p>'+
+      step(1,'Tap the <b>⋮ menu</b> (top-right of Chrome).')+
+      step(2,'Tap <b>Install app</b> (or <b>Add to Home screen</b>).')+
+      step(3,'Tap <b>Install</b> / <b>Add</b> to confirm.');
+  } else {
+    body='<p style="color:var(--inkSoft);margin:2px 0 10px">Install it as an app on your computer:</p>'+
+      step(1,'Look for an <b>install icon</b> ⊕ in the address bar, or open your browser <b>menu</b>.')+
+      step(2,'Choose <b>Install ENG7101 Practice</b> (or <b>Add to Home Screen</b>).')+
+      step(3,'Confirm — it opens in its own window from then on.');
+  }
+  installSheet.innerHTML=
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">'+
+      '<div class="serif" style="font-size:22px;font-weight:700">Install this app</div>'+
+      '<button class="btn btn-ghost" id="installClose" style="padding:6px 12px">Close</button></div>'+
+    body+foot;
+  installOvl.classList.add("show");
+  var di=document.getElementById("doInstall");
+  if(di) di.addEventListener("click",async function(){ installOvl.classList.remove("show"); deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt=null; updateInstallBtn(); });
+  document.getElementById("installClose").addEventListener("click",function(){ installOvl.classList.remove("show"); });
+}
+installBtn.addEventListener("click",openInstallHelp);
+installOvl.addEventListener("click",function(e){ if(e.target===installOvl) installOvl.classList.remove("show"); });
+window.addEventListener("beforeinstallprompt",e=>{ e.preventDefault(); deferredPrompt=e; updateInstallBtn(); });
+window.addEventListener("appinstalled",()=>{ deferredPrompt=null; installBtn.style.display="none"; installOvl.classList.remove("show"); });
+updateInstallBtn();
 if("serviceWorker" in navigator && location.protocol==="https:"){ navigator.serviceWorker.register("sw.js").catch(()=>{}); }
 
 function boot(){
