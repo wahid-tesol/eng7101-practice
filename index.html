@@ -80,6 +80,9 @@
   .spk:hover{border-color:var(--gold);background:var(--goldSoft)}
   .spk-big{font:inherit;font-weight:600;border-radius:11px;border:1px solid var(--gold);background:var(--goldSoft);color:var(--gold);padding:13px 22px;cursor:pointer;font-size:15px;transition:background .12s,color .12s}
   .spk-big:hover{background:var(--gold);color:#fff}
+  .wbank{font:inherit;font-weight:600;font-size:15px;border:1.5px solid var(--line);border-radius:10px;padding:9px 16px;background:var(--surface);cursor:pointer;color:var(--ink);transition:border-color .12s,background .12s}
+  .wbank:hover:not(:disabled){border-color:var(--gold);background:var(--goldSoft)}
+  .wbank:disabled{cursor:default}
   .foot{margin-top:58px;padding-top:24px;border-top:1px solid var(--line);text-align:center}
   .copyline{font-size:12px;letter-spacing:.05em;color:var(--muted)}
   .install{position:fixed;right:18px;bottom:18px;z-index:20;display:none}
@@ -1275,24 +1278,29 @@ function buildTrain(){
   vl.qList=words.map(function(word,n){ var q=makeVQ(word, types[n%types.length]); q.chosen=null; q.checked=false; q.correct=false; return q; });
   vl.qi=0;
 }
+function wordBank(word,pool){
+  var others=shuffleArr(pool.filter(function(x){ return x.w!==word.w; })).slice(0,5).map(function(x){ return x.w; });
+  var seen={}, uniq=[]; [word.w].concat(others).forEach(function(w){ if(!seen[w]){ seen[w]=1; uniq.push(w); } });
+  return shuffleArr(uniq);
+}
 function makeVQ(word,type){
   var pool=vl.deck.words;
   if(type==="typed"){
-    return {type:"fill",word:word,prompt:"Type the word for this meaning:",stem:word.def,accept:[word.w]};
+    return {type:"fill",word:word,prompt:"Choose the word for this meaning:",stem:word.def,accept:[word.w],bank:wordBank(word,pool)};
   }
   if(type==="dictation"){
-    return {type:"fill",word:word,dictation:true,prompt:"Listen and type the word you hear",stem:"",clue:word.def,accept:[word.w]};
+    return {type:"fill",word:word,dictation:true,prompt:"Listen and choose the word you hear",stem:"",clue:word.def,accept:[word.w],bank:wordBank(word,pool)};
   }
   if(type==="gap"){
     var esc2=word.w.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
     var reExact=new RegExp("\\b"+esc2+"\\b","i");
     if(reExact.test(word.ex)){
-      return {type:"fill",word:word,prompt:"Type the word that fits:",stem:word.ex.replace(reExact,"______"),accept:[word.w]};
+      return {type:"fill",word:word,prompt:"Choose the word that fits:",stem:word.ex.replace(reExact,"______"),accept:[word.w],bank:wordBank(word,pool)};
     }
     var reInfl=new RegExp("\\b"+esc2+"(s|es|ed|d|ing|ally|ly|ies)?\\b","i");
     var m=word.ex.match(reInfl);
     if(m){
-      return {type:"fill",word:word,prompt:"Type the word that fits:",stem:word.ex.replace(reInfl,"______"),accept:[m[0],word.w]};
+      return {type:"fill",word:word,prompt:"Choose the word that fits:",stem:word.ex.replace(reInfl,"______"),accept:[m[0],word.w],bank:wordBank(word,pool)};
     }
     type="d2w";
   }
@@ -1317,6 +1325,18 @@ function renderTrain(){
       else if(idx===chosen){bd="var(--gold)";bg="var(--goldSoft)";}
       return '<button class="opt" '+(checked?"disabled":"")+' data-vlopt="'+idx+'" style="border-color:'+bd+';background:'+bg+'"><span>'+esc(opt)+'</span></button>';
     }).join("")+'</div>';
+  } else if(it.bank){
+    body='<div style="border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--paper)">'+
+      '<div style="display:flex;flex-wrap:wrap;gap:9px;justify-content:center">'+
+      it.bank.map(function(opt){
+        var bd="var(--line)",bg="var(--surface)",cl="var(--ink)";
+        if(checked){
+          if(norm(opt)===norm(it.word.w)){ bd="var(--correct)";bg="var(--correctBg)";cl="var(--correct)"; }
+          else if(opt===chosen){ bd="var(--wrong)";bg="var(--wrongBg)";cl="var(--wrong)"; }
+          else { cl="var(--muted)"; }
+        } else if(opt===chosen){ bd="var(--gold)";bg="var(--goldSoft)"; }
+        return '<button class="wbank" '+(checked?"disabled":"")+' data-wbank="'+esc(opt)+'" style="border-color:'+bd+';background:'+bg+';color:'+cl+'">'+esc(opt)+'</button>';
+      }).join("")+'</div></div>';
   } else {
     var okf=checked&&vlFillCorrect(it,chosen);
     var st=checked?("border-color:"+(okf?"var(--correct)":"var(--wrong)")+";background:"+(okf?"var(--correctBg)":"var(--wrongBg)")):"";
@@ -1443,6 +1463,9 @@ function wireVocab(){
   });
   app.querySelectorAll("[data-say]").forEach(function(el){
     el.addEventListener("click",function(e){ e.stopPropagation(); sayWord(el.getAttribute("data-say")); });
+  });
+  app.querySelectorAll("[data-wbank]").forEach(function(el){
+    el.addEventListener("click",function(){ vl.qList[vl.qi].chosen=el.getAttribute("data-wbank"); renderVocab(); });
   });
   app.querySelectorAll("[data-vlopt]").forEach(function(el){
     el.addEventListener("click",function(){ vl.qList[vl.qi].chosen=parseInt(el.getAttribute("data-vlopt"),10); renderVocab(); });
