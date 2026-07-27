@@ -1059,7 +1059,56 @@ const VOCAB_BY_ID = {};
 VOCAB_DECKS.forEach(function(d){ VOCAB_BY_ID[d.id]=d; });
 
 function shuffleArr(a){ a=a.slice(); for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
-function sayWord(w){ try{ if(window.speechSynthesis){ speechSynthesis.cancel(); var u=new SpeechSynthesisUtterance(String(w)); u.lang="en-GB"; u.rate=0.92; speechSynthesis.speak(u); } }catch(e){} }
+var _vlVoice=null;
+function pickVoice(){
+  if(_vlVoice) return _vlVoice;
+  if(!window.speechSynthesis) return null;
+  var voices=speechSynthesis.getVoices(); if(!voices || !voices.length) return null;
+  function find(pred){ for(var i=0;i<voices.length;i++){ if(pred(voices[i])) return voices[i]; } return null; }
+  /* preferred natural British voices, best first (Chrome, Edge/Windows, Apple) */
+  var names=["Google UK English Female","Google UK English Male","Microsoft Libby Online (Natural)","Microsoft Sonia Online (Natural)","Microsoft Maisie Online (Natural)","Microsoft Ryan Online (Natural)","Microsoft Thomas Online (Natural)","Daniel","Serena","Kate","Arthur","Stephanie","Microsoft Hazel"];
+  var v=null,i;
+  for(i=0;i<names.length;i++){ (function(nm){ if(!v){ var f=find(function(x){ return x.name===nm; }); if(f) v=f; } })(names[i]); }
+  if(v){ _vlVoice=v; return v; }
+  v=find(function(x){ return /en[-_]GB/i.test(x.lang) && /natural|online|enhanced|premium/i.test(x.name); }); if(v){ _vlVoice=v; return v; }
+  v=find(function(x){ return /en[-_]GB/i.test(x.lang); }); if(v){ _vlVoice=v; return v; }
+  v=find(function(x){ return /uk english|british/i.test(x.name); }); if(v){ _vlVoice=v; return v; }
+  v=find(function(x){ return /^en/i.test(x.lang) && /natural|online|enhanced|premium/i.test(x.name); }); if(v){ _vlVoice=v; return v; }
+  v=find(function(x){ return /^en/i.test(x.lang); }); if(v){ _vlVoice=v; return v; }
+  return null;
+}
+function ttsWord(w){
+  try{
+    if(!window.speechSynthesis) return;
+    speechSynthesis.cancel();
+    var u=new SpeechSynthesisUtterance(String(w));
+    var v=pickVoice();
+    if(v){ u.voice=v; u.lang=v.lang; } else { u.lang="en-GB"; }
+    u.rate=0.9; u.pitch=1;
+    speechSynthesis.speak(u);
+  }catch(e){}
+}
+/* AUDIO_HAVE: words that have a bundled human recording (Elena). List 2 words
+   are marked; if a given file isn't present yet, playback falls back to the
+   smart device voice automatically (via the Audio error handler below). */
+function wordSlug(w){ return String(w).toLowerCase().replace(/[^a-z]/g,""); }
+var AUDIO_HAVE={};
+try{ AWL2_WORDS.forEach(function(x){ AUDIO_HAVE[wordSlug(x.w)]=1; }); }catch(e){}
+function sayWord(w){
+  var s=wordSlug(w);
+  if(AUDIO_HAVE[s]){
+    try{
+      var a=new Audio("audio/"+s+".mp3");
+      var fell=false;
+      a.addEventListener("error",function(){ if(!fell){ fell=true; ttsWord(w); } });
+      var p=a.play();
+      if(p && p.catch){ p.catch(function(){ if(!fell){ fell=true; ttsWord(w); } }); }
+      return;
+    }catch(e){}
+  }
+  ttsWord(w);
+}
+if(window.speechSynthesis){ try{ speechSynthesis.getVoices(); speechSynthesis.addEventListener("voiceschanged",function(){ _vlVoice=null; pickVoice(); }); }catch(e){} }
 function spkBtn(w){ return '<button class="spk" data-say="'+esc(w)+'" title="Hear the word" aria-label="Hear pronunciation">&#128266;</button>'; }
 
 const VOCAB_SRS_PREFIX = "eng7101:vocab:";
