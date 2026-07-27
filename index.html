@@ -89,6 +89,25 @@
   .matchcell.meaning{font-size:13px;line-height:1.4}
   .matchcell.wrong{border-color:var(--wrong);background:var(--wrongBg)}
   .matchcell.done{visibility:hidden}
+  .flip-card{perspective:1400px;cursor:pointer}
+  .flip-inner{position:relative;width:100%;min-height:236px;transition:transform .55s cubic-bezier(.45,.05,.2,1);transform-style:preserve-3d}
+  .flip-inner.flipped{transform:rotateY(180deg)}
+  .flip-face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px 26px;border-radius:16px;border:1px solid var(--goldLine);box-shadow:0 8px 24px rgba(30,22,10,.07),0 1px 2px rgba(30,22,10,.04)}
+  .flip-front{background:linear-gradient(158deg,#FFFDF9 42%,#F6EDD6)}
+  .flip-back{background:linear-gradient(158deg,#FFFDF9 42%,#E7F0EC);transform:rotateY(180deg)}
+  .pickup{position:absolute;top:12px;right:12px;font:inherit;font-size:11.5px;font-weight:700;color:var(--correct);background:var(--correctBg);border:1px solid var(--correct);border-radius:20px;padding:5px 11px;cursor:pointer;transition:background .12s,color .12s}
+  .pickup:hover{background:var(--correct);color:#fff}
+  .cline{font-size:16.5px;line-height:2.15;margin:0 0 6px;color:var(--ink)}
+  .cslot{display:inline-block;min-width:104px;padding:2px 10px;margin:0 3px;border-bottom:2px solid var(--gold);text-align:center;border-radius:7px 7px 0 0;background:var(--goldSoft);color:var(--muted);cursor:pointer;vertical-align:baseline;transition:background .12s}
+  .cslot.filled{color:var(--ink);font-weight:600;background:#fff;border:1px solid var(--line);border-bottom:2px solid var(--gold)}
+  .cslot.drop{background:var(--goldLine);color:var(--ink)}
+  .cslot.right{border-color:var(--correct)!important;background:var(--correctBg)!important;color:var(--correct)!important}
+  .cslot.wrong{border-color:var(--wrong)!important;background:var(--wrongBg)!important;color:var(--wrong)!important}
+  .wbankwrap{display:flex;flex-wrap:wrap;gap:9px;justify-content:center}
+  .wchip{display:inline-block;padding:8px 15px;border:1px solid var(--goldLine);border-radius:22px;background:var(--surface);cursor:grab;font-weight:600;font-size:14px;-webkit-user-select:none;user-select:none;box-shadow:0 1px 2px rgba(0,0,0,.04);transition:background .12s,box-shadow .12s}
+  .wchip.sel{border-color:var(--gold);background:var(--goldSoft);box-shadow:0 0 0 3px var(--goldSoft)}
+  .wchip.used{opacity:.3;cursor:default;pointer-events:none}
+  .wchip:active{cursor:grabbing}
   .foot{margin-top:58px;padding-top:24px;border-top:1px solid var(--line);text-align:center}
   .copyline{font-size:12px;letter-spacing:.05em;color:var(--muted)}
   .install{position:fixed;right:18px;bottom:18px;z-index:20;display:none}
@@ -1156,8 +1175,7 @@ function startReview(){
   var pick=due.slice(0,20);
   var words=pick.map(function(x){ return {w:x.w,def:x.def,ex:x.ex,key:x.key,box:(srs[x.key]?srs[x.key].box:0)}; });
   vl={deck:{id:"_review",title:"Daily Review",words:ALL_WORDS},words:words,stage:"train",
-      queue:[],reshow:{},drill:{},known:{},snap:[],flipped:false,qList:[],qi:0,review:true};
-  words.forEach(function(_,i){ vl.drill[i]=true; });
+      i:0,flipped:false,picked:{},qList:[],qi:0,review:true};
   buildTrain();
   renderVocab();
 }
@@ -1331,9 +1349,7 @@ function startDeck(id){
     var key=d.id+":"+idx; var b=(srs[key]&&srs[key].box)||0;
     return {w:word.w,pos:word.pos,def:word.def,ex:word.ex,key:key,box:b};
   });
-  vl={deck:d,words:words,stage:"flash",
-      queue:words.map(function(_,i){return i;}),reshow:{},drill:{},known:{},snap:[],
-      flipped:false,qList:[],qi:0};
+  vl={deck:d,words:words,stage:"flash",i:0,flipped:false,picked:{},qList:[],qi:0};
   renderVocab();
 }
 function vlStepsHTML(active){
@@ -1346,62 +1362,79 @@ function vlStepsHTML(active){
 function renderVocab(){
   if(vl.stage==="flash") return renderFlash();
   if(vl.stage==="train") return renderTrain();
+  if(vl.stage==="cloze") return renderCloze();
   return renderDone();
 }
+function activeIdxs(){ return vl.words.map(function(_,i){ return i; }).filter(function(i){ return !vl.picked[i]; }); }
 function renderFlash(){
-  if(!vl.queue.length){ return finishMeet(); }
-  var ci=vl.queue[0], c=vl.words[ci];
-  var knownCount=Object.keys(vl.known).length, drillCount=Object.keys(vl.drill).length;
+  var act=activeIdxs(), pickedCount=Object.keys(vl.picked).length;
+  if(!act.length){
+    app.innerHTML=headerHTML(vl.deck.title)+'<div class="wrap wrap-narrow" style="padding-top:26px">'+
+      vlStepsHTML("flash")+
+      '<div class="card" style="padding:34px 24px;text-align:center">'+
+        '<div class="serif" style="font-size:26px;font-weight:600">All '+vl.words.length+' words picked up &#10003;</div>'+
+        '<p style="color:var(--inkSoft);margin-top:10px">You have marked every word in this deck as known. Go and practise them.</p>'+
+        '<div style="display:flex;gap:10px;justify-content:center;margin-top:14px;flex-wrap:wrap"><button class="btn" data-vlstep="train">Go to practice &rarr;</button></div>'+
+      '</div></div>';
+    wireVocab(); return;
+  }
+  if(vl.picked[vl.i]){ vl.i=act[0]; }
+  var c=vl.words[vl.i];
   app.innerHTML=headerHTML(vl.deck.title)+'<div class="wrap wrap-narrow" style="padding-top:26px">'+
     vlStepsHTML("flash")+
-    '<div style="display:flex;justify-content:space-between;font-size:12.5px;color:var(--muted);margin-bottom:8px"><span>Flashcards · '+vl.queue.length+' to go</span><span>Known '+knownCount+' &middot; Still learning '+drillCount+'</span></div>'+
-    '<div class="card" id="vlCard" role="button" tabindex="0" style="padding:34px 24px;text-align:center;min-height:150px;cursor:pointer;display:flex;flex-direction:column;justify-content:center">'+
-      (vl.flipped
-        ? '<div><div style="font-size:18px;line-height:1.5">'+esc(c.def)+'</div><div style="font-size:14px;color:var(--inkSoft);font-style:italic;margin-top:12px;line-height:1.5">“'+esc(c.ex)+'”</div></div>'
-        : '<div><div class="serif" style="font-size:30px;font-weight:600">'+esc(c.w)+' '+spkBtn(c.w)+'</div><div style="font-size:13px;color:var(--muted);margin-top:8px">'+(c.pos?esc(c.pos)+' · ':'')+'tap to reveal meaning</div></div>')+
-    '</div>'+
-    '<div style="display:flex;gap:10px;margin-top:16px;justify-content:space-between;align-items:center;flex-wrap:wrap">'+
-      '<div>'+(vl.snap.length?'<button class="btn btn-ghost" data-vl="fback">&larr; Previous</button>':'')+'</div>'+
-      '<div style="display:flex;gap:10px;flex-wrap:wrap">'+
-        '<button class="btn btn-ghost" data-vl="flip">'+(vl.flipped?"Show word":"Flip card")+'</button>'+
-        '<button class="btn btn-ghost" data-vl="learn">Still learning &#8635;</button>'+
-        '<button class="btn" data-vl="know">Know it &#10003;</button>'+
+    '<div style="display:flex;justify-content:space-between;font-size:12.5px;color:var(--muted);margin-bottom:10px"><span>Flashcards &middot; tap the card to reveal</span><span>Picked up '+pickedCount+' &middot; '+act.length+' to go</span></div>'+
+    '<div class="flip-card" id="vlCard" role="button" tabindex="0" aria-label="Flashcard, tap to reveal meaning">'+
+      '<div class="flip-inner'+(vl.flipped?" flipped":"")+'" id="vlFlip">'+
+        '<div class="flip-face flip-front">'+
+          '<button class="pickup" data-vl="pickup" title="I already know this word">&#10003; Picked up</button>'+
+          '<div class="serif" style="font-size:32px;font-weight:600;line-height:1.1">'+esc(c.w)+' '+spkBtn(c.w)+'</div>'+
+          '<p style="font-style:italic;font-size:15.5px;line-height:1.6;color:#2c3954;margin:16px 0 0;max-width:440px">&ldquo;'+esc(c.ex)+'&rdquo;</p>'+
+          '<div style="margin-top:14px;font-size:13px;font-weight:700;color:var(--accent)">[ Guess the meaning of '+esc(c.w)+' from the sentence ]</div>'+
+          '<div style="font-size:11.5px;color:var(--muted);margin-top:10px">tap the card to reveal the meaning</div>'+
+        '</div>'+
+        '<div class="flip-face flip-back">'+
+          '<button class="pickup" data-vl="pickup" title="I already know this word">&#10003; Picked up</button>'+
+          '<div class="eyebrow" style="color:var(--gold)">Meaning</div>'+
+          '<div style="font-size:20px;line-height:1.5;margin-top:8px;max-width:440px">'+esc(c.def)+'</div>'+
+          '<p style="font-style:italic;font-size:14px;color:var(--inkSoft);margin-top:14px;max-width:440px">&ldquo;'+esc(c.ex)+'&rdquo;</p>'+
+          '<div class="serif" style="font-size:17px;font-weight:600;margin-top:12px">'+esc(c.w)+' '+spkBtn(c.w)+'</div>'+
+        '</div>'+
       '</div>'+
     '</div>'+
-    '<div style="text-align:center;font-size:11.5px;color:var(--muted);margin-top:11px;line-height:1.55">&#8635; <b>Still learning</b> — brings the word back and adds it to practice &nbsp;·&nbsp; &#10003; <b>Know it</b> — skips it in practice</div>'+
-    '</div>';
+    '<div style="display:flex;gap:10px;margin-top:18px;justify-content:space-between;align-items:center">'+
+      '<button class="btn btn-ghost" data-vl="prevcard">&larr; Previous</button>'+
+      '<button class="btn" data-vl="nextcard">Next &rarr;</button>'+
+    '</div></div>';
   wireVocab();
 }
-function vlAdvanceFlash(learn){
-  var ci=vl.queue[0], word=vl.words[ci];
-  vl.flipped=false;
-  var srs=loadSRS(); var cur=srs[word.key]||{box:word.box||0,seen:0,correct:0};
-  vl.snap.push({queue:vl.queue.slice(),drill:Object.assign({},vl.drill),known:Object.assign({},vl.known),reshow:Object.assign({},vl.reshow),key:word.key,box:word.box,srsBox:(srs[word.key]?srs[word.key].box:undefined)});
-  vl.queue.shift();
-  if(learn){
-    vl.drill[ci]=true; delete vl.known[ci];
-    cur.box=0; word.box=0;
-    vl.reshow[ci]=(vl.reshow[ci]||0)+1;
-    if(vl.reshow[ci]<=2){ vl.queue.push(ci); }   // a still-learning word returns up to twice more
-  } else {
-    delete vl.drill[ci]; vl.known[ci]=true;
-    cur.box=Math.min((cur.box||0)+1,5); word.box=cur.box;
-  }
-  srs[word.key]=cur; saveSRS(srs);
-  if(!vl.queue.length){ return finishMeet(); }
-  renderVocab();
-}
-function finishMeet(){
-  if(!Object.keys(vl.drill).length){ vl.stage="done"; renderVocab(); return; }
-  vl.stage="train"; buildTrain(); renderVocab();
+function nextCard(){ var n=vl.words.length; for(var k=1;k<=n;k++){ var j=(vl.i+k)%n; if(!vl.picked[j]){ vl.i=j; break; } } vl.flipped=false; renderVocab(); }
+function prevCard(){ var n=vl.words.length; for(var k=1;k<=n;k++){ var j=((vl.i-k)%n+n)%n; if(!vl.picked[j]){ vl.i=j; break; } } vl.flipped=false; renderVocab(); }
+function pickUp(){
+  var w=vl.words[vl.i]; vl.picked[vl.i]=true;
+  var srs=loadSRS(); var cur=srs[w.key]||{box:w.box||0,seen:0,correct:0};
+  cur.box=Math.min((cur.box||0)+1,5); cur.seen=(cur.seen||0)+1; cur.due=today()+SRS_INTERVAL[cur.box];
+  srs[w.key]=cur; saveSRS(srs); w.box=cur.box; markPractisedToday(true);
+  var n=vl.words.length; for(var k=1;k<=n;k++){ var j=(vl.i+k)%n; if(!vl.picked[j]){ vl.i=j; break; } }
+  vl.flipped=false; renderVocab();
 }
 function buildTrain(){
-  var idxs=Object.keys(vl.drill).map(Number);
-  if(!idxs.length){ idxs=vl.words.map(function(_,i){ return i; }); }   // nothing flagged -> practise the whole deck
+  var idxs=vl.words.map(function(_,i){ return i; }).filter(function(i){ return !vl.picked[i]; });
+  if(!idxs.length){ idxs=vl.words.map(function(_,i){ return i; }); }   // all picked up -> practise the whole deck
   var words=idxs.map(function(i){ return vl.words[i]; }).sort(function(a,b){ return a.box-b.box; });
   var types=["typed","dictation","w2d","gap","d2w"];
   vl.qList=words.map(function(word,n){ var q=makeVQ(word, types[n%types.length]); q.chosen=null; q.checked=false; q.correct=false; return q; });
   vl.qi=0;
+  // build the drag-and-drop passage (skip for Daily Review)
+  var czItems=[];
+  words.forEach(function(w){ var m=blankSplit(w.ex,w.w); if(m){ czItems.push({word:w.w,key:w.key,before:m.before,after:m.after}); } });
+  vl.cloze=(!vl.review && czItems.length>=3) ? {items:shuffleArr(czItems),bank:shuffleArr(czItems.map(function(x){return x.word;})),placed:{},selected:null,checked:false} : null;
+  vl.clozeDone=false;
+}
+function blankSplit(sent,word){
+  var re=new RegExp('\\b'+word.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\b','i');
+  var m=re.exec(sent);
+  if(!m) return null;
+  return {before:sent.slice(0,m.index),after:sent.slice(m.index+m[0].length)};
 }
 function wordBank(word,pool){
   var others=shuffleArr(pool.filter(function(x){ return x.w!==word.w; })).slice(0,5).map(function(x){ return x.w; });
@@ -1515,36 +1548,100 @@ function vlCheck(){
   renderVocab();
 }
 function vlNext(){
-  if(vl.qi+1>=vl.qList.length){ vl.stage="done"; renderVocab(); return; }
+  if(vl.qi+1>=vl.qList.length){
+    if(vl.cloze && !vl.clozeDone){ vl.stage="cloze"; renderVocab(); return; }
+    vl.stage="done"; renderVocab(); return;
+  }
   vl.qi++; renderVocab();
 }
 function vlPrev(){ if(vl.qi>0){ vl.qi--; renderVocab(); } }
 function vlRedo(){ vl.qList[vl.qi].checked=false; renderVocab(); }
-function vlBackFlash(){
-  if(!vl.snap || !vl.snap.length) return;
-  var snap=vl.snap.pop();
-  vl.queue=snap.queue; vl.drill=snap.drill; vl.known=snap.known; vl.reshow=snap.reshow;
-  for(var i=0;i<vl.words.length;i++){ if(vl.words[i].key===snap.key){ vl.words[i].box=snap.box; break; } }
+function renderCloze(){
+  var cz=vl.cloze;
+  var allPlaced=cz.items.every(function(_,i){ return cz.placed[i]!=null; });
+  var correct=cz.items.filter(function(it,i){ return cz.placed[i]===it.word; }).length;
+  var bankHTML=cz.bank.map(function(w){
+    var used=Object.keys(cz.placed).some(function(k){ return cz.placed[k]===w; });
+    return '<span class="wchip'+(used?" used":"")+(cz.selected===w?" sel":"")+'" draggable="'+(used?"false":"true")+'" data-cbank="'+esc(w)+'">'+esc(w)+'</span>';
+  }).join("");
+  var passageHTML=cz.items.map(function(it,i){
+    var filled=cz.placed[i], slot;
+    if(filled!=null){
+      var cls=cz.checked?(filled===it.word?" right":" wrong"):"";
+      slot='<span class="cslot filled'+cls+'" data-cslot="'+i+'">'+esc(filled)+'</span>';
+    } else { slot='<span class="cslot" data-cslot="'+i+'">&#8230;</span>'; }
+    return '<p class="cline">'+esc(it.before)+slot+esc(it.after)+'</p>';
+  }).join("");
+  app.innerHTML=headerHTML(vl.deck.title)+'<div class="wrap wrap-narrow" style="padding-top:26px">'+
+    vlStepsHTML("train")+
+    '<div class="eyebrow" style="color:var(--gold)">Complete the passage</div>'+
+    '<div style="font-size:12.5px;color:var(--muted);margin:4px 0 12px">Drag each word into the gap where it fits &mdash; or tap a word, then tap a gap.</div>'+
+    '<div class="card" style="padding:22px 24px">'+passageHTML+'</div>'+
+    '<div class="wbankwrap" style="margin-top:16px">'+bankHTML+'</div>'+
+    (cz.checked
+      ? '<div style="text-align:center;margin-top:18px"><div class="serif" style="font-size:22px;font-weight:700;color:var(--gold)">'+correct+' / '+cz.items.length+' correct</div><button class="btn" data-vl="cloze_done" style="margin-top:12px">Continue to review &rarr;</button></div>'
+      : '<div style="display:flex;gap:10px;margin-top:18px;justify-content:space-between;align-items:center"><button class="btn btn-ghost" data-vl="cloze_clear">Clear</button><button class="btn" data-vl="cloze_check"'+(allPlaced?"":" disabled")+'>Check answers</button></div>')+
+    '</div>';
+  wireVocab(); wireCloze();
+}
+function wireCloze(){
+  var cz=vl.cloze; if(!cz) return;
+  app.querySelectorAll("[data-cbank]").forEach(function(el){
+    var w=el.getAttribute("data-cbank");
+    el.addEventListener("click",function(){ if(cz.checked||el.classList.contains("used")) return; cz.selected=(cz.selected===w?null:w); renderVocab(); });
+    el.addEventListener("dragstart",function(e){ if(cz.checked){ e.preventDefault(); return; } e.dataTransfer.setData("text/plain",w); e.dataTransfer.effectAllowed="move"; });
+  });
+  app.querySelectorAll("[data-cslot]").forEach(function(el){
+    var i=parseInt(el.getAttribute("data-cslot"),10);
+    el.addEventListener("click",function(){
+      if(cz.checked) return;
+      if(cz.selected){ placeCloze(i,cz.selected); }
+      else if(cz.placed[i]!=null){ delete cz.placed[i]; renderVocab(); }
+    });
+    el.addEventListener("dragover",function(e){ if(cz.checked) return; e.preventDefault(); el.classList.add("drop"); });
+    el.addEventListener("dragleave",function(){ el.classList.remove("drop"); });
+    el.addEventListener("drop",function(e){ e.preventDefault(); if(cz.checked) return; var w=e.dataTransfer.getData("text/plain"); if(w) placeCloze(i,w); });
+  });
+}
+function placeCloze(i,w){
+  var cz=vl.cloze;
+  Object.keys(cz.placed).forEach(function(k){ if(cz.placed[k]===w) delete cz.placed[k]; });
+  cz.placed[i]=w; cz.selected=null; renderVocab();
+}
+function clozeCheck(){
+  var cz=vl.cloze; if(!cz) return; cz.checked=true; vl.clozeDone=true;
   var srs=loadSRS();
-  if(snap.srsBox===undefined){ delete srs[snap.key]; }
-  else if(srs[snap.key]){ srs[snap.key].box=snap.srsBox; }
-  else { srs[snap.key]={box:snap.srsBox,seen:0,correct:0}; }
-  saveSRS(srs);
-  vl.flipped=false; vl.stage="flash"; renderVocab();
+  cz.items.forEach(function(it,i){
+    var ok=cz.placed[i]===it.word;
+    var cur=srs[it.key]||{box:0,seen:0,correct:0};
+    cur.seen=(cur.seen||0)+1;
+    if(ok){ cur.correct=(cur.correct||0)+1; cur.box=Math.min((cur.box||0)+1,5); } else { cur.box=0; }
+    cur.due=today()+SRS_INTERVAL[cur.box]; srs[it.key]=cur;
+  });
+  saveSRS(srs); markPractisedToday(true); renderVocab();
 }
 function vlGoStage(stage){
   if(stage===vl.stage) return;
-  if(stage==="flash"){ vl.queue=vl.words.map(function(_,i){ return i; }); vl.snap=[]; vl.flipped=false; vl.stage="flash"; renderVocab(); return; }
+  if(stage==="flash"){ vl.flipped=false; vl.stage="flash"; renderVocab(); return; }
   if(stage==="train"){ if(!vl.qList || !vl.qList.length){ buildTrain(); } vl.stage="train"; renderVocab(); return; }
   vl.stage="done"; renderVocab();
+}
+function startReviewLoop(){
+  var srs=loadSRS();
+  var missed=vl.words.filter(function(w){ var s=srs[w.key]; return !s || s.box===0; });
+  if(!missed.length){ missed=vl.words.slice(); }
+  var d=vl.deck;
+  var words=missed.map(function(w){ return {w:w.w,pos:w.pos,def:w.def,ex:w.ex,key:w.key,box:(srs[w.key]?srs[w.key].box:0)}; });
+  vl={deck:d,words:words,stage:"flash",i:0,flipped:false,picked:{},qList:[],qi:0,reviewLoop:true};
+  renderVocab();
 }
 function renderDone(){
   if(vl.review) return renderReviewDone();
   var srs=loadSRS(), totalDeck=vl.words.length, drilled=vl.qList.length, recalled=trainScore();
   var mastered=vl.words.filter(function(w){ var s=srs[w.key]; return s && s.box>=1; }).length;
   var missed=vl.words.filter(function(w){ var s=srs[w.key]; return !s || s.box===0; });
-  var activity=Object.keys(vl.known).length>0 || Object.keys(vl.drill).length>0 || vl.qList.some(function(q){ return q.checked; });
-  if(activity){
+  var activity=Object.keys(vl.picked).length>0 || vl.qList.some(function(q){ return q.checked; });
+  if(activity && !vl.reviewLoop){
     recordScore(vl.deck.id,"vocab",mastered,totalDeck);
     syncResult(vl.deck.id,vl.deck.title,"vocab",mastered,totalDeck,"mastered "+mastered+"/"+totalDeck+(drilled?(" · drilled "+recalled+"/"+drilled):" · knew all"));
   }
@@ -1553,14 +1650,14 @@ function renderDone(){
   app.innerHTML=headerHTML(vl.deck.title)+'<div class="wrap wrap-narrow" style="padding-top:40px">'+
     vlStepsHTML("done")+
     '<div class="card" style="padding:28px;text-align:center">'+
-      '<div class="eyebrow">Deck complete</div>'+
+      '<div class="eyebrow">'+(vl.reviewLoop?"Review round complete":"Deck complete")+'</div>'+
       '<div class="serif" style="font-size:44px;font-weight:700;margin:6px 0 2px;color:var(--gold)">'+mastered+' / '+totalDeck+'</div>'+
       '<div style="font-size:12.5px;color:var(--muted);margin:0 0 2px">words mastered'+(drilled?(' · you practised '+drilled+' and recalled '+recalled):'')+'</div>'+
       '<p style="color:var(--inkSoft);margin-top:6px">'+msg+'</p>'+
       (missed.length
         ? '<div style="text-align:left;margin-top:14px;background:var(--goldSoft);border:1px solid var(--goldLine);border-radius:11px;padding:14px"><div class="eyebrow" style="color:var(--gold)">Words to review ('+missed.length+')</div><div style="margin-top:8px;font-size:14px;line-height:1.8">'+missed.map(function(w){ return '<strong>'+esc(w.w)+'</strong> — '+esc(w.def); }).join("<br>")+'</div></div>'
         : '<p style="color:var(--correct);font-weight:700;margin-top:10px">Every word recalled — well done!</p>')+
-      '<div style="display:flex;gap:10px;margin-top:18px;justify-content:center;flex-wrap:wrap"><button class="btn" data-vl="again">Study again</button><button class="btn btn-ghost" data-vl="home">Back to topics</button></div>'+
+      '<div style="display:flex;gap:10px;margin-top:18px;justify-content:center;flex-wrap:wrap">'+(missed.length?'<button class="btn" data-vl="reviewthese">Review these words ('+missed.length+')</button>':'')+'<button class="btn btn-ghost" data-vl="repeatdeck">Repeat the whole deck</button></div>'+
     '</div></div>';
   wireVocab();
 }
@@ -1570,17 +1667,22 @@ function wireVocab(){
     el.addEventListener("click",function(){ vlGoStage(el.getAttribute("data-vlstep")); });
   });
   app.querySelectorAll("[data-vl]").forEach(function(el){
-    el.addEventListener("click",function(){
+    el.addEventListener("click",function(e){
+      if(e&&e.stopPropagation) e.stopPropagation();
       var a=el.getAttribute("data-vl");
       if(a==="home") return renderHome();
-      if(a==="flip"){ vl.flipped=!vl.flipped; return renderVocab(); }
-      if(a==="fback") return vlBackFlash();
-      if(a==="know"||a==="learn"){ return vlAdvanceFlash(a==="learn"); }
+      if(a==="prevcard") return prevCard();
+      if(a==="nextcard") return nextCard();
+      if(a==="pickup") return pickUp();
       if(a==="check") return vlCheck();
+      if(a==="cloze_check") return clozeCheck();
+      if(a==="cloze_clear"){ vl.cloze.placed={}; vl.cloze.selected=null; return renderVocab(); }
+      if(a==="cloze_done"){ vl.stage="done"; return renderVocab(); }
       if(a==="vnext") return vlNext();
       if(a==="vprev") return vlPrev();
       if(a==="vredo") return vlRedo();
-      if(a==="again") return startDeck(vl.deck.id);
+      if(a==="again"||a==="repeatdeck") return startDeck(vl.deck.id);
+      if(a==="reviewthese") return startReviewLoop();
       if(a==="reviewmore") return startReview();
       if(a==="stats") return renderVocabStats();
       if(a==="dhint"){ vl.qList[vl.qi].showHint=true; return renderVocab(); }
@@ -1598,8 +1700,11 @@ function wireVocab(){
   var f=document.getElementById("vlFill");
   if(f){ f.addEventListener("input",function(){ vl.qList[vl.qi].chosen=f.value; var b=document.getElementById("vlCheckBtn"); if(b) b.disabled=!f.value.trim(); }); f.addEventListener("keydown",function(e){ if(e.key==="Enter"&&f.value.trim()){ vl.qList[vl.qi].chosen=f.value; vlCheck(); } }); f.focus(); }
   var card=document.getElementById("vlCard");
-  if(card){ card.addEventListener("click",function(){ vl.flipped=!vl.flipped; renderVocab(); });
-            card.addEventListener("keydown",function(e){ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); vl.flipped=!vl.flipped; renderVocab(); } }); }
+  if(card){
+    var doFlip=function(){ vl.flipped=!vl.flipped; var fi=document.getElementById("vlFlip"); if(fi) fi.classList.toggle("flipped", vl.flipped); };
+    card.addEventListener("click",doFlip);
+    card.addEventListener("keydown",function(e){ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); doFlip(); } });
+  }
 }
 
 /* WORDFORM and PAIRS (vocabulary) */
