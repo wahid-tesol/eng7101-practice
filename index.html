@@ -1418,9 +1418,8 @@ function pickUp(){
   vl.flipped=false; renderVocab();
 }
 function buildTrain(){
-  var idxs=vl.words.map(function(_,i){ return i; }).filter(function(i){ return !vl.picked[i]; });
-  if(!idxs.length){ idxs=vl.words.map(function(_,i){ return i; }); }   // all picked up -> practise the whole deck
-  var words=idxs.map(function(i){ return vl.words[i]; }).sort(function(a,b){ return a.box-b.box; });
+  // Train always covers every word in the deck, regardless of what happened in Meet.
+  var words=vl.words.slice().sort(function(a,b){ return a.box-b.box; });
   var types=["typed","dictation","w2d","gap","d2w"];
   vl.qList=words.map(function(word,n){ var q=makeVQ(word, types[n%types.length]); q.chosen=null; q.checked=false; q.correct=false; return q; });
   vl.qi=0;
@@ -1636,9 +1635,10 @@ function startReviewLoop(){
   vl={deck:d,words:words,stage:"flash",i:0,flipped:false,picked:{},qList:[],qi:0,reviewLoop:true};
   renderVocab();
 }
-// This session's outcome — drives the Review screen. A word is mastered only if it was
-// attempted this session (a training question, the passage gap, or "picked up" in Meet) and
-// every attempt was correct. Any wrong attempt, or a word never attempted, sends it to review.
+// This session's outcome — drives the Review screen. Mastery comes ONLY from the Train
+// section: a word is mastered if it was used this session (a training question or the
+// passage gap) and every attempt was correct. Any wrong attempt, or a word never used in
+// Train, sends it to review. What happened in Meet ("picked up") does not count.
 function sessionReview(){
   var qByKey={};
   vl.qList.forEach(function(q){ (qByKey[q.word.key]=qByKey[q.word.key]||[]).push(q); });
@@ -1646,7 +1646,6 @@ function sessionReview(){
   if(vl.cloze){ vl.cloze.items.forEach(function(it,i){ czByKey[it.key]={checked:vl.cloze.checked,ok:(vl.cloze.checked&&vl.cloze.placed[i]===it.word)}; }); }
   var mastered=[], review=[];
   vl.words.forEach(function(w,idx){
-    if(vl.picked[idx]){ mastered.push(w); return; }              // marked "picked up" in Meet = known
     var qs=(qByKey[w.key]||[]).filter(function(q){ return q.checked; });
     var cz=czByKey[w.key], czAtt=!!(cz&&cz.checked);
     var anyAttempt=qs.length>0 || czAtt;
