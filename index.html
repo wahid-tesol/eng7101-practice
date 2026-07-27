@@ -167,8 +167,8 @@ const norm = s => s.toLowerCase().trim().replace(/[.,;!?]+$/,"").replace(/\s+/g,
    ▼▼▼ TEACHER: paste your Google Apps Script Web App URL between the quotes.
    See TEACHER-SETUP.md for the 5-minute setup. Until it is filled in the app
    still works and tracks scores on each device, but nothing is sent to you. ▼▼▼ */
-const SYNC_URL = "";
-/* ▲▲▲ e.g. "https://script.google.com/macros/s/AKfycb....../exec" ▲▲▲ */
+const SYNC_URL = "https://script.google.com/macros/s/AKfycbyHkeFdKO1eGSkNovBU62ElmuXZDHC8MYKkJ0ims6yhC4vn-gGMk-kQ9_y3prkd3eHPgA/exec";
+/* ▲▲▲ teacher's Apps Script web-app URL ▲▲▲ */
 
 const STUDENT_KEY = "eng7101:student";
 const PENDING_KEY = "eng7101:pending";
@@ -184,63 +184,89 @@ function deviceId(){
   return d;
 }
 
-/* ---- outbound queue: survives offline / failed sends, retried on next load ---- */
+/* ---- device type + API ---- */
+function deviceType(){ return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ? "mobile" : "computer"; }
+function apiPost(payload){
+  /* text/plain avoids a CORS preflight Apps Script cannot answer; the reply is JSON */
+  return fetch(SYNC_URL,{ method:"POST", headers:{ "Content-Type":"text/plain;charset=utf-8" }, body:JSON.stringify(payload) })
+         .then(function(r){ return r.json(); });
+}
+function kindToCategory(kind){
+  var k=String(kind||"").toLowerCase();
+  if(k.indexOf("vocab")>-1) return "Vocabulary";
+  if(k.indexOf("read")>-1 || k.indexOf("comp")>-1) return "Reading";
+  if(k.indexOf("writ")>-1) return "Writing";
+  if(k.indexOf("quiz")>-1) return "Quiz";
+  return kind ? (kind.charAt(0).toUpperCase()+kind.slice(1)) : "Other";
+}
+
+/* ---- outbound result queue: survives offline, re-stamped with a fresh token on flush ---- */
 function loadPending(){ try{ return JSON.parse(localStorage.getItem(PENDING_KEY)||"[]"); }catch(e){ return []; } }
 function savePending(a){ try{ localStorage.setItem(PENDING_KEY, JSON.stringify(a)); }catch(e){} }
-function postRow(row){
-  /* text/plain body avoids a CORS preflight that Apps Script cannot answer */
-  return fetch(SYNC_URL,{ method:"POST", mode:"no-cors", keepalive:true,
-    headers:{ "Content-Type":"text/plain;charset=utf-8" }, body:JSON.stringify(row) });
+function queueRow(row){ var q=loadPending(); q.push(row); savePending(q); }
+function sendResult(row){
+  apiPost(row).then(function(res){
+    if(res && res.ok===false && /session|device/i.test(res.error||"")){ queueRow(row); handleAuthLost(); }
+  }).catch(function(){ queueRow(row); });            // offline -> keep it for next time
 }
 function flushPending(){
   if(!SYNC_URL) return;
-  const queue = loadPending(); if(!queue.length) return;
-  savePending([]);                                  // optimistic; re-queue failures
-  queue.forEach(row=>{ postRow(row).catch(()=>{ const cur=loadPending(); cur.push(row); savePending(cur); }); });
+  var st=getStudent(); if(!st||!st.token) return;
+  var queue=loadPending(); if(!queue.length) return;
+  savePending([]);                                   // optimistic; re-queue failures
+  queue.forEach(function(row){
+    row.username=st.username; row.token=st.token; row.deviceId=deviceId(); row.deviceType=deviceType();
+    apiPost(row).catch(function(){ queueRow(row); });
+  });
 }
 function syncResult(activityId, title, kind, score, total, detail){
-  const st = getStudent() || {name:"(unnamed)"};
-  const row = {
-    name:st.name||"", studentId:st.id||"", cls:st.cls||"",
-    activityId, activity:title, kind,
-    score:(score==null?"":score), total:(total==null?"":total),
-    percent:(total? Math.round((score/total)*100) : ""),
-    detail:detail||"", device:deviceId(), ts:new Date().toISOString()
-  };
-  if(!SYNC_URL) return;                              // local-only mode until URL is set
-  postRow(row).catch(()=>{ const q=loadPending(); q.push(row); savePending(q); });
+  if(!SYNC_URL) return;
+  var st=getStudent(); if(!st||!st.token) return;    // only logged-in students sync
+  sendResult({ action:"result", username:st.username, token:st.token, deviceId:deviceId(), deviceType:deviceType(),
+    category:kindToCategory(kind), item:title||activityId,
+    score:(score==null?0:score), max:(total==null?0:total), when:Date.now() });
 }
+function handleAuthLost(){ try{ var st=getStudent()||{}; delete st.token; setStudent(st); }catch(e){} }
 
 function renderIdGate(){
-  const st = getStudent() || {};
   app.innerHTML = `<div class="idgate"><div class="idcard card">
     <img class="medallion" src="${MARK}" alt="" style="margin-bottom:14px" />
-    <div class="eyebrow">Before you start</div>
-    <h1 class="serif" style="font-size:26px;margin:6px 0 4px">Who's practising?</h1>
-    <p style="color:var(--inkSoft);font-size:14.5px;margin:0 0 6px">Enter your details so your teacher can see the work you complete.</p>
-    <label class="idlbl">Full name *</label>
-    <input class="input" id="idName" placeholder="e.g. Amina Yusuf" value="${esc(st.name||"")}" autocomplete="name">
-    <label class="idlbl">Student ID / number *</label>
-    <input class="input" id="idNum" placeholder="e.g. 7101-042" value="${esc(st.id||"")}">
-    <label class="idlbl">Class / group <span class="opt-tag">(optional)</span></label>
-    <input class="input" id="idCls" placeholder="e.g. Tuesday evening" value="${esc(st.cls||"")}">
-    <button class="btn" id="idGo" style="width:100%;margin-top:20px" disabled>Start practising</button>
-    <p style="color:var(--muted);font-size:12px;margin:12px 0 0">Your name and ID are used to record which topics you finish. Use the same ID each time so your progress is kept.</p>
+    <div class="eyebrow">ENG7101 Practice</div>
+    <h1 class="serif" style="font-size:26px;margin:6px 0 4px">Log in</h1>
+    <p style="color:var(--inkSoft);font-size:14.5px;margin:0 0 6px">Use the username and password your teacher gave you.</p>
+    <label class="idlbl">Username</label>
+    <input class="input" id="lgUser" placeholder="e.g. aisha01" autocomplete="username" autocapitalize="none" spellcheck="false">
+    <label class="idlbl">Password</label>
+    <input class="input" id="lgPass" type="password" placeholder="your password" autocomplete="current-password">
+    <div id="lgErr" style="display:none;color:var(--wrong);font-size:13.5px;margin-top:12px;font-weight:600"></div>
+    <button class="btn" id="lgGo" style="width:100%;margin-top:18px" disabled>Log in</button>
+    <p style="color:var(--muted);font-size:12px;margin:14px 0 0">One account works on up to two devices — your phone and your computer. If you see a device-limit message, ask your teacher to reset it.</p>
   </div></div>`;
-  const name=document.getElementById("idName"), num=document.getElementById("idNum"), go=document.getElementById("idGo");
-  const check=()=>{ go.disabled=!(name.value.trim() && num.value.trim()); };
-  const submit=()=>{
-    const nm=name.value.trim(), nid=num.value.trim(); if(!nm||!nid) return;
-    setStudent({ name:nm, id:nid, cls:document.getElementById("idCls").value.trim() });
-    syncResult("_signin","Signed in","signin",null,null);
-    renderHome();
+  var user=document.getElementById("lgUser"), pass=document.getElementById("lgPass"), go=document.getElementById("lgGo"), err=document.getElementById("lgErr");
+  var check=function(){ go.disabled=!(user.value.trim() && pass.value); };
+  var showErr=function(m){ err.textContent=m; err.style.display="block"; };
+  var submit=function(){
+    var u=user.value.trim().toLowerCase(), p=pass.value; if(!u||!p) return;
+    err.style.display="none"; go.disabled=true; go.textContent="Logging in…";
+    if(!SYNC_URL){ showErr("The app isn't connected yet. Please tell your teacher."); go.textContent="Log in"; go.disabled=false; return; }
+    apiPost({ action:"login", username:u, password:p, deviceId:deviceId(), deviceType:deviceType() })
+      .then(function(res){
+        if(res && res.ok){
+          setStudent({ name:res.name||u, username:u, id:u, token:res.token, exp:Date.now()+29*86400000 });
+          flushPending();
+          renderHome();
+        } else {
+          showErr((res&&res.error) || "Login failed. Please try again.");
+          go.disabled=false; go.textContent="Log in";
+        }
+      })
+      .catch(function(){ showErr("Can't reach the server. Check your internet and try again."); go.disabled=false; go.textContent="Log in"; });
   };
-  [name,num].forEach(inp=>inp.addEventListener("input",check)); check();
-  [name,num,document.getElementById("idCls")].forEach(inp=>{
-    inp.addEventListener("keydown",e=>{ if(e.key==="Enter" && name.value.trim() && num.value.trim()) submit(); });
+  [user,pass].forEach(function(inp){
+    inp.addEventListener("input",check);
+    inp.addEventListener("keydown",function(e){ if(e.key==="Enter" && user.value.trim() && pass.value) submit(); });
   });
-  go.addEventListener("click",submit);
-  name.focus(); window.scrollTo(0,0);
+  check(); go.addEventListener("click",submit); user.focus(); window.scrollTo(0,0);
 }
 function whoamiHTML(){
   const st=getStudent(); if(!st) return "";
@@ -2164,7 +2190,7 @@ function renderReport(){
       <div class="eyebrow">Progress report</div>
       <h1 class="serif" style="font-size:26px;margin:6px 0 12px">${esc(st.name||"")}</h1>
       <div class="rep-meta">
-        <span><strong>Student ID:</strong> ${esc(st.id||"—")}</span>
+        <span><strong>Username:</strong> ${esc(st.username||st.id||"—")}</span>
         ${st.cls?`<span><strong>Class:</strong> ${esc(st.cls)}</span>`:""}
         <span><strong>Date:</strong> ${esc(new Date().toLocaleDateString())}</span>
       </div>
@@ -2248,7 +2274,7 @@ if("serviceWorker" in navigator && location.protocol==="https:"){ navigator.serv
 function boot(){
   flushPending();                                     // resend anything that failed while offline
   const st=getStudent();
-  if(st && st.name){ renderHome(); } else { renderIdGate(); }
+  if(st && st.token && (!st.exp || st.exp>Date.now())){ renderHome(); } else { renderIdGate(); }
 }
 boot();
 </script>
