@@ -237,12 +237,26 @@ function renderIdGate(){
     <label class="idlbl">Username</label>
     <input class="input" id="lgUser" placeholder="e.g. aisha01" autocomplete="username" autocapitalize="none" spellcheck="false">
     <label class="idlbl">Password</label>
-    <input class="input" id="lgPass" type="password" placeholder="your password" autocomplete="current-password">
+    <div style="position:relative">
+      <input class="input" id="lgPass" type="password" placeholder="your password" autocomplete="current-password" style="padding-right:46px">
+      <button type="button" id="lgEye" aria-label="Show password" style="position:absolute;right:4px;top:50%;transform:translateY(-50%);background:none;border:0;cursor:pointer;padding:9px;color:var(--muted);display:flex;align-items:center"></button>
+    </div>
     <div id="lgErr" style="display:none;color:var(--wrong);font-size:13.5px;margin-top:12px;font-weight:600"></div>
     <button class="btn" id="lgGo" style="width:100%;margin-top:18px" disabled>Log in</button>
     <p style="color:var(--muted);font-size:12px;margin:14px 0 0">One account works on up to two devices — your phone and your computer. If you see a device-limit message, ask your teacher to reset it.</p>
   </div></div>`;
   var user=document.getElementById("lgUser"), pass=document.getElementById("lgPass"), go=document.getElementById("lgGo"), err=document.getElementById("lgErr");
+  var eye=document.getElementById("lgEye");
+  var EYE_ON='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>';
+  var EYE_OFF='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.9 4.24A9.1 9.1 0 0 1 12 4c6.5 0 10 7 10 7a13.2 13.2 0 0 1-1.67 2.44"/><path d="M6.06 6.06A13.2 13.2 0 0 0 2 11s3.5 7 10 7a9 9 0 0 0 4-.94"/><path d="m2 2 20 20"/></svg>';
+  eye.innerHTML=EYE_ON;
+  eye.addEventListener("click",function(){
+    var show=pass.type==="password";
+    pass.type=show?"text":"password";
+    eye.innerHTML=show?EYE_OFF:EYE_ON;
+    eye.setAttribute("aria-label",show?"Hide password":"Show password");
+    pass.focus();
+  });
   var check=function(){ go.disabled=!(user.value.trim() && pass.value); };
   var showErr=function(m){ err.textContent=m; err.style.display="block"; };
   var submit=function(){
