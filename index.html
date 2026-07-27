@@ -83,6 +83,12 @@
   .wbank{font:inherit;font-weight:600;font-size:15px;border:1.5px solid var(--line);border-radius:10px;padding:9px 16px;background:var(--surface);cursor:pointer;color:var(--ink);transition:border-color .12s,background .12s}
   .wbank:hover:not(:disabled){border-color:var(--gold);background:var(--goldSoft)}
   .wbank:disabled{cursor:default}
+  .matchcell{font:inherit;font-size:14px;text-align:left;border:1.5px solid var(--line);border-radius:11px;padding:12px 13px;background:var(--surface);cursor:pointer;color:var(--ink);min-height:48px;width:100%;transition:border-color .12s,background .12s}
+  .matchcell:hover:not(.done){border-color:var(--gold)}
+  .matchcell.sel{border-color:var(--gold);background:var(--goldSoft)}
+  .matchcell.meaning{font-size:13px;line-height:1.4}
+  .matchcell.wrong{border-color:var(--wrong);background:var(--wrongBg)}
+  .matchcell.done{visibility:hidden}
   .foot{margin-top:58px;padding-top:24px;border-top:1px solid var(--line);text-align:center}
   .copyline{font-size:12px;letter-spacing:.05em;color:var(--muted)}
   .install{position:fixed;right:18px;bottom:18px;z-index:20;display:none}
@@ -1150,6 +1156,7 @@ function reviewBannerHTML(){
     '</div>'+
     '<div style="display:flex;gap:8px;flex-wrap:wrap">'+
       '<button class="btn btn-ghost" role="button" tabindex="0" data-open="_vocabstats">Progress</button>'+
+      '<button class="btn btn-ghost" role="button" tabindex="0" data-open="_match">Match game</button>'+
       '<button class="btn" role="button" tabindex="0" data-open="_review" style="white-space:nowrap">'+(due?('Review '+due+' &rarr;'):'Practice &rarr;')+'</button>'+
     '</div>'+
   '</div>';
@@ -1198,6 +1205,75 @@ function renderVocabStats(){
     '<div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:16px;font-size:12.5px;color:var(--inkSoft)">'+legendDot("var(--line)","Not started")+legendDot("var(--goldSoft)","Learning")+legendDot("var(--goldLine)","Strong")+legendDot("var(--accent)","Mastered")+'</div>'+
     '<div style="margin-top:20px"><button class="btn btn-ghost" data-vl="home">Back to topics</button></div></div>';
   wireVocab();
+}
+
+/* ===================== MATCH GAME (timed + combo) ===================== */
+var gameTimer=null, game=null;
+function startMatch(){
+  clearInterval(gameTimer);
+  var srs=loadSRS();
+  var started=ALL_WORDS.filter(function(x){ return srs[x.key] && (srs[x.key].seen||0)>0; });
+  var poolSrc=(started.length>=6)?started:ALL_WORDS;
+  var pick=shuffleArr(poolSrc).slice(0,6);
+  game={words:pick,left:shuffleArr(pick.slice()),right:shuffleArr(pick.slice()),sel:null,matched:{},score:0,combo:0,bestCombo:0,wrong:null,start:Date.now(),elapsed:0,done:false};
+  gameTimer=setInterval(function(){ if(game && !game.done){ game.elapsed=Math.floor((Date.now()-game.start)/1000); var el=document.getElementById("gameTime"); if(el) el.textContent=game.elapsed+"s"; } },250);
+  renderMatch();
+}
+function renderMatch(){
+  var g=game;
+  app.innerHTML=headerHTML("Match Game")+'<div class="wrap wrap-narrow" style="padding-top:26px">'+
+    '<div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--muted);margin-bottom:14px;gap:10px;flex-wrap:wrap">'+
+      '<span>Tap a word, then tap its meaning</span>'+
+      '<span style="display:flex;gap:8px"><span class="scorepill">Combo &times;'+g.combo+'</span><span class="scorepill" id="gameTime">'+g.elapsed+'s</span></span>'+
+    '</div>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'+
+      '<div style="display:flex;flex-direction:column;gap:8px">'+g.left.map(function(x){
+        if(g.matched[x.key]) return '<div class="matchcell done"></div>';
+        var sel=(g.sel && g.sel.key===x.key);
+        return '<button class="matchcell'+(sel?" sel":"")+'" data-mword="'+esc(x.key)+'"><strong>'+esc(x.w)+'</strong></button>';
+      }).join("")+'</div>'+
+      '<div style="display:flex;flex-direction:column;gap:8px">'+g.right.map(function(x){
+        if(g.matched[x.key]) return '<div class="matchcell done"></div>';
+        var wrong=(g.wrong===x.key);
+        return '<button class="matchcell meaning'+(wrong?" wrong":"")+'" data-mmean="'+esc(x.key)+'">'+esc(x.def)+'</button>';
+      }).join("")+'</div>'+
+    '</div></div>';
+  app.querySelector('[data-act="home"]').addEventListener("click",function(){ clearInterval(gameTimer); renderHome(); });
+  app.querySelectorAll("[data-mword]").forEach(function(el){ el.addEventListener("click",function(){ matchPickWord(el.getAttribute("data-mword")); }); });
+  app.querySelectorAll("[data-mmean]").forEach(function(el){ el.addEventListener("click",function(){ matchPickMean(el.getAttribute("data-mmean")); }); });
+}
+function matchPickWord(key){
+  if(game.matched[key]) return;
+  game.sel=game.words.filter(function(x){ return x.key===key; })[0];
+  game.wrong=null; renderMatch();
+}
+function matchPickMean(key){
+  var g=game; if(!g.sel) return;
+  if(g.sel.key===key){
+    g.matched[key]=true; g.score++; g.combo++; if(g.combo>g.bestCombo) g.bestCombo=g.combo;
+    var st=loadStats(); st.xp=(st.xp||0)+5+(g.combo>=3?3:0); saveStats(st);
+    g.sel=null; g.wrong=null;
+    if(g.score>=g.words.length){ return endMatch(); }
+    renderMatch();
+  } else {
+    g.combo=0; g.wrong=key; g.sel=null; renderMatch();
+    setTimeout(function(){ if(game && game.wrong===key){ game.wrong=null; renderMatch(); } },600);
+  }
+}
+function endMatch(){
+  clearInterval(gameTimer); var g=game; g.done=true;
+  var t=Math.floor((Date.now()-g.start)/1000);
+  var st=loadStats(); var isBest=(!st.matchBest || t<st.matchBest); if(isBest) st.matchBest=t; saveStats(st);
+  app.innerHTML=headerHTML("Match Game")+'<div class="wrap wrap-narrow" style="padding-top:44px">'+
+    '<div class="card" style="padding:28px;text-align:center">'+
+      '<div class="eyebrow">Round complete</div>'+
+      '<div class="serif" style="font-size:42px;font-weight:700;margin:6px 0 2px;color:var(--gold)">'+t+'s</div>'+
+      '<div style="font-size:12.5px;color:var(--muted)">'+g.words.length+' pairs matched'+(isBest?' &middot; new best!':(' &middot; best '+st.matchBest+'s'))+'</div>'+
+      '<div style="display:flex;gap:9px;justify-content:center;margin:14px 0 2px;flex-wrap:wrap"><span class="scorepill">Best combo &times;'+g.bestCombo+'</span><span class="scorepill">Level '+levelInfo().level+'</span></div>'+
+      '<div style="display:flex;gap:10px;margin-top:16px;justify-content:center;flex-wrap:wrap"><button class="btn" data-game="again">Play again</button><button class="btn btn-ghost" data-game="home">Back to topics</button></div>'+
+    '</div></div>';
+  var ag=app.querySelector('[data-game="again"]'); if(ag) ag.addEventListener("click",startMatch);
+  app.querySelectorAll('[data-act="home"],[data-game="home"]').forEach(function(el){ el.addEventListener("click",renderHome); });
 }
 function startDeck(id){
   var d=VOCAB_BY_ID[id]; if(!d) return;
@@ -1584,6 +1660,7 @@ function headerHTML(title){
 }
 
 function renderHome(){
+  clearInterval(gameTimer);
   const progress = loadProgress();
   const stat = completionStats();
   let html = `<div class="wrap" style="max-width:1000px;padding-top:46px">
@@ -1665,6 +1742,7 @@ function openTopic(id){
   if(READINGS_BY_ID[id]){ const r=READINGS_BY_ID[id]; startQuiz(id,r.questions,r.title,passageHTML(r)); }
   else if(id==="_review"){ startReview(); }
   else if(id==="_vocabstats"){ renderVocabStats(); }
+  else if(id==="_match"){ startMatch(); }
   else if(VOCAB_BY_ID[id]){ startDeck(id); }
   else if(WRITING[id]){ w={id:id,text:"",ticks:{},showModel:true}; renderWriting(); }
   else if(QUIZ[id]){ startQuiz(id,QUIZ[id],TITLE[id],""); }
