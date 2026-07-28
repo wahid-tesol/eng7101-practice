@@ -98,6 +98,8 @@
   .pickup{position:absolute;top:12px;right:12px;font:inherit;font-size:11.5px;font-weight:700;color:var(--correct);background:var(--correctBg);border:1px solid var(--correct);border-radius:20px;padding:5px 11px;cursor:pointer;transition:background .12s,color .12s}
   .pickup:hover{background:var(--correct);color:#fff}
   .cline{font-size:16.5px;line-height:2.15;margin:0 0 6px;color:var(--ink)}
+  .cstory{font-size:16.5px;line-height:2.35;margin:0 0 10px;color:var(--ink)}
+  .cstory:last-child{margin-bottom:0}
   .cslot{display:inline-block;min-width:104px;padding:2px 10px;margin:0 3px;border-bottom:2px solid var(--gold);text-align:center;border-radius:7px 7px 0 0;background:var(--goldSoft);color:var(--muted);cursor:pointer;vertical-align:baseline;transition:background .12s}
   .cslot.filled{color:var(--ink);font-weight:600;background:#fff;border:1px solid var(--line);border-bottom:2px solid var(--gold)}
   .cslot.drop{background:var(--goldLine);color:var(--ink)}
@@ -1467,16 +1469,27 @@ function pickUp(){
   var n=vl.words.length; for(var k=1;k<=n;k++){ var j=(vl.i+k)%n; if(!vl.picked[j]){ vl.i=j; break; } }
   vl.flipped=false; renderVocab();
 }
+/* Hand-written passages for the drag-and-drop Train stage. Each {{word}} is a gap filled
+   from the deck's word-bank; every gap uses the base head-word so it reads correctly. */
+const STORY_BY_DECK = {
+  wl2_1: "When Mara first stepped into the old charity house, she noticed a strange {{incongruity}}: grand paintings hanging above bare, broken chairs. The manager, a kind but {{ingenuous}} young man, trusted everyone he met. He pointed to a stack of boxes of {{indeterminate}} age and asked her to {{incorporate}} them into the new display. Most held {{innocuous}} things — old cups and spoons, nothing harmful. One dusty box, though, lay completely {{inert}} in a corner, as if untouched for years. Mara was far from {{indolent}}, so she worked all afternoon while the heat left the others {{insensible}} with tiredness. She refused to {{insinuate}} that anyone was lazy, even when it was true. To her, no act of kindness was {{inconsequential}}. She saw the {{inherent}} dignity in every family living in {{indigence}}, and treated each of them with quiet respect.",
+  wl2_2: "The village of Longmoor was known for its {{insularity}}; its people rarely spoke to outsiders and distrusted new ideas. Daily life there felt {{insipid}}, grey and without flavour. Each spring the river would {{inundate}} the low fields, and only an old earth {{levee}} held the water back. The flooding was {{intractable}}, and years of failure had left the mayor {{irresolute}}, unable to make a single firm decision. When a young engineer arrived with a plan, angry farmers met her with {{invective}}, hurling insults across the square. Yet she stayed calm and {{laconic}}, answering their fury with only a few words. The summer heat made everyone {{lethargic}}, and a heavy {{lassitude}} hung over the meeting. The villagers were so {{inured}} to disaster that they hardly reacted. But in the end, even her fiercest critics began to {{laud}} the courage of the outsider who saved their homes.",
+  wl2_3: "Dr. Okafor was a {{maverick}}, a scientist who refused to follow the crowd. His assistant, a {{loquacious}} young man, could talk for hours, while the grumpy caretaker was a true {{misanthrope}} who hated all company. Each day they would {{log}} every measurement in a careful list, for Okafor was {{meticulous}} about the smallest detail. His lectures were {{lucid}}, so clear that even {{mundane}} facts became interesting. He warned his students never to be {{mendacious}}, because a single lie could ruin honest research. Young minds, he liked to say, are {{malleable}} and easily shaped, so a teacher must guide them with care. A little {{levity}} — a joke between experiments — helped everyone relax. One long project searched for ways to {{mitigate}} the damage caused by pollution. Over the years the tired old laboratory went through a complete {{metamorphosis}}, becoming one of the finest in the country.",
+  wl2_4: "On his first morning, Sam felt like a nervous {{neophyte}}, new to everything and certain to make mistakes. His manager was held up as a {{paragon}} of fairness, admired by the whole floor. Sadly, one older clerk was {{officious}}, forever giving orders he had no right to give, and so {{pedantic}} that he corrected the tiniest comma. Another colleague was openly {{partisan}}, praising his own friends and ignoring better work from everyone else. There was a real {{paucity}} of praise in that office, and encouragement seemed a {{perennial}} shortage that never improved. Sam had a clear {{penchant}} for hard work, a liking he could not hide. He soon learned that one careless error could {{negate}} a whole week of effort. A {{perfidious}} rival even tried to steal his ideas, though the disloyalty was quickly exposed. Sam feared slipping into {{penury}}, for the pay was low, yet he never let the {{pathological}}, unreasonable fear of failure take hold of him.",
+  wl2_5: "The rescue team's leader was famously {{phlegmatic}}, calm even when everything went wrong. Their position on the icy ledge was {{precarious}}, and one careless step could {{precipitate}} a disaster. A {{pervasive}} fog crept through every valley, making the search far harder. The ground underfoot was soft and {{permeable}}, so meltwater soaked straight through it. From the village below came a {{plethora}} of advice — far too much of it — and the leader had to {{placate}} the frightened families waiting there. He was deeply {{pragmatic}}, always choosing the plan that worked over the plan that looked good. A quick, {{perfunctory}} check of the ropes would not do; every knot had to be perfect, or a climber might {{plummet}} into the gorge. The team admired the old guide's quiet {{piety}} and respect for the mountain. Years of training had given their minds a kind of {{plasticity}}, an ability to adapt to any new danger.",
+  wl2_6: "The grand hotel had once been {{pristine}}, spotless and perfect, but years of neglect had left it {{problematic}} in every way. Its new owner came from the {{rarefied}} world of fine dining, a world understood by only a few. The head chef was {{prodigal}} with money, spending wildly until the budget almost vanished. The owner would {{proscribe}} any rudeness, forbidding the staff to argue in front of guests, for she valued perfect {{propriety}}. It was {{presumptuous}} of the young waiter to correct her — far too bold for his first week. A {{pungent}} smell of spice drifted from the kitchen, sharp and strong. The old boiler had stayed {{quiescent}} for years, silent and unused, and was now a clear {{precursor}} of trouble to come. Critics gave only {{qualified}} praise — good, but not complete. So when one writer claimed the food was poor, the chef was able to {{refute}} him with a single, perfect meal.",
+  wl2_7: "Old Professor Hale was loved for his {{sage}} advice, wisdom gathered over many long years. He was {{reticent}} about his own past, unwilling to share much, yet always {{solicitous}} about his students' health and worries. A born {{skeptic}}, he doubted every claim until it was properly proven. His pupils treated him with an almost {{reverent}} respect. He hated to {{reproach}} anyone and disliked blame, but he would gently {{relegate}} lazy work to the bottom of the pile. His classes ranged across the whole {{spectrum}} of ideas, from science to art. The head teacher gave full {{sanction}} to his unusual methods, approving them without a second thought. He taught that heavy rain could {{saturate}} dry soil in minutes, and that certain plants {{secrete}} a sticky juice to trap insects. Above all, he admired one quality in a student: the firm {{resolution}} to finish whatever you begin.",
+  wl2_8: "The trial had dragged on for weeks, with only {{sporadic}} moments of drama between long, dull hours. The accused woman carried the heavy {{stigma}} of a crime she swore she never committed. The prosecutor could not {{substantiate}} his story; he had no real evidence to prove it. His whole case rested on a single {{supposition}}, an idea believed without any proof. There was a {{tacit}} understanding in the room, unspoken but shared, that his argument was weak. Much of what he said was {{tangential}}, only slightly related to the real question, and his speeches were {{verbose}}, packed with far more words than the facts required. Fresh evidence would soon {{supersede}} the old, replacing every earlier claim. The defence lawyer offered a clear, {{viable}} explanation that actually held together, and the judge found the main witness {{veracious}} and honest. In the end the woman's only {{transgression}} — a small breaking of the rules — proved far more {{tractable}} than anyone had feared.",
+  wl2_9: "The weather high in the hills was {{volatile}}, turning from bright sun to storm within minutes. Hikers had to stay {{wary}}, alert to every loose rock and darkening cloud. The strange danger did {{warrant}} real caution, and it certainly justified turning back early. Yet their guide kept a {{whimsical}} smile, playful and light, as though the wild mountain were simply telling one of its odd little jokes."
+};
 function buildTrain(){
   // Train always covers every word in the deck, regardless of what happened in Meet.
   var words=vl.words.slice().sort(function(a,b){ return a.box-b.box; });
   var types=["typed","dictation","w2d","gap","d2w"];
   vl.qList=words.map(function(word,n){ var q=makeVQ(word, types[n%types.length]); q.chosen=null; q.checked=false; q.correct=false; return q; });
   vl.qi=0;
-  // build the drag-and-drop passage (skip for Daily Review)
-  var czItems=[];
-  words.forEach(function(w){ var m=blankSplit(w.ex,w.w); if(m){ czItems.push({word:w.w,key:w.key,before:m.before,after:m.after}); } });
-  vl.cloze=(!vl.review && czItems.length>=3) ? {items:shuffleArr(czItems),bank:shuffleArr(czItems.map(function(x){return x.word;})),placed:{},selected:null,checked:false} : null;
+  // build the drag-and-drop passage (an authored story where we have one; else from example sentences)
+  vl.cloze=buildCloze(words);
   vl.clozeDone=false;
 }
 function blankSplit(sent,word){
@@ -1484,6 +1497,40 @@ function blankSplit(sent,word){
   var m=re.exec(sent);
   if(!m) return null;
   return {before:sent.slice(0,m.index),after:sent.slice(m.index+m[0].length)};
+}
+/* Passage cloze: prefer a hand-written story for the deck; fall back to blanked example sentences.
+   tokens = [{type:"text",v}|{type:"gap",i}], gaps[i] = {word,key}. Gap uses the base head-word. */
+function buildCloze(words){
+  if(vl.review) return null;
+  var story=STORY_BY_DECK[vl.deck.id];
+  var built=story ? storyTokens(story, words) : sentenceTokens(words);
+  if(!built || built.gaps.length<3) return null;
+  return { tokens:built.tokens, gaps:built.gaps, story:!!story,
+           bank:shuffleArr(built.gaps.map(function(g){ return g.word; })),
+           placed:{}, selected:null, checked:false };
+}
+function storyTokens(story, words){
+  var byWord={}; words.forEach(function(w){ byWord[w.w.toLowerCase()]=w; });
+  var tokens=[], gaps=[], gi=0, re=/\{\{([^}]+)\}\}/g, last=0, m;
+  while((m=re.exec(story))){
+    if(m.index>last) tokens.push({type:"text",v:story.slice(last,m.index)});
+    var w=byWord[String(m[1]||"").trim().toLowerCase()];
+    if(w){ tokens.push({type:"gap",i:gi}); gaps.push({word:w.w,key:w.key}); gi++; }
+    else { tokens.push({type:"text",v:m[0]}); }        // unknown placeholder -> leave literal
+    last=re.lastIndex;
+  }
+  if(last<story.length) tokens.push({type:"text",v:story.slice(last)});
+  return {tokens:tokens, gaps:gaps};
+}
+function sentenceTokens(words){
+  var tokens=[], gaps=[], gi=0;
+  words.forEach(function(w){
+    var m=blankSplit(w.ex,w.w); if(!m) return;
+    tokens.push({type:"text",v:(gi>0?" ":"")+m.before});
+    tokens.push({type:"gap",i:gi}); gaps.push({word:w.w,key:w.key}); gi++;
+    tokens.push({type:"text",v:m.after});
+  });
+  return {tokens:tokens, gaps:gaps};
 }
 function wordBank(word,pool){
   var others=shuffleArr(pool.filter(function(x){ return x.w!==word.w; })).slice(0,5).map(function(x){ return x.w; });
@@ -1609,28 +1656,27 @@ function vlPrev(){ if(vl.qi>0){ vl.qi--; renderVocab(); } }
 function vlRedo(){ vl.qList[vl.qi].checked=false; renderVocab(); }
 function renderCloze(){
   var cz=vl.cloze;
-  var allPlaced=cz.items.every(function(_,i){ return cz.placed[i]!=null; });
-  var correct=cz.items.filter(function(it,i){ return cz.placed[i]===it.word; }).length;
+  var allPlaced=cz.gaps.every(function(_,i){ return cz.placed[i]!=null; });
+  var correct=cz.gaps.filter(function(g,i){ return cz.placed[i]===g.word; }).length;
   var bankHTML=cz.bank.map(function(w){
     var used=Object.keys(cz.placed).some(function(k){ return cz.placed[k]===w; });
     return '<span class="wchip'+(used?" used":"")+(cz.selected===w?" sel":"")+'" draggable="'+(used?"false":"true")+'" data-cbank="'+esc(w)+'">'+esc(w)+'</span>';
   }).join("");
-  var passageHTML=cz.items.map(function(it,i){
-    var filled=cz.placed[i], slot;
-    if(filled!=null){
-      var cls=cz.checked?(filled===it.word?" right":" wrong"):"";
-      slot='<span class="cslot filled'+cls+'" data-cslot="'+i+'">'+esc(filled)+'</span>';
-    } else { slot='<span class="cslot" data-cslot="'+i+'">&#8230;</span>'; }
-    return '<p class="cline">'+esc(it.before)+slot+esc(it.after)+'</p>';
-  }).join("");
+  var passageHTML="";
+  cz.tokens.forEach(function(t){
+    if(t.type==="text"){ passageHTML+=esc(t.v).replace(/\n\n+/g,'</p><p class="cstory">'); return; }
+    var filled=cz.placed[t.i], cls="";
+    if(filled!=null && cz.checked) cls=(filled===cz.gaps[t.i].word?" right":" wrong");
+    passageHTML+='<span class="cslot'+(filled!=null?" filled":"")+cls+'" data-cslot="'+t.i+'">'+(filled!=null?esc(filled):"&#8230;")+'</span>';
+  });
   app.innerHTML=headerHTML(vl.deck.title)+'<div class="wrap wrap-narrow" style="padding-top:26px">'+
     vlStepsHTML("train")+
     '<div class="eyebrow" style="color:var(--gold)">Complete the passage</div>'+
     '<div style="font-size:12.5px;color:var(--muted);margin:4px 0 12px">Drag each word into the gap where it fits &mdash; or tap a word, then tap a gap.</div>'+
-    '<div class="card" style="padding:22px 24px">'+passageHTML+'</div>'+
+    '<div class="card" style="padding:22px 24px"><p class="cstory">'+passageHTML+'</p></div>'+
     '<div class="wbankwrap" style="margin-top:16px">'+bankHTML+'</div>'+
     (cz.checked
-      ? '<div style="text-align:center;margin-top:18px"><div class="serif" style="font-size:22px;font-weight:700;color:var(--gold)">'+correct+' / '+cz.items.length+' correct</div><button class="btn" data-vl="cloze_done" style="margin-top:12px">Continue to review &rarr;</button></div>'
+      ? '<div style="text-align:center;margin-top:18px"><div class="serif" style="font-size:22px;font-weight:700;color:var(--gold)">'+correct+' / '+cz.gaps.length+' correct</div><button class="btn" data-vl="cloze_done" style="margin-top:12px">Continue to review &rarr;</button></div>'
       : '<div style="display:flex;gap:10px;margin-top:18px;justify-content:space-between;align-items:center"><button class="btn btn-ghost" data-vl="cloze_clear">Clear</button><button class="btn" data-vl="cloze_check"'+(allPlaced?"":" disabled")+'>Check answers</button></div>')+
     '</div>';
   wireVocab(); wireCloze();
@@ -1662,12 +1708,12 @@ function placeCloze(i,w){
 function clozeCheck(){
   var cz=vl.cloze; if(!cz) return; cz.checked=true; vl.clozeDone=true;
   var srs=loadSRS();
-  cz.items.forEach(function(it,i){
-    var ok=cz.placed[i]===it.word;
-    var cur=srs[it.key]||{box:0,seen:0,correct:0};
+  cz.gaps.forEach(function(g,i){
+    var ok=cz.placed[i]===g.word;
+    var cur=srs[g.key]||{box:0,seen:0,correct:0};
     cur.seen=(cur.seen||0)+1;
     if(ok){ cur.correct=(cur.correct||0)+1; cur.box=Math.min((cur.box||0)+1,5); } else { cur.box=0; }
-    cur.due=today()+SRS_INTERVAL[cur.box]; srs[it.key]=cur;
+    cur.due=today()+SRS_INTERVAL[cur.box]; srs[g.key]=cur;
   });
   saveSRS(srs); markPractisedToday(true); renderVocab();
 }
@@ -1693,7 +1739,7 @@ function sessionReview(){
   var qByKey={};
   vl.qList.forEach(function(q){ (qByKey[q.word.key]=qByKey[q.word.key]||[]).push(q); });
   var czByKey={};
-  if(vl.cloze){ vl.cloze.items.forEach(function(it,i){ czByKey[it.key]={checked:vl.cloze.checked,ok:(vl.cloze.checked&&vl.cloze.placed[i]===it.word)}; }); }
+  if(vl.cloze){ vl.cloze.gaps.forEach(function(g,i){ czByKey[g.key]={checked:vl.cloze.checked,ok:(vl.cloze.checked&&vl.cloze.placed[i]===g.word)}; }); }
   var mastered=[], review=[];
   vl.words.forEach(function(w,idx){
     var qs=(qByKey[w.key]||[]).filter(function(q){ return q.checked; });
