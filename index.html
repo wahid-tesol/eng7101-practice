@@ -169,7 +169,7 @@ const norm = s => s.toLowerCase().trim().replace(/[.,;!?]+$/,"").replace(/\s+/g,
    ▼▼▼ TEACHER: paste your Google Apps Script Web App URL between the quotes.
    See TEACHER-SETUP.md for the 5-minute setup. Until it is filled in the app
    still works and tracks scores on each device, but nothing is sent to you. ▼▼▼ */
-const SYNC_URL = "https://script.google.com/macros/s/AKfycbyHkeFdKO1eGSkNovBU62ElmuXZDHC8MYKkJ0ims6yhC4vn-gGMk-kQ9_y3prkd3eHPgA/exec";
+const SYNC_URL = "https://script.google.com/macros/s/AKfycbws-O7aPN04xLY-SG-QhHQvyUjFnQhKbIZvLUgEIsrueqSTsa0Ff4s_rtRugRiord4YNg/exec";
 /* ▲▲▲ teacher's Apps Script web-app URL ▲▲▲ */
 
 const STUDENT_KEY = "eng7101:student";
@@ -237,7 +237,7 @@ function handleAuthLost(){ try{ var st=getStudent()||{}; delete st.token; setStu
    minutes -- so the teacher can see how long each student spent, per day.
    Pings are fire-and-forget: if the backend hasn't been updated yet, or the
    student is offline, they're simply ignored (no errors, nothing queued). */
-var TRACK_TIME = false;                                    // flip to true AFTER the Apps Script handlePing is deployed
+var TRACK_TIME = true;                                     // time-on-app tracking ON (Apps Script ping handler is deployed)
 var HEARTBEAT_MS = 60000;                                  // one ping per minute
 var heartbeatTimer = null;
 function sendPing(){
