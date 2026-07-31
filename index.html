@@ -95,7 +95,7 @@
   .flip-face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px 26px;border-radius:16px;border:1px solid var(--goldLine);box-shadow:0 8px 24px rgba(30,22,10,.07),0 1px 2px rgba(30,22,10,.04)}
   .flip-front{background:linear-gradient(158deg,#FFFDF9 42%,#F6EDD6)}
   .flip-back{background:linear-gradient(158deg,#FFFDF9 42%,#E7F0EC);transform:rotateY(180deg)}
-  .pickup{position:absolute;top:12px;right:12px;font:inherit;font-size:11.5px;font-weight:700;color:var(--correct);background:var(--correctBg);border:1px solid var(--correct);border-radius:20px;padding:5px 11px;cursor:pointer;transition:background .12s,color .12s}
+  .pickup{position:absolute;top:12px;left:12px;font:inherit;font-size:11.5px;font-weight:700;color:var(--correct);background:var(--correctBg);border:1px solid var(--correct);border-radius:20px;padding:5px 11px;cursor:pointer;transition:background .12s,color .12s}
   .pickup:hover{background:var(--correct);color:#fff}
   .cline{font-size:16.5px;line-height:2.15;margin:0 0 6px;color:var(--ink)}
   .cstory{font-size:16.5px;line-height:2.35;margin:0 0 10px;color:var(--ink)}
@@ -230,6 +230,28 @@ function syncResult(activityId, title, kind, score, total, detail){
 }
 function handleAuthLost(){ try{ var st=getStudent()||{}; delete st.token; setStudent(st); }catch(e){} }
 
+/* ---- time-on-app heartbeat -------------------------------------------------
+   While a logged-in student has the app open and visible, we quietly ping the
+   backend once a minute. The Apps Script records the FIRST ping of the day as
+   the login time, keeps moving the LAST-seen time forward, and adds up active
+   minutes -- so the teacher can see how long each student spent, per day.
+   Pings are fire-and-forget: if the backend hasn't been updated yet, or the
+   student is offline, they're simply ignored (no errors, nothing queued). */
+var TRACK_TIME = false;                                    // flip to true AFTER the Apps Script handlePing is deployed
+var HEARTBEAT_MS = 60000;                                  // one ping per minute
+var heartbeatTimer = null;
+function sendPing(){
+  if(!SYNC_URL) return;
+  var st=getStudent(); if(!st||!st.token) return;          // logged-in students only
+  if(document.visibilityState==="hidden") return;          // don't count background/idle time
+  apiPost({ action:"ping", username:st.username, name:st.name||st.username, token:st.token, deviceId:deviceId(), deviceType:deviceType(), when:Date.now() })
+    .then(function(res){ if(res && res.ok===false && /session|device/i.test(res.error||"")){ handleAuthLost(); stopHeartbeat(); } })
+    .catch(function(){});                                  // offline / backend not updated -> ignore
+}
+function startHeartbeat(){ if(!TRACK_TIME) return; stopHeartbeat(); sendPing(); heartbeatTimer=setInterval(sendPing, HEARTBEAT_MS); }
+function stopHeartbeat(){ if(heartbeatTimer){ clearInterval(heartbeatTimer); heartbeatTimer=null; } }
+document.addEventListener("visibilitychange", function(){ if(document.visibilityState==="visible") sendPing(); });
+
 function renderIdGate(){
   app.innerHTML = `<div class="idgate"><div class="idcard card">
     <img class="medallion" src="${MARK}" alt="" style="margin-bottom:14px" />
@@ -270,6 +292,7 @@ function renderIdGate(){
         if(res && res.ok){
           setStudent({ name:res.name||u, username:u, id:u, token:res.token, exp:Date.now()+29*86400000 });
           flushPending();
+          startHeartbeat();
           renderHome();
         } else {
           showErr((res&&res.error) || "Login failed. Please try again.");
@@ -2003,7 +2026,7 @@ function renderHome(){
     el.addEventListener("keydown",e=>{ if(e.key==="Enter"||e.key===" "){e.preventDefault();openTopic(id);} });
   });
   const sw=app.querySelector('[data-act="switch"]');
-  if(sw) sw.addEventListener("click",()=>{ clearStudent(); renderIdGate(); });
+  if(sw) sw.addEventListener("click",()=>{ stopHeartbeat(); clearStudent(); renderIdGate(); });
   const rp=app.querySelector('[data-act="report"]');
   if(rp) rp.addEventListener("click",renderReport);
   window.scrollTo(0,0);
@@ -2334,7 +2357,7 @@ if("serviceWorker" in navigator && location.protocol==="https:"){ navigator.serv
 function boot(){
   flushPending();                                     // resend anything that failed while offline
   const st=getStudent();
-  if(st && st.token && (!st.exp || st.exp>Date.now())){ renderHome(); } else { renderIdGate(); }
+  if(st && st.token && (!st.exp || st.exp>Date.now())){ startHeartbeat(); renderHome(); } else { renderIdGate(); }
 }
 boot();
 </script>
