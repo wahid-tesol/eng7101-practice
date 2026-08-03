@@ -263,6 +263,55 @@ function startHeartbeat(){ if(!TRACK_TIME) return; stopHeartbeat(); sendPing(); 
 function stopHeartbeat(){ if(heartbeatTimer){ clearInterval(heartbeatTimer); heartbeatTimer=null; } }
 document.addEventListener("visibilitychange", function(){ if(document.visibilityState==="visible") sendPing(); });
 
+/* ---- cross-device progress sync ----------------------------------------------
+   Mirrors the student's own report to the backend so it follows them onto any
+   device they sign in on. pushProgress() saves a snapshot; pullProgress() fetches
+   it on login/boot and merges (best score kept, most recent state kept).
+   Degrades silently if the backend hasn't been updated yet. */
+var progressPushTimer=null;
+function pushProgress(){
+  if(!SYNC_URL) return;
+  var st=getStudent(); if(!st||!st.token) return;
+  if(progressPushTimer) clearTimeout(progressPushTimer);
+  progressPushTimer=setTimeout(function(){
+    var st2=getStudent(); if(!st2||!st2.token) return;
+    apiPost({ action:"saveprogress", username:st2.username, token:st2.token, deviceId:deviceId(), deviceType:deviceType(), progress:JSON.stringify(loadProgress()) }).catch(function(){});
+  }, 1500);
+}
+function mergeProgressEntry(L, Svr){
+  if(!L) return Svr; if(!Svr) return L;
+  var lT=Date.parse(L.lastTs||"")||0, sT=Date.parse(Svr.lastTs||"")||0;
+  var newer=(sT>lT)?Svr:L, older=(newer===Svr)?L:Svr;
+  var m=Object.assign({}, older, newer);            // most recent state wins on overlap
+  m.attempts=Math.max(L.attempts||0, Svr.attempts||0);
+  var lb=L.best, sb=Svr.best;
+  m.best=(lb&&sb)?((sb.s>lb.s)?sb:lb):(lb||sb);      // keep the higher best score
+  return m;
+}
+function refreshReportView(){
+  try{
+    if(document.querySelector(".rep-actions")) renderReport();
+    else if(document.querySelector(".masthead")) renderHome();
+  }catch(e){}
+}
+function pullProgress(){
+  if(!SYNC_URL) return;
+  var st=getStudent(); if(!st||!st.token) return;
+  apiPost({ action:"getprogress", username:st.username, token:st.token, deviceId:deviceId(), deviceType:deviceType() })
+    .then(function(res){
+      if(!(res && res.ok && res.progress!=null)) return;
+      var server={}; try{ server=(typeof res.progress==="string")?JSON.parse(res.progress||"{}"):res.progress; }catch(e){ return; }
+      var local=loadProgress(), merged={}, changed=false, ids={};
+      Object.keys(local).forEach(function(k){ ids[k]=1; });
+      Object.keys(server).forEach(function(k){ ids[k]=1; });
+      Object.keys(ids).forEach(function(id){
+        merged[id]=mergeProgressEntry(local[id], server[id]);
+        if(JSON.stringify(merged[id])!==JSON.stringify(local[id])) changed=true;
+      });
+      if(changed){ saveProgress(merged); pushProgress(); refreshReportView(); }
+    }).catch(function(){});
+}
+
 function renderIdGate(){
   app.innerHTML = `<div class="idgate"><div class="idcard card">
     <img class="medallion" src="${MARK}" alt="" style="margin-bottom:14px" />
@@ -305,6 +354,7 @@ function renderIdGate(){
           flushPending();
           startHeartbeat();
           renderHome();
+          pullProgress();                            // restore this student's report from any device
         } else {
           showErr((res&&res.error) || "Login failed. Please try again.");
           go.disabled=false; go.textContent="Log in";
@@ -2245,13 +2295,13 @@ function recordScore(id, kind, s, t){
   const p=loadProgress(); const e=p[id]||{attempts:0};
   e.attempts=(e.attempts||0)+1; e.kind=kind; e.last={s,t};
   if(!e.best || s>e.best.s) e.best={s,t};
-  e.lastTs=new Date().toISOString(); p[id]=e; saveProgress(p); return e;
+  e.lastTs=new Date().toISOString(); p[id]=e; saveProgress(p); pushProgress(); return e;
 }
 function recordWriting(id, words, ticks, checklistLen){
   const p=loadProgress(); const e=p[id]||{attempts:0};
   e.attempts=(e.attempts||0)+1; e.kind="writing"; e.words=words; e.ticks=ticks; e.checklist=checklistLen;
   e.detail=`${words} words · ${ticks}/${checklistLen} self-checks`;
-  e.lastTs=new Date().toISOString(); p[id]=e; saveProgress(p); return e;
+  e.lastTs=new Date().toISOString(); p[id]=e; saveProgress(p); pushProgress(); return e;
 }
 function isScored(id){ return !!READINGS_BY_ID[id] || !!QUIZ[id]; }
 /* every "ready" topic counts toward the completion total */
@@ -2643,6 +2693,7 @@ function resendAll(){
   });
   const stat=completionStats();
   syncResult("_summary","Overall completion","summary",stat.done,stat.total,`${stat.done}/${stat.total} topics`);
+  pushProgress();
   return n;
 }
 function renderReport(){
@@ -2752,7 +2803,7 @@ if("serviceWorker" in navigator && location.protocol==="https:"){ navigator.serv
 function boot(){
   flushPending();                                     // resend anything that failed while offline
   const st=getStudent();
-  if(st && st.token && (!st.exp || st.exp>Date.now())){ startHeartbeat(); renderHome(); } else { renderIdGate(); }
+  if(st && st.token && (!st.exp || st.exp>Date.now())){ startHeartbeat(); renderHome(); pullProgress(); } else { renderIdGate(); }
 }
 boot();
 </script>
