@@ -662,11 +662,11 @@ const READING_PLACEBO = {
     {type:"mcq",q:"'anticipation' (paragraph 2) here means:",options:["expectation of something to come","memory of the past","fear of doctors","refusal to believe"],answer:0,why:"To anticipate is to expect; anticipation is the expectation of what is coming."},
     {type:"mcq",q:"An 'ethical' (paragraph 3) question is one about:",options:["what is morally right or wrong","what is medically effective","what is financially cheap","what is scientifically new"],answer:0,why:"Ethics concerns right and wrong conduct."},
     {type:"mcq",q:"Something 'subjective' (paragraph 4) is:",options:["based on personal feeling","proven by measurement","completely false","shared by everyone"],answer:0,why:"Subjective means based on personal experience; 'proven by measurement' describes its opposite, objective."}
-    ,{type:"open",q:"What is the placebo effect?",model:"It is when a patient given a fake or inactive treatment improves simply because they believe it will work."},
-    {type:"open",q:"How did scientists' view of the placebo effect change with modern research?",model:"They once dismissed it as imagination, but brain scans showed that expecting relief triggers the body's own painkillers — a genuine biological process."},
-    {type:"open",q:"Why does the placebo effect create an ethical problem for doctors?",model:"Because giving a fake treatment deceives the patient, yet it can also genuinely reduce their suffering, so honesty and helping the patient seem to conflict."},
-    {type:"open",q:"According to the passage, what surprising finding involves patients who KNOW they are taking a placebo?",model:"Some still improve even when openly told the pill is a placebo, suggesting the ritual of taking medicine matters almost as much as the medicine."},
-    {type:"open",q:"Why must every new drug be tested against a placebo?",model:"Because a patient's report of pain is subjective, so a placebo comparison is needed to prove the drug itself, not belief, caused any improvement."}
+    ,{type:"open",q:"What is the placebo effect?",model:"The placebo effect is the way a patient's symptoms improve after taking a fake or inactive treatment, simply because they believe it will work.",source:"If a patient is given a sugar pill but believes it is a powerful medicine, their symptoms often improve."},
+    {type:"open",q:"How did scientists' view of the placebo effect change with modern research?",model:"Scientists once dismissed the placebo effect as imagination, but brain scans later showed that expecting relief triggers the body's own painkillers — a genuine biological process.",source:"Brain scans reveal that simply expecting relief can trigger the release of the body's own painkillers."},
+    {type:"open",q:"Why does the placebo effect create an ethical problem for doctors?",model:"The ethical problem is that giving a fake treatment deceives the patient, yet the same placebo can genuinely reduce their suffering — so honesty and helping the patient seem to conflict.",source:"Deceiving a patient with a fake treatment is dishonest, yet the placebo can genuinely reduce suffering."},
+    {type:"open",q:"According to the passage, what surprising finding involves patients who KNOW they are taking a placebo?",model:"The surprising finding is that some patients improve even when they are openly told the pill is a placebo, which suggests the ritual of taking medicine matters almost as much as the medicine.",source:"some trials show that patients improve even when they are openly told the pill is a placebo, which suggests that the ritual of taking medicine matters almost as much as the medicine itself."},
+    {type:"open",q:"Why must every new drug be tested against a placebo?",model:"New drugs must be tested against a placebo because a patient's report of pain is subjective, so the comparison proves the drug itself — not belief — caused any improvement.",source:"scientists must test every new drug against a placebo to be sure that the drug, and not belief alone, is responsible for any improvement."}
   ]
 };
 
@@ -2451,8 +2451,22 @@ function openTopic(id){
 
 /* bold target words written as **word** in a passage; everything else is escaped */
 function fmtPara(x){ return esc(x).replace(/\*\*([^*]+)\*\*/g,'<b>$1</b>'); }
-function passageHTML(r){
-  let p = r.paras.map(x=>`<p style="font-size:16px;line-height:1.7;margin:0 0 14px;color:#2c3954">${fmtPara(x)}</p>`).join("");
+function highlightPara(raw, highlights){
+  var s=String(raw), toks=[];
+  (highlights||[]).forEach(function(h){
+    if(!h||!h.text) return;
+    var idx=s.indexOf(h.text);
+    if(idx<0) return;
+    var ti=toks.length; toks.push(h.bg);
+    s = s.slice(0,idx) + "[[HL"+ti+"]]" + h.text + "[[/HL]]" + s.slice(idx+h.text.length);
+  });
+  var html = esc(s).replace(/\*\*([^*]+)\*\*/g,'<b>$1</b>');
+  html = html.replace(/\[\[HL(\d+)\]\]/g, function(m,i){ return '<mark style="background:'+toks[+i]+';padding:1px 3px;border-radius:4px">'; })
+             .replace(/\[\[\/HL\]\]/g,'</mark>');
+  return html;
+}
+function passageHTML(r, highlights){
+  let p = r.paras.map(x=>`<p style="font-size:16px;line-height:1.7;margin:0 0 14px;color:#2c3954">${highlightPara(x, highlights)}</p>`).join("");
   return `<div class="card" style="padding:26px 26px 30px;margin:0 0 22px">
       <div class="eyebrow">${esc(r.meta)}</div>
       <h2 class="serif" style="font-size:26px;margin:8px 0 16px">${esc(r.title)}</h2>${p}</div>`;
@@ -2464,6 +2478,28 @@ function passageHTML(r){
    comprehension (open) questions reveal a model answer. */
 var rw=null;
 const RW_BLOCK=5;
+/* light tile colours; each comprehension answer gets one, and the same colour
+   highlights where the answer is found in the passage */
+var RW_HLCOLORS=[
+  {bg:"#FBEFC9",bd:"#D9B84A"},
+  {bg:"#D9E9F7",bd:"#8FB6DA"},
+  {bg:"#DCEFDF",bd:"#88C69A"},
+  {bg:"#F7DEE7",bd:"#DFA0B6"},
+  {bg:"#EAE0F4",bd:"#B39AD3"}
+];
+/* colour + source map for the open (comprehension) questions in the current block */
+function rwBlockHighlights(){
+  var start=rw.block*RW_BLOCK, end=Math.min(start+RW_BLOCK, rw.items.length), out=[], k=0;
+  for(var qi=start; qi<end; qi++){
+    var it=rw.items[qi];
+    if(it.type==="open"){
+      var c=RW_HLCOLORS[k%RW_HLCOLORS.length];
+      out.push({ qi:qi, bg:c.bg, bd:c.bd, source:it.source||null });
+      k++;
+    }
+  }
+  return out;
+}
 function startReadingWorksheet(id){
   var r=READINGS_BY_ID[id];
   rw={ id:id, r:r, items:r.questions.map(shuffleItem), block:0, answers:{}, checkedBlocks:{}, split:0.52, passScroll:0 };
@@ -2477,6 +2513,7 @@ function rwScore(){
 }
 function rwRightHTML(){
   var items=rw.items, n=items.length, nB=rwBlocks(), start=rw.block*RW_BLOCK, end=Math.min(start+RW_BLOCK,n);
+  var hlMap={}; rwBlockHighlights().forEach(function(h){ hlMap[h.qi]=h; });
   var note='<p style="font-size:12.5px;color:var(--muted);margin:0 0 12px">Answer the questions in this block, then tap <b>Check answers</b>. Vocabulary questions are graded; comprehension questions reveal a model answer.</p>';
   var tabs='<div style="display:flex;gap:8px;margin-bottom:16px">';
   for(var b=0;b<nB;b++){
@@ -2507,7 +2544,9 @@ function rwRightHTML(){
     } else {
       cards+='<textarea class="input" data-rwtext="'+qi+'" placeholder="Write your answer, then check it against the model.">'+esc(rw.answers[qi]||"")+'</textarea>';
       if(checked){
-        cards+='<div style="margin-top:12px;padding:12px 14px;background:var(--accentSoft);border-radius:10px;border-left:3px solid var(--accent)"><div class="eyebrow" style="color:var(--accent)">Model answer</div><p style="margin:6px 0 0;font-size:14px">'+esc(it.model)+'</p></div>';
+        var h=hlMap[qi], boxBg=h?h.bg:"var(--accentSoft)", boxBd=h?h.bd:"var(--accent)";
+        var srcNote=(h&&h.source)?'<div style="font-size:11.5px;color:#5a5647;margin-top:8px;font-weight:600">Highlighted in the passage in this colour.</div>':'';
+        cards+='<div style="margin-top:12px;padding:12px 14px;background:'+boxBg+';border-radius:10px;border-left:4px solid '+boxBd+'"><div class="eyebrow" style="color:#4a4636">Model answer</div><p style="margin:6px 0 0;font-size:14px;color:#2b2a26">'+esc(it.model)+'</p>'+srcNote+'</div>';
       }
     }
     cards+='</div>';
@@ -2536,7 +2575,10 @@ function rwCheck(){
   if(s) s.scrollTop=0; else window.scrollTo(0,0);
 }
 function renderReadingWorksheet(){
-  var r=rw.r, passage=passageHTML(r), right=rwRightHTML(), footer=rwFooterHTML();
+  var r=rw.r;
+  var showHl=!!rw.checkedBlocks[rw.block];
+  var hls=showHl ? rwBlockHighlights().filter(function(h){return h.source;}).map(function(h){return {text:h.source, bg:h.bg};}) : [];
+  var passage=passageHTML(r, hls), right=rwRightHTML(), footer=rwFooterHTML();
   var wide=(window.innerWidth||document.documentElement.clientWidth)>=900;
   if(wide){
     var leftPct=Math.round(Math.max(0.28,Math.min(0.72,rw.split||0.52))*1000)/10;
