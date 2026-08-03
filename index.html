@@ -99,6 +99,17 @@
   .pickup:hover{background:var(--correct);color:#fff}
   .cline{font-size:16.5px;line-height:2.15;margin:0 0 6px;color:var(--ink)}
   .cstory{font-size:16.5px;line-height:2.35;margin:0 0 10px;color:var(--ink)}
+  /* Reading split view (wide screens): passage left, questions right, draggable divider */
+  .rsplit{display:flex;align-items:stretch;width:100%}
+  .rsplit-read,.rsplit-q{overflow-y:auto;overflow-x:hidden;min-width:0}
+  .rsplit-read{padding:2px 20px 40px 2px}
+  .rsplit-q{padding:2px 2px 40px 20px}
+  .rsplit-bar{flex:0 0 16px;cursor:col-resize;position:relative;display:flex;align-items:center;justify-content:center;touch-action:none;user-select:none;-webkit-user-select:none}
+  .rsplit-bar::before{content:"";position:absolute;top:0;bottom:0;width:2px;background:var(--line)}
+  .rsplit-bar:hover::before{background:var(--gold)}
+  .rsplit-grip{position:relative;width:15px;height:48px;border-radius:7px;background:var(--surface);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:13px;line-height:1;letter-spacing:-1px;box-shadow:0 1px 4px rgba(0,0,0,.1)}
+  .rsplit-bar:hover .rsplit-grip{border-color:var(--gold);color:var(--gold)}
+  body.rsplit-dragging{cursor:col-resize;user-select:none;-webkit-user-select:none}
   .cstory:last-child{margin-bottom:0}
   .cslot{display:inline-block;min-width:104px;padding:2px 10px;margin:0 3px;border-bottom:2px solid var(--gold);text-align:center;border-radius:7px 7px 0 0;background:var(--goldSoft);color:var(--muted);cursor:pointer;vertical-align:baseline;transition:background .12s}
   .cslot.filled{color:var(--ink);font-weight:600;background:#fff;border:1px solid var(--line);border-bottom:2px solid var(--gold)}
@@ -2046,11 +2057,9 @@ function openTopic(id){
 function fmtPara(x){ return esc(x).replace(/\*\*([^*]+)\*\*/g,'<b>$1</b>'); }
 function passageHTML(r){
   let p = r.paras.map(x=>`<p style="font-size:16px;line-height:1.7;margin:0 0 14px;color:#2c3954">${fmtPara(x)}</p>`).join("");
-  return `<div class="card" style="padding:26px 26px 30px;margin-bottom:26px">
+  return `<div class="card" style="padding:26px 26px 30px;margin:0 0 22px">
       <div class="eyebrow">${esc(r.meta)}</div>
-      <h2 class="serif" style="font-size:26px;margin:8px 0 16px">${esc(r.title)}</h2>${p}</div>
-    <h3 class="serif" style="font-size:18px;margin:0 0 4px">Questions</h3>
-    <p style="font-size:13.5px;color:var(--muted);margin-top:0">Five vocabulary questions are graded automatically; the comprehension questions show a model answer to check yourself against.</p>`;
+      <h2 class="serif" style="font-size:26px;margin:8px 0 16px">${esc(r.title)}</h2>${p}</div>`;
 }
 
 /* ---- QUIZ ENGINE ---- */
@@ -2126,17 +2135,57 @@ function renderQuiz(){
   }
   if(checked||it.type==="open"){ nav+=`<button class="btn" data-act="next">${q.i+1>=total?"Finish":"Next →"}</button>`; }
   nav+=`</div>`;
-  app.innerHTML=headerHTML(q.label)+`<div class="wrap wrap-narrow" style="padding-top:30px">
-    ${q.top||""}
-    <div style="display:flex;justify-content:space-between;font-size:12.5px;color:var(--muted);margin-bottom:8px">
+  const hasPassage=!!q.top;
+  const wide=(window.innerWidth||document.documentElement.clientWidth)>=900;
+  const noteHtml=hasPassage
+    ?`<p style="font-size:12.5px;color:var(--muted);margin:0 0 14px">Vocabulary questions are graded automatically; comprehension questions show a model answer to check yourself against.</p>`
+    :"";
+  const progressHtml=`<div style="display:flex;justify-content:space-between;font-size:12.5px;color:var(--muted);margin-bottom:8px">
       <span>Question ${q.i+1} of ${total}</span><span class="scorepill">Score ${q.score}/${autoTotal}</span></div>
     <div style="height:5px;background:var(--line);border-radius:4px;margin-bottom:22px;overflow:hidden">
-      <div style="width:${(q.i/total)*100}%;height:100%;background:var(--gold);transition:width .2s"></div></div>
-    <div class="card" style="padding:22px 22px 24px">
+      <div style="width:${(q.i/total)*100}%;height:100%;background:var(--gold);transition:width .2s"></div></div>`;
+  const cardHtml=`<div class="card" style="padding:22px 22px 24px">
       ${it.base?`<div class="eyebrow" style="margin-bottom:8px">${esc(it.base)}</div>`:""}
       <p class="serif" style="font-size:19px;line-height:1.45;margin:0 0 18px">${esc(it.q)}</p>
-      ${qHtml}${fb}</div>${nav}</div>`;
-  wireQuiz();
+      ${qHtml}${fb}</div>`;
+  const rightHtml=noteHtml+progressHtml+cardHtml+nav;
+
+  if(hasPassage && wide){
+    const leftPct=Math.round(Math.max(0.28,Math.min(0.72,q.split||0.52))*1000)/10;
+    app.innerHTML=headerHTML(q.label)+`<div class="wrap" style="max-width:1180px;padding-top:18px">
+      <div class="rsplit" id="rsplit" style="height:calc(100vh - 118px)">
+        <div class="rsplit-read" id="rsplitRead" style="flex:0 0 ${leftPct}%">${q.top}</div>
+        <div class="rsplit-bar" id="rsplitBar" title="Drag to resize · double-click to reset"><div class="rsplit-grip">⋮</div></div>
+        <div class="rsplit-q" id="rsplitQ" style="flex:1 1 0;min-width:0">${rightHtml}</div>
+      </div></div>`;
+    wireQuiz(); wireSplit();
+  } else {
+    app.innerHTML=headerHTML(q.label)+`<div class="wrap wrap-narrow" style="padding-top:30px">
+      ${q.top||""}${rightHtml}</div>`;
+    wireQuiz();
+  }
+}
+/* Reading split view: draggable divider + persist passage scroll across questions */
+function wireSplit(){
+  const bar=document.getElementById("rsplitBar");
+  const cont=document.getElementById("rsplit");
+  const left=document.getElementById("rsplitRead");
+  if(!bar||!cont||!left) return;
+  left.scrollTop=q.passScroll||0;
+  left.addEventListener("scroll",function(){ q.passScroll=left.scrollTop; });
+  function setRatio(clientX){
+    const r=cont.getBoundingClientRect();
+    let ratio=(clientX-r.left)/r.width;
+    ratio=Math.max(0.28,Math.min(0.72,ratio));
+    q.split=ratio; left.style.flexBasis=(ratio*100)+"%";
+  }
+  function onMove(e){ setRatio(e.clientX); if(e.cancelable) e.preventDefault(); }
+  function onUp(){ document.body.classList.remove("rsplit-dragging");
+    window.removeEventListener("pointermove",onMove); window.removeEventListener("pointerup",onUp); }
+  bar.addEventListener("pointerdown",function(e){ e.preventDefault();
+    document.body.classList.add("rsplit-dragging");
+    window.addEventListener("pointermove",onMove); window.addEventListener("pointerup",onUp); });
+  bar.addEventListener("dblclick",function(){ q.split=0.52; left.style.flexBasis="52%"; });
 }
 function wireQuiz(){
   app.querySelectorAll("[data-act]").forEach(el=>{
