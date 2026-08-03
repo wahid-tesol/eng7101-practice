@@ -2267,9 +2267,42 @@ function headerHTML(title){
     <button class="btn btn-ghost" style="padding:7px 13px" data-act="home">&larr; All topics</button>
     <span class="serif" style="font-weight:700;font-size:16px">${esc(title)}</span>
     <span style="flex:1"></span>
-    <img class="medallion xs" src="${MARK}" alt="" />
+    <img class="medallion xs" src="${MARK}" alt="Account" data-act="account" title="Account & log out" style="cursor:pointer" />
   </div></div>`;
 }
+
+/* Account menu — opened by clicking the AW logo on any screen. Shows who is
+   signed in and a Log out button. Delegated click below works on every page. */
+function openAccountMenu(){
+  var st=getStudent()||{};
+  var dev=(typeof deviceType==="function"?deviceType():"device");
+  var back=document.createElement("div");
+  back.id="acctBack";
+  back.style.cssText="position:fixed;inset:0;background:rgba(20,16,8,.38);z-index:9999;display:flex;align-items:flex-start;justify-content:flex-end;padding:62px 16px 0";
+  back.innerHTML='<div role="dialog" aria-label="Account" style="background:var(--surface);width:280px;max-width:92vw;border-radius:16px;border:1px solid var(--line);box-shadow:0 16px 44px rgba(0,0,0,.26);padding:18px 18px 16px">'+
+    '<div class="eyebrow" style="color:var(--gold)">Account</div>'+
+    '<div class="serif" style="font-size:20px;font-weight:700;margin:2px 0 3px">'+esc(st.name||"—")+'</div>'+
+    '<div style="font-size:13.5px;color:var(--inkSoft);margin-bottom:2px">Username: <strong>'+esc(st.username||st.id||"—")+'</strong></div>'+
+    '<div style="font-size:12.5px;color:var(--muted);margin-bottom:15px">Signed in on this '+esc(dev)+'</div>'+
+    '<button id="acctLogout" class="btn" style="width:100%;background:var(--wrong);border-color:var(--wrong);color:#fff;margin-bottom:8px">Log out</button>'+
+    '<button id="acctClose" class="btn btn-ghost" style="width:100%">Close</button>'+
+  '</div>';
+  document.body.appendChild(back);
+  function close(){ var b=document.getElementById("acctBack"); if(b) b.remove(); }
+  back.addEventListener("click",function(e){ if(e.target===back) close(); });
+  document.getElementById("acctClose").addEventListener("click",close);
+  document.getElementById("acctLogout").addEventListener("click",function(){
+    try{ flushPending(); }catch(e){}      // push any unsent results before signing out
+    try{ stopHeartbeat(); }catch(e){}
+    clearStudent();
+    close();
+    renderIdGate();
+  });
+}
+document.addEventListener("click",function(e){
+  var el=e.target&&e.target.closest&&e.target.closest('[data-act="account"]');
+  if(el){ e.preventDefault(); openAccountMenu(); }
+});
 
 function renderHome(){
   clearInterval(gameTimer);
@@ -2277,7 +2310,7 @@ function renderHome(){
   const stat = completionStats();
   let html = `<div class="wrap" style="max-width:1000px;padding-top:46px">
     <div class="masthead">
-      <img class="medallion" src="${MARK}" alt="AW monogram — Abdul Wahid" />
+      <img class="medallion" src="${MARK}" alt="AW monogram — Abdul Wahid" data-act="account" title="Account & log out" style="cursor:pointer" />
       <div>
         <h1 class="title">ENG7101 Practice</h1>
         <div class="byline">Written and developed by <span class="nm">Abdul Wahid</span></div>
