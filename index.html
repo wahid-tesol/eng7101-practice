@@ -141,6 +141,8 @@
   .idcard{max-width:430px;width:100%;padding:30px 28px;text-align:center}
   .idcard .input{text-align:left}
   .idlbl{display:block;text-align:left;font-size:12.5px;font-weight:700;color:var(--inkSoft);margin:13px 0 5px;letter-spacing:.02em}
+  /* the right answer, picked out inside an explanation that also names a near miss */
+  .ansok{color:var(--correct);font-weight:700}
   .opt-tag{font-weight:400;color:var(--muted)}
   .whoami{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;justify-content:space-between;margin-top:18px;
     background:var(--goldSoft);border:1px solid var(--goldLine);border-radius:11px;padding:9px 14px;font-size:13.5px;color:var(--ink)}
@@ -176,6 +178,26 @@
 
 const esc = s => String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
 const norm = s => s.toLowerCase().trim().replace(/[.,;!?]+$/,"").replace(/\s+/g," ");
+
+/* An explanation often names the right word and the wrong one in the same breath
+   ("economical ... compare economic"). Show the right one in green so the eye
+   lands on it first and nobody takes the contrast word away by mistake.
+   One pass over the already-escaped text, longest word first, so "economic"
+   cannot match inside "economical" and nothing inserted is re-scanned. */
+function answerWords(it){
+  if(!it) return [];
+  if(it.type==="fill" && Array.isArray(it.accept)) return it.accept.slice();
+  if(it.type==="mcq" && Array.isArray(it.options) && it.answer!=null) return [String(it.options[it.answer])];
+  return [];
+}
+function whyHTML(it){
+  var html = esc((it && it.why) || "");
+  var words = answerWords(it).filter(Boolean)
+    .sort(function(a,b){ return String(b).length - String(a).length; })
+    .map(function(w){ return String(w).replace(/[.*+?^${}()|[\]\\]/g,"\\$&"); });
+  if(!words.length) return html;
+  return html.replace(new RegExp("\\b(" + words.join("|") + ")\\b","gi"), '<b class="ansok">$1</b>');
+}
 
 /* ============================================================================
    STUDENT IDENTITY + PROGRESS SYNC
@@ -2635,7 +2657,7 @@ function rwRightHTML(){
       cards+='</div>';
       if(checked){
         var ok=chosen===it.answer, lbl=ok?"Correct":(chosen==null?"Not answered":"Not quite"), col=ok?"var(--correct)":"var(--wrong)", bgc=ok?"var(--correctBg)":"var(--wrongBg)";
-        cards+='<div style="margin-top:12px;padding:11px 13px;border-radius:10px;background:'+bgc+';border-left:3px solid '+col+'"><div style="font-weight:700;font-size:13px;color:'+col+'">'+lbl+'</div><p style="margin:5px 0 0;font-size:13.5px">'+esc(it.why)+'</p></div>';
+        cards+='<div style="margin-top:12px;padding:11px 13px;border-radius:10px;background:'+bgc+';border-left:3px solid '+col+'"><div style="font-weight:700;font-size:13px;color:'+col+'">'+lbl+'</div><p style="margin:5px 0 0;font-size:13.5px">'+whyHTML(it)+'</p></div>';
       }
     } else {
       cards+='<textarea class="input" data-rwtext="'+qi+'" placeholder="Write your answer, then check it against the model.">'+esc(rw.answers[qi]||"")+'</textarea>';
@@ -2781,7 +2803,7 @@ function renderQuiz(){
   if(checked && it.type!=="open"){
     fb=`<div style="margin-top:16px;padding:13px;border-radius:11px;background:${correct?"var(--correctBg)":"var(--wrongBg)"};border-left:3px solid ${correct?"var(--correct)":"var(--wrong)"}">
       <div style="font-weight:700;color:${correct?"var(--correct)":"var(--wrong)"};font-size:13.5px">${correct?"Correct":"Not quite"}</div>
-      <p style="margin:5px 0 0;font-size:14px">${esc(it.why)}</p></div>`;
+      <p style="margin:5px 0 0;font-size:14px">${whyHTML(it)}</p></div>`;
   }
   let nav=`<div style="display:flex;justify-content:flex-end;gap:10px;margin-top:18px">`;
   if(it.type!=="open" && !checked){
