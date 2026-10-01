@@ -141,6 +141,11 @@
   .idcard{max-width:430px;width:100%;padding:30px 28px;text-align:center}
   .idcard .input{text-align:left}
   .idlbl{display:block;text-align:left;font-size:12.5px;font-weight:700;color:var(--inkSoft);margin:13px 0 5px;letter-spacing:.02em}
+  .lgterms{display:flex;align-items:flex-start;gap:10px;text-align:left;margin:18px 0 0;
+    font-size:13.5px;color:var(--inkSoft);cursor:pointer;line-height:1.45}
+  .lgterms input{width:18px;height:18px;margin:1px 0 0;flex:none;accent-color:var(--gold);cursor:pointer}
+  .lgterms input:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+  .lgterms a{color:var(--gold);font-weight:600}
   /* the right answer, picked out inside an explanation that also names a near miss */
   .ansok{color:var(--correct);font-weight:700}
   /* square, not a letter: a tick box says more than one answer may be right */
@@ -241,6 +246,9 @@ const SYNC_URL = "https://script.google.com/macros/s/AKfycbws-O7aPN04xLY-SG-QhHQ
 const STUDENT_KEY = "eng7101:student";
 const PENDING_KEY = "eng7101:pending";
 const DEVICE_KEY  = "eng7101:device";
+/* Bump this when terms.html changes materially, so the sheet records which
+   version each student agreed to. */
+const TERMS_VERSION = "2026-10-01";
 
 function getStudent(){ try{ return JSON.parse(localStorage.getItem(STUDENT_KEY)||"null"); }catch(e){ return null; } }
 function setStudent(s){ try{ localStorage.setItem(STUDENT_KEY, JSON.stringify(s)); }catch(e){} }
@@ -287,36 +295,92 @@ function flushPending(){
     apiPost(row).catch(function(){ queueRow(row); });
   });
 }
+/* How long this topic was open, so a score that arrived impossibly fast is visible
+   in the sheet. Stamped by openTopic; 0 when the row is a re-sync of older work. */
+var topicStart = { id:null, t:0 };
+function topicSeconds(activityId){
+  if(!topicStart.id || topicStart.id !== activityId || !topicStart.t) return 0;
+  return Math.max(0, Math.round((Date.now() - topicStart.t) / 1000));
+}
 function syncResult(activityId, title, kind, score, total, detail){
   if(!SYNC_URL) return;
   var st=getStudent(); if(!st||!st.token) return;    // only logged-in students sync
   sendResult({ action:"result", username:st.username, token:st.token, deviceId:deviceId(), deviceType:deviceType(),
     category:kindToCategory(kind), item:title||activityId,
-    score:(score==null?0:score), max:(total==null?0:total), when:Date.now() });
+    score:(score==null?0:score), max:(total==null?0:total),
+    seconds:topicSeconds(activityId), when:Date.now() });
 }
 function handleAuthLost(){ try{ var st=getStudent()||{}; delete st.token; setStudent(st); }catch(e){} }
 
-/* ---- time-on-app heartbeat -------------------------------------------------
-   While a logged-in student has the app open and visible, we quietly ping the
-   backend once a minute. The Apps Script records the FIRST ping of the day as
-   the login time, keeps moving the LAST-seen time forward, and adds up active
-   minutes -- so the teacher can see how long each student spent, per day.
-   Pings are fire-and-forget: if the backend hasn't been updated yet, or the
-   student is offline, they're simply ignored (no errors, nothing queued). */
-var TRACK_TIME = true;                                     // time-on-app tracking ON (Apps Script ping handler is deployed)
-var HEARTBEAT_MS = 60000;                                  // one ping per minute
-var heartbeatTimer = null;
-function sendPing(){
-  if(!SYNC_URL) return;
-  var st=getStudent(); if(!st||!st.token) return;          // logged-in students only
-  if(document.visibilityState==="hidden") return;          // don't count background/idle time
-  apiPost({ action:"ping", username:st.username, name:st.name||st.username, token:st.token, deviceId:deviceId(), deviceType:deviceType(), when:Date.now() })
-    .then(function(res){ if(res && res.ok===false && /session|device/i.test(res.error||"")){ handleAuthLost(); stopHeartbeat(); } })
-    .catch(function(){});                                  // offline / backend not updated -> ignore
+/* ---- time on app: counted here, reported in sessions -----------------------
+   The old version pinged the backend once a minute, and every ping made the
+   Apps Script read the whole Time sheet under a global lock -- so a class of
+   thirty queued behind one another and it got slower all year.
+
+   Now the browser keeps its own count: a tick every 15 seconds while the app is
+   actually visible. What it has counted is sent every 5 minutes, and whenever
+   the student hides or closes the app, as ONE session row the backend appends
+   without reading anything. Same information for the teacher, about a twelfth
+   of the writes, and no whole-sheet read.
+
+   A report is sent through the normal queue, so a session counted offline is
+   kept and goes up with everything else. The closing report goes by sendBeacon,
+   which the browser delivers even as the page is being torn down. */
+var TRACK_TIME     = true;
+var TICK_MS        = 15000;                                // how often we count
+var FLUSH_MS       = 5 * 60000;                            // how often we report
+var sessionId      = "s-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 7);
+var tickTimer      = null;
+var activeMs       = 0;                                    // counted but not yet reported
+var segmentStartMs = Date.now();
+
+function trackTick(){
+  if(document.visibilityState === "hidden") return;        // background time is not study time
+  activeMs += TICK_MS;
+  if(activeMs >= FLUSH_MS) reportSession(false);
 }
-function startHeartbeat(){ if(!TRACK_TIME) return; stopHeartbeat(); sendPing(); heartbeatTimer=setInterval(sendPing, HEARTBEAT_MS); }
-function stopHeartbeat(){ if(heartbeatTimer){ clearInterval(heartbeatTimer); heartbeatTimer=null; } }
-document.addEventListener("visibilitychange", function(){ if(document.visibilityState==="visible") sendPing(); });
+function sessionPayload(){
+  var st = getStudent();
+  if(!st || !st.token || activeMs <= 0) return null;
+  var now = Date.now();
+  var row = { action:"session", username:st.username, token:st.token,
+              deviceId:deviceId(), deviceType:deviceType(), sessionId:sessionId,
+              activeSeconds:Math.round(activeMs/1000), from:segmentStartMs, to:now };
+  activeMs = 0; segmentStartMs = now;                      // reset before sending, never counted twice
+  return row;
+}
+function reportSession(closing){
+  if(!SYNC_URL || !TRACK_TIME) return;
+  var row = sessionPayload();
+  if(!row) return;
+  if(closing){
+    /* the page is going away: sendBeacon survives it, fetch usually does not */
+    var body = JSON.stringify(row);
+    try{
+      if(navigator.sendBeacon &&
+         navigator.sendBeacon(SYNC_URL, new Blob([body], {type:"text/plain;charset=utf-8"}))) return;
+    }catch(e){}
+    try{ fetch(SYNC_URL,{ method:"POST", headers:{"Content-Type":"text/plain;charset=utf-8"},
+                          body:body, keepalive:true }); }catch(e){ queueRow(row); }
+    return;
+  }
+  sendResult(row);                                         // queues itself if we are offline
+}
+function startHeartbeat(){
+  if(!TRACK_TIME) return;
+  stopHeartbeat();
+  activeMs = 0; segmentStartMs = Date.now();
+  tickTimer = setInterval(trackTick, TICK_MS);
+}
+function stopHeartbeat(){
+  if(tickTimer){ clearInterval(tickTimer); tickTimer = null; }
+  reportSession(false);                                    // never throw away what was counted
+}
+document.addEventListener("visibilitychange", function(){
+  if(document.visibilityState === "hidden") reportSession(true);
+  else segmentStartMs = Date.now();
+});
+window.addEventListener("pagehide", function(){ reportSession(true); });
 
 /* ---- cross-device progress sync ----------------------------------------------
    Mirrors the student's own report to the backend so it follows them onto any
@@ -380,6 +444,10 @@ function renderIdGate(){
       <input class="input" id="lgPass" type="password" placeholder="your password" autocomplete="current-password" style="padding-right:46px">
       <button type="button" id="lgEye" aria-label="Show password" style="position:absolute;right:4px;top:50%;transform:translateY(-50%);background:none;border:0;cursor:pointer;padding:9px;color:var(--muted);display:flex;align-items:center"></button>
     </div>
+    <label class="lgterms" for="lgAgree">
+      <input type="checkbox" id="lgAgree">
+      <span>I agree to the <a href="terms.html" target="_blank" rel="noopener">terms and conditions</a></span>
+    </label>
     <div id="lgErr" style="display:none;color:var(--wrong);font-size:13.5px;margin-top:12px;font-weight:600"></div>
     <button class="btn" id="lgGo" style="width:100%;margin-top:18px" disabled>Log in</button>
     <p style="color:var(--muted);font-size:12px;margin:14px 0 0">One account works on up to two devices — your phone and your computer. If you see a device-limit message, ask your teacher to reset it.</p>
@@ -396,16 +464,20 @@ function renderIdGate(){
     eye.setAttribute("aria-label",show?"Hide password":"Show password");
     pass.focus();
   });
-  var check=function(){ go.disabled=!(user.value.trim() && pass.value); };
+  var agree=document.getElementById("lgAgree");
+  /* Log in stays disabled until the box is ticked, so nobody can agree by accident */
+  var check=function(){ go.disabled=!(user.value.trim() && pass.value && agree.checked); };
+  agree.addEventListener("change",check);
   var showErr=function(m){ err.textContent=m; err.style.display="block"; };
   var submit=function(){
     var u=user.value.trim().toLowerCase(), p=pass.value; if(!u||!p) return;
+    if(!agree.checked){ showErr("Please agree to the terms and conditions first."); return; }
     err.style.display="none"; go.disabled=true; go.textContent="Logging in…";
     if(!SYNC_URL){ showErr("The app isn't connected yet. Please tell your teacher."); go.textContent="Log in"; go.disabled=false; return; }
-    apiPost({ action:"login", username:u, password:p, deviceId:deviceId(), deviceType:deviceType() })
+    apiPost({ action:"login", username:u, password:p, deviceId:deviceId(), deviceType:deviceType(), agreedTerms:true, termsVersion:TERMS_VERSION })
       .then(function(res){
         if(res && res.ok){
-          setStudent({ name:res.name||u, username:u, id:u, token:res.token, exp:Date.now()+29*86400000 });
+          setStudent({ name:res.name||u, username:u, id:u, cohort:res.cohort||"", token:res.token, exp:Date.now()+119*86400000 });
           flushPending();
           startHeartbeat();
           renderHome();
@@ -3090,6 +3162,7 @@ function renderHome(){
 }
 
 function openTopic(id){
+  topicStart = { id:id, t:Date.now() };               // for the Seconds column on Results
   if(READINGS_BY_ID[id]){ startReadingWorksheet(id); }
   else if(id==="_review"){ startReview(); }
   else if(id==="_vocabstats"){ renderVocabStats(); }
