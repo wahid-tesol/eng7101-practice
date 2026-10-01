@@ -1553,11 +1553,13 @@ function ttsWord(w){
     speechSynthesis.speak(u);
   }catch(e){}
 }
-/* AUDIO_HAVE: words that have a bundled human recording (Elena). List 2 words
-   are marked; if a given file isn't present yet, playback falls back to the
-   smart device voice automatically (via the Audio error handler below). */
+/* AUDIO_HAVE: words that have a bundled recording. Every word of both Academic
+   Lists is recorded (Talia and Karen, alternating), so both lists are marked; if
+   a given file isn't present, playback falls back to the smart device voice
+   automatically (via the Audio error handler below). */
 function wordSlug(w){ return String(w).toLowerCase().replace(/[^a-z]/g,""); }
 var AUDIO_HAVE={};
+try{ AWL1_WORDS.forEach(function(x){ AUDIO_HAVE[wordSlug(x.w)]=1; }); }catch(e){}
 try{ AWL2_WORDS.forEach(function(x){ AUDIO_HAVE[wordSlug(x.w)]=1; }); }catch(e){}
 function sayWord(w){
   var s=wordSlug(w);
