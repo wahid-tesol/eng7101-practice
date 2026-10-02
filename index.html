@@ -3191,6 +3191,8 @@ function startQuiz(id,items,label,topHtml){
 /* A two-step item asks the student to name the fault, then to choose every repair
    that actually fixes it. Full marks need both. Getting step one wrong ends the
    question: there is nothing to repair if you have not seen what is broken. */
+/* 3 not 3.0, but 2.8 stays 2.8 */
+function showScore(n){ return Math.round(n*10)/10; }
 function hasStep2(it){ return Array.isArray(it.fixes) && it.fixes.length > 0; }
 function step2Correct(){
   const it=q.items[q.i];
@@ -3198,6 +3200,27 @@ function step2Correct(){
   const want=[]; it.fixes.forEach(function(f,i){ if(f.ok) want.push(i); });
   const got=(q.picks||[]).slice().sort(function(a,b){ return a-b; });
   return want.length===got.length && want.every(function(v,k){ return v===got[k]; });
+}
+/* How much of step two the student actually earned, from 0 to 1.
+   hits/repairs minus falseAlarms/wrongOptions: ticking everything scores 0, and so
+   does ticking nothing, so neither is a way round knowing the answer. */
+function step2Accuracy(){
+  const it=q.items[q.i];
+  if(!hasStep2(it)) return 1;
+  const picks=q.picks||[];
+  let repairs=0, wrongs=0, hits=0, falseAlarms=0;
+  it.fixes.forEach(function(f,i){
+    if(f.ok){ repairs++; if(picks.indexOf(i)>=0) hits++; }
+    else { wrongs++; if(picks.indexOf(i)>=0) falseAlarms++; }
+  });
+  const got = (repairs?hits/repairs:0) - (wrongs?falseAlarms/wrongs:0);
+  return Math.max(0, Math.min(1, got));
+}
+/* What this question is worth to the student, out of one mark. */
+function questionMark(){
+  const it=q.items[q.i];
+  if(!(it.type==="mcq" && hasStep2(it))) return step1Correct()?1:0;
+  return (step1Correct()?0.5:0) + 0.5*step2Accuracy();
 }
 function step1Correct(){
   const it=q.items[q.i];
@@ -3216,15 +3239,15 @@ function renderQuiz(){
   if(q.done){
     if(autoTotal){
       const kind = q.id==="reading" ? "reading" : "quiz";
-      const e = recordScore(q.id, kind, q.score, autoTotal);
-      syncResult(q.id, q.label, kind, q.score, autoTotal, `best ${e.best.s}/${e.best.t} · attempt ${e.attempts}`);
+      const e = recordScore(q.id, kind, showScore(q.score), autoTotal);
+      syncResult(q.id, q.label, kind, showScore(q.score), autoTotal, `best ${e.best.s}/${e.best.t} · attempt ${e.attempts}`);
     }
     const pct=autoTotal?Math.round((q.score/autoTotal)*100):0;
     const msg=pct>=80?"Excellent — you've got this.":pct>=50?"Good progress. Review the ones you missed and try again.":"Worth another pass — read the explanations carefully.";
     app.innerHTML=headerHTML(q.label)+`<div class="wrap wrap-narrow" style="padding-top:48px">
       <div class="card" style="padding:30px;text-align:center">
         <div class="eyebrow">Practice complete</div>
-        <div class="serif" style="font-size:46px;font-weight:700;margin:8px 0 2px;color:var(--gold)">${q.score} / ${autoTotal}</div>
+        <div class="serif" style="font-size:46px;font-weight:700;margin:8px 0 2px;color:var(--gold)">${showScore(q.score)} / ${autoTotal}</div>
         <p style="color:var(--inkSoft);margin-top:0">${msg}</p>
         <button class="btn" style="margin-top:12px" data-act="restart">Try again</button></div></div>`;
     wireQuiz(); return;
@@ -3235,8 +3258,8 @@ function renderQuiz(){
   if(inStep2){
     /* Square boxes, not the single-choice row: more than one repair is right. */
     qHtml=`<p style="font-size:13.5px;color:var(--inkSoft);margin:0 0 13px">
-        Now choose <b>every</b> version that repairs it <b>and keeps the meaning</b>. There is usually
-        more than one way to mend a sentence. Some options are correct English but quietly lose
+        Now choose <b>every</b> version that repairs it <b>and keeps the meaning</b>. ${it.fixes.filter(f=>f.ok).length} of these ${it.fixes.length} do.
+        Some options are correct English but quietly lose
         part of what the original said, and those do not count.</p>
       <div style="display:grid;gap:9px">`+it.fixes.map((f,idx)=>{
       const on=(q.picks||[]).indexOf(idx)>=0;
@@ -3279,10 +3302,11 @@ function renderQuiz(){
       : wrong+" of your choices does not repair it";
     /* With step one wrong the mark is already gone, so the heading says so rather
        than calling a good step two "correct". */
+    const earned = showScore(questionMark());
     const head = scored ? "Correct — both steps"
       : s1 ? "Not quite — " + repairs
-      : (ok ? "Repair practice — every repair found, but the fault was named wrongly, so no mark"
-            : "Repair practice — " + repairs + ", and no mark for this one");
+      : (ok ? "Every repair found, but the fault was named wrongly"
+            : repairs.charAt(0).toUpperCase() + repairs.slice(1));
     const tone = scored ? "correct" : "wrong";
     fb=`<div style="margin-top:16px;padding:13px;border-radius:11px;background:var(--${tone}Bg);border-left:3px solid var(--${tone})">
       <div style="font-weight:700;color:var(--${tone});font-size:13.5px">${head}</div>
@@ -3292,7 +3316,8 @@ function renderQuiz(){
            A green tick is not enough there: say what the pattern is called and how
            it works, or the student learns only that they guessed wrong. */
         + (f.note?`<div class="worth"><span class="worth-h">Worth knowing</span>${esc(f.note)}</div>`:"")
-      ).join("")+`</div></div>`;
+      ).join("")+`<p style="margin:9px 0 0;font-size:12.5px;color:var(--inkSoft);border-top:1px solid var(--line);padding-top:7px">
+        This question: <b>${earned} of 1</b> — ${s1?"0.5":"0"} for naming the fault, ${showScore(0.5*step2Accuracy())} for the repairs.</p></div></div>`;
   } else if(checked && it.type!=="open"){
     const step1 = step1Correct();
     const more = step1 && hasStep2(it);
@@ -3322,7 +3347,7 @@ function renderQuiz(){
       ?`<p class="qnote">${QUIZ_NOTE[q.id]}</p>`
       :"");
   const progressHtml=`<div style="display:flex;justify-content:space-between;font-size:12.5px;color:var(--muted);margin-bottom:8px">
-      <span>Question ${q.i+1} of ${total}</span><span class="scorepill">Score ${q.score}/${autoTotal}</span></div>
+      <span>Question ${q.i+1} of ${total}</span><span class="scorepill">Score ${showScore(q.score)}/${autoTotal}</span></div>
     <div style="height:5px;background:var(--line);border-radius:4px;margin-bottom:22px;overflow:hidden">
       <div style="width:${(q.i/total)*100}%;height:100%;background:var(--gold);transition:width .2s"></div></div>`;
   const cardHtml=`<div class="card" style="padding:22px 22px 24px">
@@ -3413,7 +3438,8 @@ function doCheck(){
   /* A two-step item scores once, at the end of step two. Step one being right only
      earns the chance to repair; step one being wrong ends the question at nothing. */
   const twoStep = it.type==="mcq" && hasStep2(it);
-  if(!twoStep || q.step===2){ if(quizCorrect()) q.score++; }
+  if(!twoStep){ if(quizCorrect()) q.score++; }
+  else if(q.step===2){ q.score += questionMark(); }
   renderQuiz();
 }
 function doNext(){
