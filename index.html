@@ -184,6 +184,15 @@ const norm = s => s.toLowerCase().trim().replace(/[.,;!?]+$/,"").replace(/\s+/g,
    lands on it first and nobody takes the contrast word away by mistake.
    One pass over the already-escaped text, longest word first, so "economic"
    cannot match inside "economical" and nothing inserted is re-scanned. */
+/* Grammar answers are often bare function words — is, are, has, than — and those
+   same words run all through the prose of an explanation. Marking every "is" green
+   would highlight the wrong thing, including inside a sentence about the WRONG
+   answer ("'are' is a trap"), so an answer on this list is only ever marked when
+   the item asks for it by name through "green". */
+var GREEN_SKIP = {};
+"is are was were am be been being has have had having do does did will would shall should can could may might must it its their there then than a an the of to in on at for with as that this these those and or but not no so if".split(" ")
+  .forEach(function(w){ GREEN_SKIP[w] = 1; });
+
 function answerWords(it){
   if(!it) return [];
   /* "green" lets an item name the form to pick out when the explanation teaches the
@@ -191,7 +200,11 @@ function answerWords(it){
      the rule being learnt is "carry out". Both are marked when both appear. */
   var extra = Array.isArray(it.green) ? it.green.slice() : [];
   if(it.type==="fill" && Array.isArray(it.accept)) return extra.concat(it.accept);
-  if(it.type==="mcq" && Array.isArray(it.options) && it.answer!=null) return extra.concat([String(it.options[it.answer])]);
+  if(it.type==="mcq" && Array.isArray(it.options) && it.answer!=null){
+    var right = String(it.options[it.answer]);
+    if(GREEN_SKIP[right.trim().toLowerCase()]) return extra;      // declared or nothing
+    return extra.concat([right]);
+  }
   if(extra.length) return extra;
   return [];
 }
@@ -2579,12 +2592,14 @@ const PAIRS = [
   {type:"mcq",q:"Be careful not to ___ your keys again.",options:["loose","lose"],answer:1,
    why:"lose is the verb, with one o sound as in news. Loose is the adjective meaning not tight, and rhymes with goose."},
   {type:"mcq",q:"She is two years older ___ her brother.",options:["then","than"],answer:1,
+   green:["than"],
    why:"than makes a comparison. Then is about time or sequence: first this, then that."},
   {type:"mcq",q:"A crisp white wine ___ the seafood beautifully.",options:["complements","compliments"],answer:0,
    why:"complements means completes or goes well with. Look at the middle: complement contains complete. A compliment is praise."},
   {type:"mcq",q:"The car remained ___ at the red light.",options:["stationery","stationary"],answer:1,
    why:"stationary with an a means not moving. Stationery with an e is paper and pens: e for envelopes."},
   {type:"mcq",q:"The company increased ___ profits last year.",options:["its","it's"],answer:0,
+   green:["its"],
    why:"its is possessive and never takes an apostrophe. It's is only ever short for it is or it has."},
   {type:"mcq",q:"___ going to announce the results tomorrow.",options:["Their","They're","There"],answer:1,
    why:"They're is short for they are. Their shows possession, and there is about place."},
