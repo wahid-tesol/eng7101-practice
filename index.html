@@ -143,6 +143,10 @@
   .idlbl{display:block;text-align:left;font-size:12.5px;font-weight:700;color:var(--inkSoft);margin:13px 0 5px;letter-spacing:.02em}
   /* the right answer, picked out inside an explanation that also names a near miss */
   .ansok{color:var(--correct);font-weight:700}
+  /* square, not a letter: a tick box says more than one answer may be right */
+  .optbox{flex:none;width:19px;height:19px;border:1.5px solid var(--line);border-radius:4px;
+    display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;
+    line-height:1;margin-top:1px;transition:border-color .12s,color .12s}
   .opt-tag{font-weight:400;color:var(--muted)}
   .whoami{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;justify-content:space-between;margin-top:18px;
     background:var(--goldSoft);border:1px solid var(--goldLine);border-radius:11px;padding:9px 14px;font-size:13.5px;color:var(--ink)}
@@ -949,53 +953,53 @@ const TENSE = [
 ];
 
 const FRAGMENTS = [
-  {type:"mcq",q:"“Watching the last train disappear into the tunnel.”",options:["Complete sentence","Fragment","Run-on"],answer:1,
+  {type:"mcq",q:"“Watching the last train disappear into the tunnel.”",options:["Complete sentence","Fragment","Run-on"],answer:1,fixes:[{t:"We stood watching the last train disappear into the tunnel.",ok:true,why:"A subject and a finite verb are added in front, and nothing is lost."},{t:"She watched the last train disappear into the tunnel.",ok:true,why:"The participle becomes the main verb and a subject is supplied."},{t:"Watching the last train disappear into the tunnel, he felt suddenly alone.",ok:true,why:"The phrase stays, and a main clause is attached for it to describe."},{t:"The last train disappeared.",ok:false,why:"A complete sentence, but the watching and the tunnel have both been dropped."},{t:"Watching the last train, which disappeared into the tunnel.",ok:false,why:"Longer, but still no main verb anywhere — a fragment with a relative clause stuck on."}],
    why:"Fragment. An -ing phrase with nothing to hang it on: no subject, no main verb. Give it both — \"We stood watching the last train disappear into the tunnel\" — or join it to the sentence before."},
-  {type:"mcq",q:"“The children laughing in the playground next door.”",options:["Complete sentence","Fragment","Run-on"],answer:1,
+  {type:"mcq",q:"“The children laughing in the playground next door.”",options:["Complete sentence","Fragment","Run-on"],answer:1,fixes:[{t:"The children were laughing in the playground next door.",ok:true,why:"Adding \"were\" turns the participle into a finite verb."},{t:"I could hear the children laughing in the playground next door.",ok:true,why:"A new subject and verb take the phrase as their object."},{t:"The children laughed in the playground next door.",ok:true,why:"The participle is replaced by a simple past verb."},{t:"The playground next door was noisy.",ok:false,why:"Complete, but the children and their laughing have gone."},{t:"The children laughing loudly in the playground next door.",ok:false,why:"An adverb has been added, not a verb. Still a fragment."}],
    why:"Fragment. \"laughing\" is a participle, not a main verb, so nothing is said about the children. Make it finite: \"The children were laughing in the playground next door.\""},
-  {type:"mcq",q:"“Exhausted by the long climb and soaked to the skin.”",options:["Complete sentence","Fragment","Run-on"],answer:1,
+  {type:"mcq",q:"“Exhausted by the long climb and soaked to the skin.”",options:["Complete sentence","Fragment","Run-on"],answer:1,fixes:[{t:"Exhausted by the long climb and soaked to the skin, we turned back.",ok:true,why:"A main clause is attached, and now we know who was exhausted."},{t:"We were exhausted by the long climb and soaked to the skin.",ok:true,why:"A subject and \"were\" make the participles into a complete predicate."},{t:"The climb was long.",ok:false,why:"Complete, but the exhaustion and the soaking are both lost."},{t:"Exhausted by the long climb and soaked to the skin after hours of rain.",ok:false,why:"Another phrase added, still no subject and no main verb."}],
    why:"Fragment. Two past participles describing somebody who is never named. Supply them: \"Exhausted by the long climb and soaked to the skin, we turned back.\""},
-  {type:"mcq",q:"“Written in a great hurry the night before the deadline.”",options:["Complete sentence","Fragment","Run-on"],answer:1,
+  {type:"mcq",q:"“Written in a great hurry the night before the deadline.”",options:["Complete sentence","Fragment","Run-on"],answer:1,fixes:[{t:"The essay was written in a great hurry the night before the deadline.",ok:true,why:"A subject and \"was\" give the participle something to belong to."},{t:"Written in a great hurry the night before the deadline, the essay still passed.",ok:true,why:"The phrase is kept and a main clause follows for it to describe."},{t:"He wrote it in a great hurry the night before the deadline.",ok:true,why:"Turned round into the active, with subject and finite verb."},{t:"The deadline was the next morning.",ok:false,why:"Complete, but says nothing about the writing, which was the point."},{t:"Written in a great hurry, the night before the deadline.",ok:false,why:"Only a comma has been added. Still a participle phrase with no main clause."}],
    why:"Fragment. A participle phrase floating free, describing nothing that is stated. Attach it: \"The essay was written in a great hurry the night before the deadline.\""},
-  {type:"mcq",q:"“To finish the whole assignment before the weekend.”",options:["Complete sentence","Fragment","Run-on"],answer:1,
+  {type:"mcq",q:"“To finish the whole assignment before the weekend.”",options:["Complete sentence","Fragment","Run-on"],answer:1,fixes:[{t:"She hoped to finish the whole assignment before the weekend.",ok:true,why:"The infinitive becomes the object of a real verb, \"hoped\"."},{t:"To finish the whole assignment before the weekend, he worked all night.",ok:true,why:"The infinitive stays as a purpose and a main clause is added."},{t:"My aim was to finish the whole assignment before the weekend.",ok:true,why:"The infinitive is now the complement of \"was\"."},{t:"The weekend was coming.",ok:false,why:"Complete, but the assignment has disappeared from the sentence."},{t:"Wanting to finish the whole assignment before the weekend.",ok:false,why:"One non-finite form swapped for another. Still a fragment."}],
    why:"Fragment. An infinitive is not a finite verb, so this is a plan without a sentence around it. \"She hoped to finish the whole assignment before the weekend.\""},
-  {type:"mcq",q:"“In order to save enough money for the trip.”",options:["Complete sentence","Fragment","Run-on"],answer:1,
+  {type:"mcq",q:"“In order to save enough money for the trip.”",options:["Complete sentence","Fragment","Run-on"],answer:1,fixes:[{t:"In order to save enough money for the trip, he took a second job.",ok:true,why:"The purpose is kept and the action it serves is supplied."},{t:"She worked double shifts in order to save enough money for the trip.",ok:true,why:"A main clause comes first and the purpose follows it."},{t:"The trip was expensive.",ok:false,why:"Complete, but the saving has gone, which was what the phrase was about."},{t:"In order to save enough money for the trip to Spain.",ok:false,why:"A longer phrase is still a phrase: no subject, no finite verb."}],
    why:"Fragment. \"In order to\" announces a purpose, and a purpose needs an action to belong to: \"In order to save enough money for the trip, he took a second job.\""},
-  {type:"mcq",q:"“After a long and tiring day at the office.”",options:["Complete sentence","Fragment","Run-on"],answer:1,
+  {type:"mcq",q:"“After a long and tiring day at the office.”",options:["Complete sentence","Fragment","Run-on"],answer:1,fixes:[{t:"After a long and tiring day at the office, she fell asleep on the sofa.",ok:true,why:"The time phrase is kept and a main clause says what happened."},{t:"He went straight to bed after a long and tiring day at the office.",ok:true,why:"The same repair with the phrase moved to the end."},{t:"The office was busy.",ok:false,why:"Complete, but the long tiring day has been replaced by something else."},{t:"After a long and tiring day at the office and a slow journey home.",ok:false,why:"Two phrases now, and still nothing happens in the sentence."}],
    why:"Fragment. Prepositional phrases only — they tell you when, but nobody does anything. \"After a long and tiring day at the office, she fell asleep on the sofa.\""},
-  {type:"mcq",q:"“In the middle of the crowded market on Friday morning.”",options:["Complete sentence","Fragment","Run-on"],answer:1,
+  {type:"mcq",q:"“In the middle of the crowded market on Friday morning.”",options:["Complete sentence","Fragment","Run-on"],answer:1,fixes:[{t:"In the middle of the crowded market on Friday morning, we lost sight of each other.",ok:true,why:"Place and time are kept, and an event is added."},{t:"She found him in the middle of the crowded market on Friday morning.",ok:true,why:"A subject and verb come first, with the phrase attached after."},{t:"Friday morning was busy.",ok:false,why:"Complete, but the market and the crowd have gone."},{t:"In the middle of the crowded market, on Friday morning.",ok:false,why:"A comma does not create a verb. Still a fragment."}],
    why:"Fragment. Place and time, and no event. Add a subject and a verb: \"In the middle of the crowded market on Friday morning, we lost sight of each other.\""},
-  {type:"mcq",q:"“Ms Lina, the director of the university drama club.”",options:["Complete sentence","Fragment","Run-on"],answer:1,
+  {type:"mcq",q:"“Ms Lina, the director of the university drama club.”",options:["Complete sentence","Fragment","Run-on"],answer:1,fixes:[{t:"Ms Lina, the director of the university drama club, welcomed the new members.",ok:true,why:"The appositive is kept between commas and a verb is added."},{t:"Ms Lina is the director of the university drama club.",ok:true,why:"The appositive becomes the complement of \"is\"."},{t:"The university has a drama club.",ok:false,why:"Complete, but Ms Lina has disappeared from the sentence."},{t:"Ms Lina, who is the director of the university drama club.",ok:false,why:"A relative clause instead of an appositive, and still no main verb."}],
    why:"Fragment. A name followed by an appositive renaming her, but no verb. \"Ms Lina, the director of the university drama club, welcomed the new members.\""},
-  {type:"mcq",q:"“The most surprising result of the whole experiment.”",options:["Complete sentence","Fragment","Run-on"],answer:1,
+  {type:"mcq",q:"“The most surprising result of the whole experiment.”",options:["Complete sentence","Fragment","Run-on"],answer:1,fixes:[{t:"The most surprising result of the whole experiment was never published.",ok:true,why:"A verb is added, so the noun phrase becomes a subject."},{t:"Nobody expected the most surprising result of the whole experiment.",ok:true,why:"The noun phrase becomes the object of a real verb."},{t:"The experiment was surprising.",ok:false,why:"Complete, but \"the most surprising result\" has been reduced to something vaguer."},{t:"The most surprising result of the whole experiment, published last year.",ok:false,why:"A participle phrase added to a noun phrase. Still no main verb."}],
    why:"Fragment. A long noun phrase is still only a noun phrase. Say something about it: \"The most surprising result of the whole experiment was never published.\""},
-  {type:"mcq",q:"“And forgot to lock the door on his way out.”",options:["Complete sentence","Fragment","Run-on"],answer:1,
+  {type:"mcq",q:"“And forgot to lock the door on his way out.”",options:["Complete sentence","Fragment","Run-on"],answer:1,fixes:[{t:"He forgot to lock the door on his way out.",ok:true,why:"The missing subject is supplied and the stray \"and\" is dropped."},{t:"He left in a hurry and forgot to lock the door on his way out.",ok:true,why:"A first clause is added, so \"and\" now joins two real verbs."},{t:"The door was unlocked.",ok:false,why:"Complete, but it reports the result and loses the forgetting."},{t:"And forgetting to lock the door on his way out.",ok:false,why:"Changing the verb to an -ing form makes it less complete, not more."}],
    why:"Fragment. The verb has lost its subject. Either restore it — \"He forgot to lock the door\" — or join the phrase to the sentence it belongs with."},
-  {type:"mcq",q:"“But never replied to a single one of my messages.”",options:["Complete sentence","Fragment","Run-on"],answer:1,
+  {type:"mcq",q:"“But never replied to a single one of my messages.”",options:["Complete sentence","Fragment","Run-on"],answer:1,fixes:[{t:"She never replied to a single one of my messages.",ok:true,why:"A subject is supplied and the stray \"but\" is dropped."},{t:"He read every message but never replied to a single one of them.",ok:true,why:"A first clause is added, so \"but\" joins two verbs properly."},{t:"My messages were long.",ok:false,why:"Complete, but the failure to reply, which is the whole point, has gone."},{t:"But never replying to a single one of my messages.",ok:false,why:"An -ing form has even less standing as a main verb."}],
    why:"Fragment. Starting with \"but\" is not the problem; having no subject is. \"But she never replied to a single one of my messages.\""},
-  {type:"mcq",q:"“Because the roads were completely flooded that morning.”",options:["Complete sentence","Fragment","Run-on"],answer:1,
+  {type:"mcq",q:"“Because the roads were completely flooded that morning.”",options:["Complete sentence","Fragment","Run-on"],answer:1,fixes:[{t:"Because the roads were completely flooded that morning, the school closed.",ok:true,why:"The reason is kept and the thing it explains is added."},{t:"The school closed because the roads were completely flooded that morning.",ok:true,why:"The same repair with the main clause first and no comma needed."},{t:"The roads were completely flooded that morning.",ok:true,why:"Dropping \"Because\" leaves a complete sentence on its own."},{t:"It rained heavily that morning.",ok:false,why:"Complete, but it gives a different fact; the flooded roads have gone."},{t:"Because of the completely flooded roads that morning.",ok:false,why:"\"Because of\" makes it a phrase rather than a clause. Still a fragment."}],
    why:"Fragment. \"Because\" makes the clause dependent: it gives a reason for something that has not been said. \"Because the roads were completely flooded that morning, the school closed.\""},
-  {type:"mcq",q:"“Since nobody had told us about the change of plan.”",options:["Complete sentence","Fragment","Run-on"],answer:1,
+  {type:"mcq",q:"“Since nobody had told us about the change of plan.”",options:["Complete sentence","Fragment","Run-on"],answer:1,fixes:[{t:"Since nobody had told us about the change of plan, we arrived an hour early.",ok:true,why:"The cause is kept and its effect is supplied."},{t:"We arrived an hour early since nobody had told us about the change of plan.",ok:true,why:"The same two clauses with the main one first."},{t:"Nobody had told us about the change of plan.",ok:true,why:"Removing \"Since\" leaves a sentence that stands by itself."},{t:"The plan had changed.",ok:false,why:"Complete, but it loses the point: that nobody told us."},{t:"Since the change of plan nobody had been told about.",ok:false,why:"Rearranged into something awkward that is still dependent."}],
    why:"Fragment. \"Since\" here means because, and a cause needs an effect beside it: \"Since nobody had told us about the change of plan, we arrived an hour early.\""},
-  {type:"mcq",q:"“Although she had practised for weeks before the show.”",options:["Complete sentence","Fragment","Run-on"],answer:1,
+  {type:"mcq",q:"“Although she had practised for weeks before the show.”",options:["Complete sentence","Fragment","Run-on"],answer:1,fixes:[{t:"Although she had practised for weeks before the show, her hands still shook.",ok:true,why:"The concession is kept and the contrasting main clause is added."},{t:"Her hands still shook, although she had practised for weeks before the show.",ok:true,why:"The same contrast with the clauses the other way round."},{t:"She had practised for weeks before the show.",ok:true,why:"Dropping \"Although\" leaves a complete sentence."},{t:"The show was important to her.",ok:false,why:"Complete, but the weeks of practice have gone."},{t:"Although practising for weeks before the show.",ok:false,why:"The finite verb has been removed, which makes it worse, not better."}],
    why:"Fragment. \"Although\" sets up a contrast and then abandons it. Finish the thought: \"Although she had practised for weeks before the show, her hands still shook.\""},
-  {type:"mcq",q:"“Even though the instructions seemed perfectly clear.”",options:["Complete sentence","Fragment","Run-on"],answer:1,
+  {type:"mcq",q:"“Even though the instructions seemed perfectly clear.”",options:["Complete sentence","Fragment","Run-on"],answer:1,fixes:[{t:"Even though the instructions seemed perfectly clear, half the class got it wrong.",ok:true,why:"A main clause gives the concession something to work against."},{t:"Half the class got it wrong even though the instructions seemed perfectly clear.",ok:true,why:"The same sentence with the main clause leading."},{t:"The instructions seemed perfectly clear.",ok:true,why:"Without \"Even though\" it stands on its own."},{t:"The instructions were two pages long.",ok:false,why:"Complete, but it swaps the point about clarity for a point about length."},{t:"Even though the perfectly clear instructions.",ok:false,why:"The verb has gone. A noun phrase after a conjunction is still a fragment."}],
    why:"Fragment. A contrast clause with nothing to contrast. \"Even though the instructions seemed perfectly clear, half the class got it wrong.\""},
-  {type:"mcq",q:"“Unless we leave before the traffic gets heavy.”",options:["Complete sentence","Fragment","Run-on"],answer:1,
+  {type:"mcq",q:"“Unless we leave before the traffic gets heavy.”",options:["Complete sentence","Fragment","Run-on"],answer:1,fixes:[{t:"Unless we leave before the traffic gets heavy, we will miss the start.",ok:true,why:"The condition is kept and the consequence is stated."},{t:"We will miss the start unless we leave before the traffic gets heavy.",ok:true,why:"The same conditional with the main clause first."},{t:"The traffic gets heavy after four o’clock.",ok:false,why:"Complete, but the condition about leaving has disappeared."},{t:"Unless leaving before the traffic gets heavy.",ok:false,why:"An -ing form where a clause is needed. Still a fragment."}],
    why:"Fragment. \"Unless\" states a condition, so the result is still owed: \"Unless we leave before the traffic gets heavy, we will miss the start.\""},
-  {type:"mcq",q:"“If the weather stays dry for the rest of the week.”",options:["Complete sentence","Fragment","Run-on"],answer:1,
+  {type:"mcq",q:"“If the weather stays dry for the rest of the week.”",options:["Complete sentence","Fragment","Run-on"],answer:1,fixes:[{t:"If the weather stays dry for the rest of the week, the harvest will be saved.",ok:true,why:"The condition now has a result clause."},{t:"The harvest will be saved if the weather stays dry for the rest of the week.",ok:true,why:"The same conditional, main clause first."},{t:"The weather will stay dry for the rest of the week.",ok:true,why:"Dropping \"If\" turns the clause into a plain statement."},{t:"Rain is forecast for Thursday.",ok:false,why:"Complete, and it contradicts the condition rather than completing it."},{t:"If dry weather for the rest of the week.",ok:false,why:"The verb has been removed. Still a fragment."}],
    why:"Fragment. An \"if\" clause is only half a conditional. Supply the other half: \"If the weather stays dry for the rest of the week, the harvest will be saved.\""},
-  {type:"mcq",q:"“As soon as the results were posted on the noticeboard.”",options:["Complete sentence","Fragment","Run-on"],answer:1,
+  {type:"mcq",q:"“As soon as the results were posted on the noticeboard.”",options:["Complete sentence","Fragment","Run-on"],answer:1,fixes:[{t:"As soon as the results were posted on the noticeboard, a crowd gathered.",ok:true,why:"The time clause is kept and the event is supplied."},{t:"A crowd gathered as soon as the results were posted on the noticeboard.",ok:true,why:"The same sentence with the main clause leading."},{t:"The results were posted on the noticeboard.",ok:true,why:"Without \"As soon as\" it is a complete statement."},{t:"The noticeboard was outside the office.",ok:false,why:"Complete, but the results and the timing have gone."},{t:"As soon as the posting of the results on the noticeboard.",ok:false,why:"The clause has been turned into a noun phrase, which is still a fragment."}],
    why:"Fragment. A time clause tells you when something happened, but not what. \"As soon as the results were posted on the noticeboard, a crowd gathered.\""},
-  {type:"mcq",q:"“Before anyone had a chance to ask a question.”",options:["Complete sentence","Fragment","Run-on"],answer:1,
+  {type:"mcq",q:"“Before anyone had a chance to ask a question.”",options:["Complete sentence","Fragment","Run-on"],answer:1,fixes:[{t:"Before anyone had a chance to ask a question, he had left the room.",ok:true,why:"The time clause is kept and a main clause says what happened."},{t:"He had left the room before anyone had a chance to ask a question.",ok:true,why:"The same two clauses, main one first."},{t:"Nobody had a chance to ask a question.",ok:false,why:"Complete, and close in meaning, but it drops the sequence that \"before\" set up."},{t:"Before the chance to ask a question.",ok:false,why:"The clause has lost its subject and verb. Still a fragment."}],
    why:"Fragment. \"Before\" needs a main clause to be before. \"Before anyone had a chance to ask a question, he had left the room.\""},
-  {type:"mcq",q:"“Wherever the old road finally comes to an end.”",options:["Complete sentence","Fragment","Run-on"],answer:1,
+  {type:"mcq",q:"“Wherever the old road finally comes to an end.”",options:["Complete sentence","Fragment","Run-on"],answer:1,fixes:[{t:"Wherever the old road finally comes to an end, there is a small chapel.",ok:true,why:"The dependent clause is kept and a main clause is added."},{t:"A small chapel stands wherever the old road finally comes to an end.",ok:true,why:"The same sentence with the main clause first."},{t:"The old road finally comes to an end.",ok:true,why:"Dropping \"Wherever\" leaves a complete sentence."},{t:"The chapel is very old.",ok:false,why:"Complete, but the road has gone entirely."},{t:"Wherever the end of the old road.",ok:false,why:"No verb at all now. Still a fragment."}],
    why:"Fragment. \"Wherever\" opens a dependent clause, so the sentence never arrives. \"Wherever the old road finally comes to an end, there is a small chapel.\""},
-  {type:"mcq",q:"“However hard the team tried to recover the ball.”",options:["Complete sentence","Fragment","Run-on"],answer:1,
+  {type:"mcq",q:"“However hard the team tried to recover the ball.”",options:["Complete sentence","Fragment","Run-on"],answer:1,fixes:[{t:"However hard the team tried to recover the ball, the match was lost.",ok:true,why:"The concession is kept and the outcome is supplied."},{t:"The match was lost, however hard the team tried to recover the ball.",ok:true,why:"The same contrast with the main clause first."},{t:"The team tried hard to recover the ball.",ok:true,why:"Rewritten as a plain statement without \"However hard\"."},{t:"The ball went out of play.",ok:false,why:"Complete, but it says nothing about the team trying."},{t:"However hard the attempt to recover the ball.",ok:false,why:"The verb has been removed. Still a fragment."}],
    why:"Fragment. \"However hard\" concedes something, and a concession needs a main clause. \"However hard the team tried to recover the ball, the match was lost.\""},
-  {type:"mcq",q:"“Which completely changed the way I saw the problem.”",options:["Complete sentence","Fragment","Run-on"],answer:1,
+  {type:"mcq",q:"“Which completely changed the way I saw the problem.”",options:["Complete sentence","Fragment","Run-on"],answer:1,fixes:[{t:"He said one sentence, which completely changed the way I saw the problem.",ok:true,why:"The relative clause is attached to a main clause it can describe."},{t:"That remark completely changed the way I saw the problem.",ok:true,why:"\"Which\" is replaced by a real subject, so the clause becomes a sentence."},{t:"I saw the problem differently.",ok:false,why:"Complete, but it drops the cause: what changed my view has gone."},{t:"Which completely changed the way I saw the problem that day.",ok:false,why:"Two more words, and still a relative clause with nothing to relate to."}],
    why:"Fragment. A relative clause has nothing to relate to. Either attach it to the noun it describes, or start afresh: \"That remark completely changed the way I saw the problem.\""},
-  {type:"mcq",q:"“Who had been waiting patiently since early morning.”",options:["Complete sentence","Fragment","Run-on"],answer:1,
+  {type:"mcq",q:"“Who had been waiting patiently since early morning.”",options:["Complete sentence","Fragment","Run-on"],answer:1,fixes:[{t:"The passengers, who had been waiting patiently since early morning, finally boarded.",ok:true,why:"The clause is attached to the noun it describes, inside a main clause."},{t:"They had been waiting patiently since early morning.",ok:true,why:"\"Who\" is replaced by a subject, so the clause stands alone."},{t:"The morning was cold.",ok:false,why:"Complete, but the waiting and the people have both gone."},{t:"Who had been waiting patiently since early morning at the gate.",ok:false,why:"A longer relative clause is still a relative clause."}],
    why:"Fragment. \"Who\" needs an antecedent in the same sentence: \"The passengers, who had been waiting patiently since early morning, finally boarded.\""},
   {type:"mcq",q:"“The match was cancelled because the pitch was waterlogged.”",options:["Complete sentence","Fragment","Run-on"],answer:0,
    why:"Complete sentence. A main clause, \"The match was cancelled\", with a reason attached after it. A dependent clause is fine as long as a main clause is present."},
@@ -1017,13 +1021,13 @@ const FRAGMENTS = [
    why:"Adding a main clause finishes the thought: \"Because the shop had already closed, we went home.\" The third option moves \"because\" to the end, where it joins nothing."},
   {type:"mcq",q:"Choose the complete sentence:",options:["Running to catch the last bus of the night.","She ran to catch the last bus of the night.","To catch the last bus of the night."],answer:1,green:["She ran"],
    why:"Only \"She ran to catch the last bus\" has both a subject and a finite verb. \"Running to catch...\" is a participle phrase and \"To catch...\" an infinitive; neither makes a claim about anybody."},
-  {type:"mcq",q:"“Hoping to hear some good news at last.”",options:["Complete sentence","Fragment","Run-on"],answer:1,
+  {type:"mcq",q:"“Hoping to hear some good news at last.”",options:["Complete sentence","Fragment","Run-on"],answer:1,fixes:[{t:"We sat hoping to hear some good news at last.",ok:true,why:"A subject and a finite verb are added in front."},{t:"Hoping to hear some good news at last, she opened the letter.",ok:true,why:"The participle phrase is kept and given a main clause to describe."},{t:"She hoped to hear some good news at last.",ok:true,why:"The participle becomes the main verb."},{t:"The news was good.",ok:false,why:"Complete, but the hoping has gone and the meaning has changed."},{t:"Hoping very much to hear some good news at last.",ok:false,why:"An adverb is not a verb. Still a fragment."}],
    why:"Fragment. A participle phrase with no subject and no main verb. \"We sat hoping to hear some good news at last.\""},
-  {type:"mcq",q:"“The tall man in the grey coat near the entrance.”",options:["Complete sentence","Fragment","Run-on"],answer:1,
+  {type:"mcq",q:"“The tall man in the grey coat near the entrance.”",options:["Complete sentence","Fragment","Run-on"],answer:1,fixes:[{t:"The tall man in the grey coat near the entrance checked our tickets.",ok:true,why:"A verb is added, so the noun phrase becomes the subject of a sentence."},{t:"I recognised the tall man in the grey coat near the entrance.",ok:true,why:"The noun phrase becomes the object of a real verb."},{t:"The entrance was crowded.",ok:false,why:"Complete, but the man himself has disappeared."},{t:"The tall man in the grey coat standing near the entrance.",ok:false,why:"A participle has been added, not a finite verb. Still a fragment."}],
    why:"Fragment. Three modifiers piled on a noun, and still no verb. \"The tall man in the grey coat near the entrance checked our tickets.\""},
-  {type:"mcq",q:"“Because I really wanted to see how the story ended.”",options:["Complete sentence","Fragment","Run-on"],answer:1,
+  {type:"mcq",q:"“Because I really wanted to see how the story ended.”",options:["Complete sentence","Fragment","Run-on"],answer:1,fixes:[{t:"I stayed up until two because I really wanted to see how the story ended.",ok:true,why:"The reason is kept and the action it explains is added."},{t:"Because I really wanted to see how the story ended, I stayed up until two.",ok:true,why:"The same sentence with the reason first and a comma after it."},{t:"I really wanted to see how the story ended.",ok:true,why:"Dropping \"Because\" leaves a complete sentence."},{t:"The story had a good ending.",ok:false,why:"Complete, but it reports the ending instead of my reason for staying up."},{t:"Because of really wanting to see how the story ended.",ok:false,why:"\"Because of\" takes a phrase, so this is still a fragment."}],
    why:"Fragment. \"Because\" again: a reason with nothing to explain. \"I stayed up until two because I really wanted to see how the story ended.\""},
-  {type:"mcq",q:"“Which surprised absolutely everyone in the room.”",options:["Complete sentence","Fragment","Run-on"],answer:1,
+  {type:"mcq",q:"“Which surprised absolutely everyone in the room.”",options:["Complete sentence","Fragment","Run-on"],answer:1,fixes:[{t:"He resigned on the spot, which surprised absolutely everyone in the room.",ok:true,why:"The relative clause now has a main clause to comment on."},{t:"His decision surprised absolutely everyone in the room.",ok:true,why:"\"Which\" is replaced by a subject, so the clause stands alone."},{t:"Everyone in the room was surprised.",ok:false,why:"Complete, but the thing that caused the surprise has been left out."},{t:"Which surprised absolutely everyone sitting in the room.",ok:false,why:"Still a relative clause with nothing before it to attach to."}],
    why:"Fragment. A \"which\" clause must sit beside the thing it describes. \"He resigned on the spot, which surprised absolutely everyone in the room.\""},
   {type:"mcq",q:"“The lights suddenly went out.”",options:["Complete sentence","Fragment","Run-on"],answer:0,
    why:"Complete sentence. Short is not the same as incomplete: there is a subject, \"The lights\", and a finite verb, \"went\"."},
@@ -3107,18 +3111,38 @@ function shuffleItem(it){
   if(it.type!=="mcq" || !Array.isArray(it.options)) return it;
   const order = it.options.map((_,i)=>i);
   for(let i=order.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); const t=order[i]; order[i]=order[j]; order[j]=t; }
-  return {...it, options: order.map(i=>it.options[i]), answer: order.indexOf(it.answer)};
+  const out = {...it, options: order.map(i=>it.options[i]), answer: order.indexOf(it.answer)};
+  /* step two carries "ok" on each repair rather than an index, so it shuffles freely */
+  if(Array.isArray(it.fixes)) out.fixes = shuffleArr(it.fixes);
+  return out;
 }
 function startQuiz(id,items,label,topHtml){
   const mixed = items.map(shuffleItem);
-  q = {id,items:mixed,label,top:topHtml||"",i:0,choice:null,checked:false,reveal:false,score:0,done:false};
+  q = {id,items:mixed,label,top:topHtml||"",i:0,choice:null,checked:false,reveal:false,
+       step:1,picks:[],score:0,done:false};
   renderQuiz();
 }
-function quizCorrect(){
+/* A two-step item asks the student to name the fault, then to choose every repair
+   that actually fixes it. Full marks need both. Getting step one wrong ends the
+   question: there is nothing to repair if you have not seen what is broken. */
+function hasStep2(it){ return Array.isArray(it.fixes) && it.fixes.length > 0; }
+function step2Correct(){
+  const it=q.items[q.i];
+  if(!hasStep2(it)) return true;
+  const want=[]; it.fixes.forEach(function(f,i){ if(f.ok) want.push(i); });
+  const got=(q.picks||[]).slice().sort(function(a,b){ return a-b; });
+  return want.length===got.length && want.every(function(v,k){ return v===got[k]; });
+}
+function step1Correct(){
   const it=q.items[q.i];
   if(it.type==="mcq") return q.choice===it.answer;
   if(it.type==="fill") return q.choice!=null && it.accept.some(a=>norm(a)===norm(q.choice));
   return false;
+}
+function quizCorrect(){
+  const it=q.items[q.i];
+  if(it.type==="mcq" && hasStep2(it)) return step1Correct() && q.step===2 && step2Correct();
+  return step1Correct();
 }
 function renderQuiz(){
   const total=q.items.length;
@@ -3140,8 +3164,26 @@ function renderQuiz(){
     wireQuiz(); return;
   }
   const it=q.items[q.i], checked=q.checked, correct=checked&&quizCorrect();
+  const inStep2 = q.step===2 && hasStep2(it);
   let qHtml="";
-  if(it.type==="mcq"){
+  if(inStep2){
+    /* Square boxes, not the single-choice row: more than one repair is right. */
+    qHtml=`<p style="font-size:13.5px;color:var(--inkSoft);margin:0 0 13px">
+        Now choose <b>every</b> version that repairs it. More than one works — a fragment can be
+        mended in several ways. Some options are complete sentences that lose part of what the
+        fragment said.</p>
+      <div style="display:grid;gap:9px">`+it.fixes.map((f,idx)=>{
+      const on=(q.picks||[]).indexOf(idx)>=0;
+      let bd="var(--line)",bg="var(--surface)";
+      if(checked){ if(f.ok){bd="var(--correct)";bg="var(--correctBg)";} else if(on){bd="var(--wrong)";bg="var(--wrongBg)";} }
+      else if(on){bd="var(--gold)";bg="var(--goldSoft)";}
+      const mark = checked ? (f.ok?"&#10003;":(on?"&#10007;":"")) : (on?"&#10003;":"");
+      const mcol = checked ? (f.ok?"var(--correct)":"var(--wrong)") : "var(--ink)";
+      return `<button class="opt" ${checked?"disabled":""} data-fix="${idx}" style="border-color:${bd};background:${bg}">
+        <span class="optbox" style="color:${mcol};border-color:${on||(checked&&f.ok)?mcol:"var(--line)"}">${mark}</span>
+        <span>${esc(f.t)}</span></button>`;
+    }).join("")+`</div>`;
+  } else if(it.type==="mcq"){
     qHtml=`<div style="display:grid;gap:9px">`+it.options.map((opt,idx)=>{
       let bd="var(--line)",bg="var(--surface)";
       if(checked){ if(idx===it.answer){bd="var(--correct)";bg="var(--correctBg)";} else if(idx===q.choice){bd="var(--wrong)";bg="var(--wrongBg)";} }
@@ -3161,17 +3203,37 @@ function renderQuiz(){
       :`<button class="link" style="margin-top:12px" data-act="reveal">Show model answer</button>`;
   }
   let fb="";
-  if(checked && it.type!=="open"){
-    fb=`<div style="margin-top:16px;padding:13px;border-radius:11px;background:${correct?"var(--correctBg)":"var(--wrongBg)"};border-left:3px solid ${correct?"var(--correct)":"var(--wrong)"}">
-      <div style="font-weight:700;color:${correct?"var(--correct)":"var(--wrong)"};font-size:13.5px">${correct?"Correct":"Not quite"}</div>
-      <p style="margin:5px 0 0;font-size:14px">${whyHTML(it)}</p></div>`;
+  if(checked && inStep2){
+    const ok=step2Correct();
+    const missed=it.fixes.filter((f,i)=>f.ok && (q.picks||[]).indexOf(i)<0).length;
+    const wrong=it.fixes.filter((f,i)=>!f.ok && (q.picks||[]).indexOf(i)>=0).length;
+    const head = ok ? "Correct — both steps"
+      : (missed&&wrong) ? "Not quite — you missed "+missed+" and picked "+wrong+" that does not work"
+      : missed ? "Not quite — "+missed+" more would also have worked"
+      : "Not quite — "+wrong+" of your choices does not repair it";
+    fb=`<div style="margin-top:16px;padding:13px;border-radius:11px;background:${ok?"var(--correctBg)":"var(--wrongBg)"};border-left:3px solid ${ok?"var(--correct)":"var(--wrong)"}">
+      <div style="font-weight:700;color:${ok?"var(--correct)":"var(--wrong)"};font-size:13.5px">${head}</div>
+      <div style="margin:7px 0 0;display:grid;gap:6px">`+it.fixes.map(f=>
+        `<p style="margin:0;font-size:13.5px"><b class="${f.ok?"ansok":""}" style="${f.ok?"":"color:var(--wrong)"}">${f.ok?"Works":"No"}</b> — ${esc(f.why)}</p>`
+      ).join("")+`</div></div>`;
+  } else if(checked && it.type!=="open"){
+    const step1 = step1Correct();
+    const more = step1 && hasStep2(it);
+    fb=`<div style="margin-top:16px;padding:13px;border-radius:11px;background:${step1?"var(--correctBg)":"var(--wrongBg)"};border-left:3px solid ${step1?"var(--correct)":"var(--wrong)"}">
+      <div style="font-weight:700;color:${step1?"var(--correct)":"var(--wrong)"};font-size:13.5px">${step1?(more?"Right so far — step 1 of 2":"Correct"):"Not quite"}</div>
+      <p style="margin:5px 0 0;font-size:14px">${whyHTML(it)}</p>
+      ${!step1&&hasStep2(it)?`<p style="margin:7px 0 0;font-size:13px;color:var(--inkSoft)">Step 2 needed the fault named first, so this one scores nothing.</p>`:""}</div>`;
   }
   let nav=`<div style="display:flex;justify-content:flex-end;gap:10px;margin-top:18px">`;
   if(it.type!=="open" && !checked){
-    const dis=(q.choice===null||q.choice==="")?"disabled":"";
+    const dis = inStep2 ? ((q.picks||[]).length?"":"disabled") : ((q.choice===null||q.choice==="")?"disabled":"");
     nav+=`<button class="btn" id="checkBtn" ${dis} data-act="check">Check</button>`;
   }
-  if(checked||it.type==="open"){ nav+=`<button class="btn" data-act="next">${q.i+1>=total?"Finish":"Next →"}</button>`; }
+  if(checked && !inStep2 && hasStep2(it) && step1Correct()){
+    nav+=`<button class="btn" data-act="step2">Continue →</button>`;
+  } else if(checked||it.type==="open"){
+    nav+=`<button class="btn" data-act="next">${q.i+1>=total?"Finish":"Next →"}</button>`;
+  }
   nav+=`</div>`;
   const hasPassage=!!q.top;
   const wide=(window.innerWidth||document.documentElement.clientWidth)>=900;
@@ -3234,14 +3296,24 @@ function wireQuiz(){
     const act=el.getAttribute("data-act");
     el.addEventListener("click",()=>{
       if(act==="home"){ renderHome(); }
-      else if(act==="restart"){ q.i=0;q.choice=null;q.checked=false;q.reveal=false;q.score=0;q.done=false;renderQuiz(); }
+      else if(act==="restart"){ q.i=0;q.choice=null;q.checked=false;q.reveal=false;q.step=1;q.picks=[];q.score=0;q.done=false;renderQuiz(); }
       else if(act==="reveal"){ const t=document.getElementById("openInput"); if(t)q.choice=t.value; q.reveal=true; renderQuiz(); }
       else if(act==="check"){ doCheck(); }
       else if(act==="next"){ doNext(); }
+      else if(act==="step2"){ q.step=2; q.checked=false; q.picks=[]; renderQuiz(); }
     });
   });
   app.querySelectorAll("[data-opt]").forEach(el=>{
     el.addEventListener("click",()=>{ q.choice=parseInt(el.getAttribute("data-opt"),10); renderQuiz(); });
+  });
+  app.querySelectorAll("[data-fix]").forEach(el=>{
+    el.addEventListener("click",()=>{
+      const n=parseInt(el.getAttribute("data-fix"),10);
+      q.picks=q.picks||[];
+      const at=q.picks.indexOf(n);
+      if(at>=0) q.picks.splice(at,1); else q.picks.push(n);   // a tick box toggles
+      renderQuiz();
+    });
   });
   const fill=document.getElementById("fillInput");
   if(fill){
@@ -3256,13 +3328,18 @@ function doCheck(){
   const it=q.items[q.i];
   if(it.type==="fill"){ const f=document.getElementById("fillInput"); if(f)q.choice=f.value; }
   if(it.type==="open") return;
-  q.checked=true; if(quizCorrect()) q.score++; renderQuiz();
+  q.checked=true;
+  /* A two-step item scores once, at the end of step two. Step one being right only
+     earns the chance to repair; step one being wrong ends the question at nothing. */
+  const twoStep = it.type==="mcq" && hasStep2(it);
+  if(!twoStep || q.step===2){ if(quizCorrect()) q.score++; }
+  renderQuiz();
 }
 function doNext(){
   const it=q.items[q.i];
   if(it.type==="open"){ const t=document.getElementById("openInput"); if(t)q.choice=t.value; }
   if(q.i+1>=q.items.length){ q.done=true; renderQuiz(); return; }
-  q.i++; q.choice=null; q.checked=false; q.reveal=false; renderQuiz();
+  q.i++; q.choice=null; q.checked=false; q.reveal=false; q.step=1; q.picks=[]; renderQuiz();
 }
 
 /* ---- WRITING STUDIO ---- */
