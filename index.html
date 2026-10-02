@@ -157,6 +157,9 @@
     border-radius:9px;padding:9px 12px}
   .worth-h{display:block;font-size:10px;letter-spacing:.11em;text-transform:uppercase;
     font-weight:700;color:var(--gold);margin-bottom:4px}
+  .qmarks{font-size:12.5px;line-height:1.55;color:var(--inkSoft);margin:0 0 12px;
+    border-left:3px solid var(--goldLine);padding:2px 0 2px 12px}
+  .qmarks b{color:var(--ink);font-style:normal}
   .qnote{font-size:12.5px;line-height:1.5;color:var(--inkSoft);background:var(--goldSoft);
     border:1px solid var(--goldLine);border-radius:10px;padding:10px 13px;margin:0 0 16px}
   .qnote b{color:var(--ink)}
@@ -3375,26 +3378,28 @@ function step2Correct(){
   const got=(q.picks||[]).slice().sort(function(a,b){ return a-b; });
   return want.length===got.length && want.every(function(v,k){ return v===got[k]; });
 }
-/* How much of step two the student actually earned, from 0 to 1.
-   hits/repairs minus falseAlarms/wrongOptions: ticking everything scores 0, and so
-   does ticking nothing, so neither is a way round knowing the answer. */
-function step2Accuracy(){
-  const it=q.items[q.i];
-  if(!hasStep2(it)) return 1;
-  const picks=q.picks||[];
-  let repairs=0, wrongs=0, hits=0, falseAlarms=0;
-  it.fixes.forEach(function(f,i){
-    if(f.ok){ repairs++; if(picks.indexOf(i)>=0) hits++; }
-    else { wrongs++; if(picks.indexOf(i)>=0) falseAlarms++; }
-  });
-  const got = (repairs?hits/repairs:0) - (wrongs?falseAlarms/wrongs:0);
-  return Math.max(0, Math.min(1, got));
-}
-/* What this question is worth to the student, out of one mark. */
+/* Marking, as the owner set it:
+     naming the fault            +1
+     each correct repair ticked  +1
+     each wrong option ticked    -0.5
+   So a question is worth 1 plus however many repairs it actually has. An item with
+   four repairs is a five-mark question; a one-step item is worth one. Questions are
+   not all worth the same, and that is the point: a question carries the weight of
+   what is in it. */
+function okCount(it){ return hasStep2(it) ? it.fixes.filter(function(f){ return f.ok; }).length : 0; }
+function questionMax(it){ return (it && it.type==="mcq" && hasStep2(it)) ? 1 + okCount(it) : 1; }
+/* The marks earned on the question now showing. */
 function questionMark(){
   const it=q.items[q.i];
   if(!(it.type==="mcq" && hasStep2(it))) return step1Correct()?1:0;
-  return (step1Correct()?0.5:0) + 0.5*step2Accuracy();
+  var pts = step1Correct() ? 1 : 0;
+  (q.picks||[]).forEach(function(i){ pts += it.fixes[i].ok ? 1 : -0.5; });
+  return Math.max(0, pts);        // a question floors at nought, never goes negative
+}
+/* The marks available on the bank as a whole. */
+function bankTotal(items){
+  return items.filter(function(x){ return x.type!=="open"; })
+              .reduce(function(n,x){ return n + questionMax(x); }, 0);
 }
 function step1Correct(){
   const it=q.items[q.i];
@@ -3409,7 +3414,7 @@ function quizCorrect(){
 }
 function renderQuiz(){
   const total=q.items.length;
-  const autoTotal=q.items.filter(x=>x.type!=="open").length;
+  const autoTotal=bankTotal(q.items);
   if(q.done){
     if(autoTotal){
       const kind = q.id==="reading" ? "reading" : "quiz";
@@ -3432,7 +3437,7 @@ function renderQuiz(){
   if(inStep2){
     /* Square boxes, not the single-choice row: more than one repair is right. */
     qHtml=`<p style="font-size:13.5px;color:var(--inkSoft);margin:0 0 13px">
-        Now choose <b>every</b> version that repairs it <b>and keeps the meaning</b>. ${it.fixes.filter(f=>f.ok).length} of these ${it.fixes.length} do.
+        Now choose <b>every</b> version that repairs it <b>and keeps the meaning</b>. ${it.fixes.filter(f=>f.ok).length} of these ${it.fixes.length} do, one mark each. A wrong tick costs half a mark.
         Some options are correct English but quietly lose
         part of what the original said, and those do not count.</p>
       <div style="display:grid;gap:9px">`+it.fixes.map((f,idx)=>{
@@ -3491,7 +3496,7 @@ function renderQuiz(){
            it works, or the student learns only that they guessed wrong. */
         + (f.note?`<div class="worth"><span class="worth-h">Worth knowing</span>${esc(f.note)}</div>`:"")
       ).join("")+`<p style="margin:9px 0 0;font-size:12.5px;color:var(--inkSoft);border-top:1px solid var(--line);padding-top:7px">
-        This question: <b>${earned} of 1</b> — ${s1?"0.5":"0"} for naming the fault, ${showScore(0.5*step2Accuracy())} for the repairs.</p></div></div>`;
+        This question: <b>${earned} of ${questionMax(it)}</b> — ${s1?"1":"0"} for naming the fault, ${it.fixes.filter((f,n)=>f.ok&&(q.picks||[]).indexOf(n)>=0).length} for repairs found${wrong?", minus "+showScore(0.5*wrong)+" for "+wrong+(wrong>1?" wrong choices":" wrong choice"):""}.</p></div></div>`;
   } else if(checked && it.type!=="open"){
     const step1 = step1Correct();
     const more = step1 && hasStep2(it);
@@ -3515,11 +3520,17 @@ function renderQuiz(){
   nav+=`</div>`;
   const hasPassage=!!q.top;
   const wide=(window.innerWidth||document.documentElement.clientWidth)>=900;
+  /* How the marks work, said before the student starts rather than discovered at
+     the end — including the half mark a wrong tick costs. */
+  const twoStep=q.items.some(hasStep2);
+  const marksNote=`<p class="qmarks"><i>${twoStep
+    ? `How this is marked: <b>1 mark</b> for naming the fault, and <b>1 more for every correct repair</b> you tick. A wrong tick <b>costs half a mark</b>, so choose what you mean rather than ticking everything. Questions are worth different amounts — one with four repairs is worth five marks. This set is worth <b>${showScore(bankTotal(q.items))} marks</b> in all.`
+    : `How this is marked: <b>1 mark</b> for each correct answer, <b>${showScore(bankTotal(q.items))} marks</b> in all. Nothing is deducted for a wrong answer here.`}</i></p>`;
   const noteHtml=hasPassage
     ?`<p style="font-size:12.5px;color:var(--muted);margin:0 0 14px">Vocabulary questions are graded automatically; comprehension questions show a model answer to check yourself against.</p>`
-    :(QUIZ_NOTE[q.id]
+    :(marksNote+(QUIZ_NOTE[q.id]
       ?`<p class="qnote">${QUIZ_NOTE[q.id]}</p>`
-      :"");
+      :""));
   const progressHtml=`<div style="display:flex;justify-content:space-between;font-size:12.5px;color:var(--muted);margin-bottom:8px">
       <span>Question ${q.i+1} of ${total}</span><span class="scorepill">Score ${showScore(q.score)}/${autoTotal}</span></div>
     <div style="height:5px;background:var(--line);border-radius:4px;margin-bottom:22px;overflow:hidden">
