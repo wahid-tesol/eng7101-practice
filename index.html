@@ -157,6 +157,10 @@
     border-radius:9px;padding:9px 12px}
   .worth-h{display:block;font-size:10px;letter-spacing:.11em;text-transform:uppercase;
     font-weight:700;color:var(--gold);margin-bottom:4px}
+  /* small roman numerals pair each option with its line in the explanation */
+  .optnum{flex:none;min-width:20px;font-size:13px;font-weight:700;color:var(--gold);
+    margin-top:2px;text-align:right;font-style:normal}
+  .fbnum{display:inline-block;min-width:26px;font-weight:700;color:var(--gold);font-size:13px}
   .qmarks{font-size:12.5px;line-height:1.55;color:var(--inkSoft);margin:0 0 12px;
     border-left:3px solid var(--goldLine);padding:2px 0 2px 12px}
   .qmarks b{color:var(--ink);font-style:normal}
@@ -3370,6 +3374,8 @@ function startQuiz(id,items,label,topHtml){
    question: there is nothing to repair if you have not seen what is broken. */
 /* 3 not 3.0, but 2.8 stays 2.8 */
 function showScore(n){ return Math.round(n*10)/10; }
+/* i, ii, iii ... so each line of the explanation can name its option */
+function roman(n){ return ["","i","ii","iii","iv","v","vi","vii","viii","ix","x"][n] || String(n); }
 function hasStep2(it){ return Array.isArray(it.fixes) && it.fixes.length > 0; }
 function step2Correct(){
   const it=q.items[q.i];
@@ -3437,9 +3443,7 @@ function renderQuiz(){
   if(inStep2){
     /* Square boxes, not the single-choice row: more than one repair is right. */
     qHtml=`<p style="font-size:13.5px;color:var(--inkSoft);margin:0 0 13px">
-        Now choose <b>every</b> version that repairs it <b>and keeps the meaning</b>. ${it.fixes.filter(f=>f.ok).length} of these ${it.fixes.length} do, one mark each. A wrong tick costs half a mark.
-        Some options are correct English but quietly lose
-        part of what the original said, and those do not count.</p>
+        Tick every version that repairs it <b>and keeps the meaning</b> — <b>${it.fixes.filter(f=>f.ok).length} of these ${it.fixes.length}</b> do.</p>
       <div style="display:grid;gap:9px">`+it.fixes.map((f,idx)=>{
       const on=(q.picks||[]).indexOf(idx)>=0;
       let bd="var(--line)",bg="var(--surface)";
@@ -3448,6 +3452,7 @@ function renderQuiz(){
       const mark = checked ? (f.ok?"&#10003;":(on?"&#10007;":"")) : (on?"&#10003;":"");
       const mcol = checked ? (f.ok?"var(--correct)":"var(--wrong)") : "var(--ink)";
       return `<button class="opt" ${checked?"disabled":""} data-fix="${idx}" style="border-color:${bd};background:${bg}">
+        <span class="optnum">${roman(idx+1)}</span>
         <span class="optbox" style="color:${mcol};border-color:${on||(checked&&f.ok)?mcol:"var(--line)"}">${mark}</span>
         <span>${esc(f.t)}</span></button>`;
     }).join("")+`</div>`;
@@ -3489,8 +3494,8 @@ function renderQuiz(){
     const tone = scored ? "correct" : "wrong";
     fb=`<div style="margin-top:16px;padding:13px;border-radius:11px;background:var(--${tone}Bg);border-left:3px solid var(--${tone})">
       <div style="font-weight:700;color:var(--${tone});font-size:13.5px">${head}</div>
-      <div style="margin:7px 0 0;display:grid;gap:6px">`+it.fixes.map(f=>
-        `<p style="margin:0;font-size:13.5px"><b class="${f.ok?"ansok":""}" style="${f.ok?"":"color:var(--wrong)"}">${f.ok?"Works":"No"}</b> — ${esc(f.why)}</p>`
+      <div style="margin:7px 0 0;display:grid;gap:6px">`+it.fixes.map((f,fi)=>
+        `<p style="margin:0;font-size:13.5px"><span class="fbnum">${roman(fi+1)}</span><b class="${f.ok?"ansok":""}" style="${f.ok?"":"color:var(--wrong)"}">${f.ok?"Works":"No"}</b> — ${esc(f.why)}</p>`
         /* Some correct options use a construction taught nowhere else in the bank.
            A green tick is not enough there: say what the pattern is called and how
            it works, or the student learns only that they guessed wrong. */
@@ -3524,8 +3529,8 @@ function renderQuiz(){
      the end — including the half mark a wrong tick costs. */
   const twoStep=q.items.some(hasStep2);
   const marksNote=`<p class="qmarks"><i>${twoStep
-    ? `How this is marked: <b>1 mark</b> for naming the fault, and <b>1 more for every correct repair</b> you tick. A wrong tick <b>costs half a mark</b>, so choose what you mean rather than ticking everything. Questions are worth different amounts — one with four repairs is worth five marks. This set is worth <b>${showScore(bankTotal(q.items))} marks</b> in all.`
-    : `How this is marked: <b>1 mark</b> for each correct answer, <b>${showScore(bankTotal(q.items))} marks</b> in all. Nothing is deducted for a wrong answer here.`}</i></p>`;
+    ? `<b>1</b> mark for naming the fault. <b>1</b> for each correct repair. <b>Half a mark off</b> for a wrong tick. <b>${showScore(bankTotal(q.items))}</b> marks in this set.`
+    : `<b>1</b> mark for each correct answer. Nothing is deducted. <b>${showScore(bankTotal(q.items))}</b> marks in this set.`}</i></p>`;
   const noteHtml=hasPassage
     ?`<p style="font-size:12.5px;color:var(--muted);margin:0 0 14px">Vocabulary questions are graded automatically; comprehension questions show a model answer to check yourself against.</p>`
     :(marksNote+(QUIZ_NOTE[q.id]
