@@ -3525,15 +3525,15 @@ function renderQuiz(){
   nav+=`</div>`;
   const hasPassage=!!q.top;
   const wide=(window.innerWidth||document.documentElement.clientWidth)>=900;
-  /* How the marks work, said before the student starts rather than discovered at
-     the end — including the half mark a wrong tick costs. */
+  /* Said once, on the first question. The words never change, so repeating them
+     above all fifty was noise rather than help. */
   const twoStep=q.items.some(hasStep2);
-  const marksNote=`<p class="qmarks"><i>${twoStep
-    ? `<b>1</b> mark for naming the fault. <b>1</b> for each correct repair. <b>Half a mark off</b> for a wrong tick. <b>${showScore(bankTotal(q.items))}</b> marks in this set.`
-    : `<b>1</b> mark for each correct answer. Nothing is deducted. <b>${showScore(bankTotal(q.items))}</b> marks in this set.`}</i></p>`;
+  const marksNote=q.i>0 ? "" : `<p class="qmarks"><i>${twoStep
+    ? `<b>1</b> mark for naming the fault, <b>1</b> for each correct repair. <b>Negative marking:</b> you lose <b>0.5</b> for every wrong tick. <b>${showScore(bankTotal(q.items))}</b> marks in this set.`
+    : `<b>1</b> mark for each correct answer, <b>${showScore(bankTotal(q.items))}</b> in this set. <b>No negative marking</b> here.`}</i></p>`;
   const noteHtml=hasPassage
     ?`<p style="font-size:12.5px;color:var(--muted);margin:0 0 14px">Vocabulary questions are graded automatically; comprehension questions show a model answer to check yourself against.</p>`
-    :(marksNote+(QUIZ_NOTE[q.id]
+    :(marksNote+((QUIZ_NOTE[q.id] && q.i===0)
       ?`<p class="qnote">${QUIZ_NOTE[q.id]}</p>`
       :""));
   const progressHtml=`<div style="display:flex;justify-content:space-between;font-size:12.5px;color:var(--muted);margin-bottom:8px">
