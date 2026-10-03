@@ -287,9 +287,14 @@ function kindToCategory(kind){
 function loadPending(){ try{ return JSON.parse(localStorage.getItem(PENDING_KEY)||"[]"); }catch(e){ return []; } }
 function savePending(a){ try{ localStorage.setItem(PENDING_KEY, JSON.stringify(a)); }catch(e){} }
 function queueRow(row){ var q=loadPending(); q.push(row); savePending(q); }
+function keepForLater(res){                        // did the server fail to write it?
+  return !!(res && res.ok===false && (res.retry || /busy/i.test(res.error||"")));
+}
 function sendResult(row){
   apiPost(row).then(function(res){
-    if(res && res.ok===false && /session|device/i.test(res.error||"")){ queueRow(row); handleAuthLost(); }
+    if(!res || res.ok!==false) return;
+    if(/session|device/i.test(res.error||"")){ queueRow(row); handleAuthLost(); return; }
+    if(keepForLater(res)) queueRow(row);             // backend was busy: the row is NOT saved
   }).catch(function(){ queueRow(row); });            // offline -> keep it for next time
 }
 function flushPending(){
@@ -299,7 +304,8 @@ function flushPending(){
   savePending([]);                                   // optimistic; re-queue failures
   queue.forEach(function(row){
     row.username=st.username; row.token=st.token; row.deviceId=deviceId(); row.deviceType=deviceType();
-    apiPost(row).catch(function(){ queueRow(row); });
+    apiPost(row).then(function(res){ if(keepForLater(res)) queueRow(row); })
+               .catch(function(){ queueRow(row); });
   });
 }
 /* How long this topic was open, so a score that arrived impossibly fast is visible
