@@ -26,8 +26,13 @@ function addMyStudents() {
 ```
 
 Each password is printed in the Execution log **and** written into column **I** of
-the Roster. The cell empties itself the first time the student logs in with it, so a
-password still showing in column I means that student has not logged in yet.
+the Roster, and it **stays there** — `KEEP_PASSWORD_VISIBLE = true` at the top of
+the code. You can read anybody's password at any time.
+
+The cost of that convenience: the spreadsheet holds working credentials. Anyone who
+sees it, or any export or screen-share of it, can log in as any student. Set
+`KEEP_PASSWORD_VISIBLE = false` and each password clears itself the first time its
+owner logs in. Column **E, "Last login"** tells you who has started either way.
 
 ## Resetting a password
 
