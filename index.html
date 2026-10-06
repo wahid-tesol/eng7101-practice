@@ -122,7 +122,15 @@
   .wchip.used{opacity:.3;cursor:default;pointer-events:none}
   .wchip:active{cursor:grabbing}
   .foot{margin-top:58px;padding-top:24px;border-top:1px solid var(--line);text-align:center}
+  .footname{font-family:"Cormorant Garamond",Georgia,"Times New Roman",serif;font-weight:600;
+    font-size:21px;line-height:1.2;color:var(--ink);margin-top:2px}
+  /* each qualification on its own line: run together they broke across
+     "Adelaide / University", which reads as two different places */
+  .footcred{font-size:12.5px;line-height:1.65;color:var(--muted);margin-top:4px;
+    max-width:46ch;margin-left:auto;margin-right:auto;text-wrap:pretty}
+  .footcred + .footcred{margin-top:1px}
   .copyline{font-size:12px;letter-spacing:.05em;color:var(--muted)}
+  .copyline .dot{padding:0 2px}
   .install{position:fixed;left:50%;transform:translateX(-50%);bottom:14px;z-index:20;display:none;border-radius:22px;
     background:var(--surface);color:var(--muted);border:1px solid var(--line);box-shadow:0 2px 8px rgba(0,0,0,.07);
     padding:8px 16px;font-size:13px;font-weight:600;opacity:.62;transition:opacity .15s}
@@ -3158,8 +3166,11 @@ function renderHome(){
   if(lastUmb){ html += `</section>`; }
   html += `<div class="foot">
     <img class="medallion sm" src="${MARK}" alt="" style="margin-bottom:11px" />
-    <div class="copyline">&copy; 2026 Abdul Wahid &middot; All rights reserved</div>
-    <div class="copyline" style="margin-top:6px;opacity:.75">All practice content is original and written to B1+/B2 level.</div>
+    <div class="footname">Abdul Wahid</div>
+    <div class="footcred">Master of Education (TESOL), Adelaide University</div>
+    <div class="footcred">Cambridge CELTA</div>
+    <div class="copyline" style="margin-top:14px;opacity:.75">All practice content is original and written to B1+/B2 level.</div>
+    <div class="copyline" style="margin-top:6px">&copy; 2026 <span class="dot">&middot;</span> All rights reserved</div>
   </div></div>`;
   app.innerHTML = html;
   app.querySelectorAll("[data-open]").forEach(el=>{
