@@ -276,7 +276,13 @@ function deviceId(){
 }
 
 /* ---- device type + API ---- */
-function deviceType(){ return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ? "mobile" : "computer"; }
+function deviceType(){
+  var ua = navigator.userAgent || "";
+  if (/Mobi|Android|iPhone|iPad|iPod/i.test(ua)) return "mobile";
+  /* since iPadOS 13 an iPad says it is a Mac; a Mac with a touchscreen is an iPad */
+  if (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1) return "mobile";
+  return "computer";
+}
 function apiPost(payload){
   /* text/plain avoids a CORS preflight Apps Script cannot answer; the reply is JSON */
   return fetch(SYNC_URL,{ method:"POST", headers:{ "Content-Type":"text/plain;charset=utf-8" }, body:JSON.stringify(payload) })
@@ -490,11 +496,15 @@ function renderIdGate(){
   var check=function(){ go.disabled=!(user.value.trim() && pass.value && agree.checked); };
   agree.addEventListener("change",check);
   var showErr=function(m){ err.textContent=m; err.style.display="block"; };
+  /* Enter calls submit() directly and ignores the disabled button, so without
+     this a second Enter sent a second login while the first was on its way */
+  var busy=false;
   var submit=function(){
+    if(busy) return;
     var u=user.value.trim().toLowerCase(), p=pass.value; if(!u||!p) return;
     if(!agree.checked){ showErr("Please agree to the terms and conditions first."); return; }
-    err.style.display="none"; go.disabled=true; go.textContent="Logging in…";
-    if(!SYNC_URL){ showErr("The app isn't connected yet. Please tell your teacher."); go.textContent="Log in"; go.disabled=false; return; }
+    err.style.display="none"; busy=true; go.disabled=true; go.textContent="Logging in…";
+    if(!SYNC_URL){ showErr("The app isn't connected yet. Please tell your teacher."); busy=false; go.textContent="Log in"; go.disabled=false; return; }
     apiPost({ action:"login", username:u, password:p, deviceId:deviceId(), deviceType:deviceType(), agreedTerms:true, termsVersion:TERMS_VERSION })
       .then(function(res){
         if(res && res.ok){
@@ -505,10 +515,10 @@ function renderIdGate(){
           pullProgress();                            // restore this student's report from any device
         } else {
           showErr((res&&res.error) || "Login failed. Please try again.");
-          go.disabled=false; go.textContent="Log in";
+          busy=false; go.disabled=false; go.textContent="Log in";
         }
       })
-      .catch(function(){ showErr("Can't reach the server. Check your internet and try again."); go.disabled=false; go.textContent="Log in"; });
+      .catch(function(){ showErr("Can't reach the server. Check your internet and try again."); busy=false; go.disabled=false; go.textContent="Log in"; });
   };
   [user,pass].forEach(function(inp){
     inp.addEventListener("input",check);
